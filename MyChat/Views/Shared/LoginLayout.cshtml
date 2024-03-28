@@ -1,0 +1,37 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Login</title>
+    <link rel="stylesheet" href="~/css/bootstrap4.min.css">
+    <link rel="stylesheet" href="~/css/LoginFontawsom-all.min.css">
+    <link rel="stylesheet" type="text/css" href="~/css/LoginStyle.css" />
+    <link rel="stylesheet" type="text/css" href="~/css/uikit.min.css" />
+</head>
+
+<body class="h-100">
+    <div class="container-fluid full-bg h-100">
+        <div class="container h-100">
+            <div class="row no-margin h-100">
+                <div class="bg-layer d-flex col-md-4">
+                    <div class="login-box row text-center d-flex justify-content-center">
+                        @RenderBody()
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</body>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/popper.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="~/lib/UIkit/uikit.min.js"></script>
+<script src="~/lib/UIkit/uikit-icons.min.js"></script>
+<script src="~/js/SiteUtils.js" asp-append-version="true"></script>
+<script src="~/js/Login.js" asp-append-version="true"></script>
+</html>
