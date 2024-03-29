@@ -81,6 +81,7 @@ namespace ServiceLayer.Services.Chat
             AddToGroup(userIdentifier, newGroupName);
         }
 
+        #region Get
         /// <summary>
         /// Gets Active Groups
         /// </summary>
@@ -112,6 +113,7 @@ namespace ServiceLayer.Services.Chat
 
             return new ServiceResult<List<string>>(_UserGroups[userIdentifier]);
         }
+        #endregion
 
         /// <summary>
         /// Removes User To Specified Group & Removes Group To User's GroupsList
