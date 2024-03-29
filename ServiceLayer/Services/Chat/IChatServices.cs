@@ -21,7 +21,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ServiceLayer.HubServices
+namespace ServiceLayer.Services.Chat
 {
     public interface IChatServices
     {
@@ -48,14 +48,11 @@ namespace ServiceLayer.HubServices
         {
             _userService = userService;
             _userInfoContext = userInfoContext;
-            this._core = core;
+            _core = core;
             _chatHub = chatHub;
         }
 
         #endregion
-
-
-
 
         public async Task<ServiceResult<MessagesDto>> SendMessageAsync(SendMessageDto messageDto)
         {

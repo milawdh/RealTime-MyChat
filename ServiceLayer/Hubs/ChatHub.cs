@@ -2,10 +2,10 @@
 using DomainShared.Dtos.Chat.Message;
 using Microsoft.AspNetCore.SignalR;
 using ServiceLayer.Hubs.Api;
-using ServiceLayer.HubServices;
 using ServiceLayer.Services.User;
 using ElmahCore;
 using Microsoft.AspNetCore.Authorization;
+using ServiceLayer.Services.Chat;
 
 namespace ServiceLayer.Hubs
 {

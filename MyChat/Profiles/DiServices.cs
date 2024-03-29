@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using ServiceLayer.HubServices;
+using ServiceLayer.Services.Chat;
 using ServiceLayer.Services.User;
 using Services.Services;
 using System;
