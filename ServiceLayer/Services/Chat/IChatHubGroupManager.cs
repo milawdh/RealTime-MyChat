@@ -1,4 +1,8 @@
-﻿using ServiceLayer.API;
+﻿using Microsoft.AspNet.SignalR;
+using Microsoft.AspNetCore.SignalR;
+using ServiceLayer.API;
+using ServiceLayer.Hubs;
+using ServiceLayer.Hubs.Api;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,15 +16,15 @@ namespace ServiceLayer.Services.Chat
         /// <summary>
         /// Adds User To Specified Group & Adds Group To User's GroupsList
         /// </summary>
-        /// <param name="userIdentifier">User Identifier In ChatHub</param>
+        /// <param name="userConnectionId">User Identifier In ChatHub</param>
         /// <param name="groupName">Group Identifier For Users</param>
-        void AddToGroup(string userIdentifier, string groupName);
-        
+        void AddToGroup(string userConnectionId, string groupName);
+
         /// <summary>
         /// Gets Active Groups
         /// </summary>
         /// <returns></returns>
-        void RemoveFromGroup(string userIdentifier, string groupName);
+        void RemoveFromGroup(string userConnectionId, string groupName);
 
         /// <summary>
         /// Gets Active Groups
@@ -31,9 +35,9 @@ namespace ServiceLayer.Services.Chat
         /// <summary>
         /// Gets Specified User's Active Groups
         /// </summary>
-        /// <param name="userIdentifier">User's Idenfier in ChatHub</param>
+        /// <param name="userConnectionId">User's Idenfier in ChatHub</param>
         /// <returns></returns>
-        ServiceResult<List<string>> GetUserGroups(string userIdentifier);
+        ServiceResult<List<string>> GetUserGroups(string userConnectionId);
 
         /// <summary>
         /// Gets Specified Group UserIdentifiers
@@ -42,72 +46,82 @@ namespace ServiceLayer.Services.Chat
         /// <returns></returns>
         ServiceResult<List<string>> GetGroupUsers(string groupName);
 
+        void SetDisconnected(string userConnectionId);
 
-        public void ChangeUserGroup(string userIdentifier, string perviousGroupName, string newGroupName);
+        public void ChangeUserGroup(string userConnectionId, string perviousGroupName, string newGroupName);
     }
     public class ChatHubGroupManager : IChatHubGroupManager
     {
         private static Dictionary<string, List<string>> _UserGroups;
         private static Dictionary<string, List<string>> _GroupUsers;
+        private readonly IHubContext<ChatHub, IChatHubApi> _chatHub;
 
-        public ChatHubGroupManager()
+
+        public ChatHubGroupManager(IHubContext<ChatHub, IChatHubApi> chatHub)
         {
             _UserGroups = _UserGroups ?? new Dictionary<string, List<string>>();
             _GroupUsers = _GroupUsers ?? new Dictionary<string, List<string>>();
+            _chatHub = chatHub;
         }
 
         #region SetValues
+
         /// <summary>
         /// Adds User To Specified Group & Adds Group To User's GroupsList
         /// </summary>
-        /// <param name="userIdentifier">User Identifier In ChatHub</param>
+        /// <param name="userConnectionId">User Identifier In ChatHub</param>
         /// <param name="groupName">Group Identifier For Users</param>
-        public void AddToGroup(string userIdentifier, string groupName)
+        public void AddToGroup(string userConnectionId, string groupName)
         {
-            if (!_UserGroups.ContainsKey(userIdentifier))
-                _UserGroups[userIdentifier] = new List<string>() { groupName };
+            if (!_UserGroups.ContainsKey(userConnectionId))
+                _UserGroups[userConnectionId] = new List<string>() { groupName };
             else
-                _UserGroups[userIdentifier].Add(groupName);
+                _UserGroups[userConnectionId].Add(groupName);
 
             if (!_GroupUsers.ContainsKey(groupName))
-                _GroupUsers[groupName] = new List<string>() { userIdentifier };
+                _GroupUsers[groupName] = new List<string>() { userConnectionId };
             else
-                _GroupUsers[groupName].Add(userIdentifier);
+                _GroupUsers[groupName].Add(userConnectionId);
 
+            _chatHub.Groups.AddToGroupAsync(userConnectionId, groupName).Wait();
         }
 
-        public void ChangeUserGroup(string userIdentifier, string perviousGroupName, string newGroupName)
+        public void ChangeUserGroup(string userConnectionId, string perviousGroupName, string newGroupName)
         {
-            RemoveFromGroup(userIdentifier, perviousGroupName);
-            AddToGroup(userIdentifier, newGroupName);
+            RemoveFromGroup(userConnectionId, perviousGroupName);
+            AddToGroup(userConnectionId, newGroupName);
         }
 
         /// <summary>
         /// Removes User To Specified Group & Removes Group To User's GroupsList
         /// </summary>
-        /// <param name="userIdentifier">User Identifier In Hub</param>
+        /// <param name="userConnectionId">User Identifier In Hub</param>
         /// <param name="groupName">Group Identifier For Users</param>
-        public void RemoveFromGroup(string userIdentifier, string groupName)
+        public void RemoveFromGroup(string userConnectionId, string groupName)
         {
-            if (_UserGroups.ContainsKey(userIdentifier))
+            if (_UserGroups.ContainsKey(userConnectionId))
             {
-                _UserGroups[userIdentifier].Remove(groupName);
+                _UserGroups[userConnectionId].Remove(groupName);
 
-                if (!_UserGroups[userIdentifier].Any())
-                    _UserGroups.Remove(userIdentifier);
+                if (!_UserGroups[userConnectionId].Any())
+                    _UserGroups.Remove(userConnectionId);
             }
 
             if (_GroupUsers.ContainsKey(groupName))
             {
-                _GroupUsers[groupName].Remove(userIdentifier);
+                _GroupUsers[groupName].Remove(userConnectionId);
 
                 if (!_GroupUsers[groupName].Any())
                     _GroupUsers.Remove(groupName);
             }
+
+            _chatHub.Groups.RemoveFromGroupAsync(userConnectionId, groupName).Wait();
         }
+
         #endregion
-        
+
         #region Get
+
         /// <summary>
         /// Gets Active Groups
         /// </summary>
@@ -130,15 +144,28 @@ namespace ServiceLayer.Services.Chat
         /// <summary>
         /// Gets Specified User's Active Groups
         /// </summary>
-        /// <param name="userIdentifier">User's Idenfier in ChatHub</param>
+        /// <param name="userConnectionId">User's Idenfier in ChatHub</param>
         /// <returns></returns>
-        public ServiceResult<List<string>> GetUserGroups(string userIdentifier)
+        public ServiceResult<List<string>> GetUserGroups(string userConnectionId)
         {
-            if (!_UserGroups.ContainsKey(userIdentifier))
+            if (!_UserGroups.ContainsKey(userConnectionId))
                 return new ServiceResult<List<string>>("UserIdentifier Not Found");
 
-            return new ServiceResult<List<string>>(_UserGroups[userIdentifier]);
+            return new ServiceResult<List<string>>(_UserGroups[userConnectionId]);
         }
+
+        public void SetDisconnected(string userConnectionId)
+        {
+            if (_UserGroups.ContainsKey(userConnectionId))
+            {
+                if (_UserGroups[userConnectionId] is not null)
+                {
+                    _UserGroups[userConnectionId].ForEach(x => _GroupUsers.Remove(x));
+                    _UserGroups.Remove(userConnectionId);
+                }
+            }
+        }
+
         #endregion
 
     }

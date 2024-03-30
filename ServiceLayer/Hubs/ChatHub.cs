@@ -17,31 +17,44 @@ namespace ServiceLayer.Hubs
         private readonly IUserInfoContext _userInfoContext;
         private readonly IUserService _userService;
         private readonly IChatServices _chatServices;
+        private readonly IChatHubGroupManager _chatHubGroupManager;
 
-        public ChatHub(IUserInfoContext webAppContext, IUserService userService, IChatServices chatServices)
+        public ChatHub(IUserInfoContext webAppContext, IUserService userService,
+            IChatServices chatServices,
+            IChatHubGroupManager chatHubGroupManager)
         {
             _userInfoContext = webAppContext;
             _userService = userService;
             _chatServices = chatServices;
+
+            _chatHubGroupManager = chatHubGroupManager;
         }
 
         public override async Task OnConnectedAsync()
         {
             try
             {
-                
-
+                //Set UserOnline
                 _userService.SetUserOnline();
                 await Clients.Caller.SetUserInfo(_userInfoContext.UserInitiliazeDto);
 
 
                 await base.OnConnectedAsync();
+                //Get User Data
+                await Clients.Caller.GetCurrentChatRoom();
             }
             catch (Exception ex)
             {
                 ElmahExtensions.RaiseError(ex);
             }
         }
+
+        public async Task SetCurrentChatRoom(Guid? chatRoomId)
+        {
+            if (chatRoomId != null)
+                _chatHubGroupManager.AddToGroup(Context.ConnectionId, chatRoomId.Value.ToString());
+        }
+
 
         #region Chat
 
@@ -57,7 +70,7 @@ namespace ServiceLayer.Hubs
 
                 var result = await _chatServices.GetChatRoomAsync(id);
                 //if (result.Success)
-                    //SetUserCurrentRoom(id.ToString());
+                //SetUserCurrentRoom(id.ToString());
 
                 return new ApiResult<object>(result);
             }
@@ -85,7 +98,10 @@ namespace ServiceLayer.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
+            //Set User Offline
             _userService.SetUserOffline();
+            _chatHubGroupManager.SetDisconnected(Context.ConnectionId);
+
 
             ElmahExtensions.RaiseError(exception);
             await base.OnDisconnectedAsync(exception);

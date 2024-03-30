@@ -9,5 +9,7 @@ namespace ServiceLayer.Hubs.Api
 	{
         Task SetUserInfo(UserInitDto userDto);
         Task RecieveMessage(ApiResult<RecieveMessageDto> message);
+
+        Task GetCurrentChatRoom();
     }
 }

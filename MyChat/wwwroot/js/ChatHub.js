@@ -10,12 +10,17 @@ StartChatConnection()
 function StartChatConnection() {
 
     chatConnection.start().then(function () {
-        $.connection.hub.qs = 'isChat=true';
         StyleConnected()
     }).catch(function (err) {
         return console.error(err.toString());
     });
 }
+
+chatConnection.on("GetCurrentChatRoom", () => {
+    debugger
+    chatConnection.invoke("SetCurrentChatRoom", chat != null ? chat.id : null);
+})
+
 function StyleDisconnected() {
     document.getElementById('Dimmer').innerHTML = `<div style="position: absolute; left: 50%; top:50%;">
             <div uk-spinner style="position:relative;z-index:9999;left:-50%;top:-50%;">

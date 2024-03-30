@@ -21,6 +21,8 @@ namespace ServiceLayer.Profiles
 			services.AddScoped<IUserLoginService, UserLoginService>();
 			services.AddScoped<IChatServices, ChatService>();
 			services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+			services.AddSingleton<IChatHubGroupManager, ChatHubGroupManager>();
 		}
 	}
 }
