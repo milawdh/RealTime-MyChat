@@ -56,7 +56,6 @@ namespace ServiceLayer.Services.Chat
             _GroupUsers = _GroupUsers ?? new Dictionary<string, List<string>>();
         }
 
-        #region SetValues
         /// <summary>
         /// Adds User To Specified Group & Adds Group To User's GroupsList
         /// </summary>
@@ -82,31 +81,6 @@ namespace ServiceLayer.Services.Chat
             AddToGroup(userIdentifier, newGroupName);
         }
 
-        /// <summary>
-        /// Removes User To Specified Group & Removes Group To User's GroupsList
-        /// </summary>
-        /// <param name="userIdentifier">User Identifier In Hub</param>
-        /// <param name="groupName">Group Identifier For Users</param>
-        public void RemoveFromGroup(string userIdentifier, string groupName)
-        {
-            if (_UserGroups.ContainsKey(userIdentifier))
-            {
-                _UserGroups[userIdentifier].Remove(groupName);
-
-                if (!_UserGroups[userIdentifier].Any())
-                    _UserGroups.Remove(userIdentifier);
-            }
-
-            if (_GroupUsers.ContainsKey(groupName))
-            {
-                _GroupUsers[groupName].Remove(userIdentifier);
-
-                if (!_GroupUsers[groupName].Any())
-                    _GroupUsers.Remove(groupName);
-            }
-        }
-        #endregion
-        
         #region Get
         /// <summary>
         /// Gets Active Groups
@@ -141,5 +115,28 @@ namespace ServiceLayer.Services.Chat
         }
         #endregion
 
+        /// <summary>
+        /// Removes User To Specified Group & Removes Group To User's GroupsList
+        /// </summary>
+        /// <param name="userIdentifier">User Identifier In Hub</param>
+        /// <param name="groupName">Group Identifier For Users</param>
+        public void RemoveFromGroup(string userIdentifier, string groupName)
+        {
+            if (_UserGroups.ContainsKey(userIdentifier))
+            {
+                _UserGroups[userIdentifier].Remove(groupName);
+
+                if (!_UserGroups[userIdentifier].Any())
+                    _UserGroups.Remove(userIdentifier);
+            }
+
+            if (_GroupUsers.ContainsKey(groupName))
+            {
+                _GroupUsers[groupName].Remove(userIdentifier);
+
+                if (!_GroupUsers[groupName].Any())
+                    _GroupUsers.Remove(groupName);
+            }
+        }
     }
 }
