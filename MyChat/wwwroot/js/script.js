@@ -212,7 +212,8 @@ let addMessageToMessageArea = (msg) => {
 
 let generateMessageArea = async (elem, chatId) => {
 
-    chat = await getChatRoom(chatId);
+    chat = await getChatRoomDetials(chatId);
+    await setCurrentChatRoom();
 
     document.getElementById(`ChReadDiv${chatId}`).innerHTML = ''
     mClassList(DOM.inputArea).contains("d-none", (elem) =>
@@ -264,14 +265,12 @@ let showChatList = () => {
 let sendMessage = async () => {
     debugger
     let value = DOM.messageInput.value;
-    DOM.messageInput.value = "";
-    if (value === "") return;
+    if (value === "")
+        return;
 
-    let msg = {
-        body: value,
-        recieverChatRoomId: chat.id
-    };
-    var sendMessageResult = await SendMessageToHub(msg);
+    DOM.messageInput.value = "";
+
+    var sendMessageResult = await SendMessageToHub(value);
     addMessageToMessageArea(sendMessageResult);
 };
 

@@ -1,11 +1,11 @@
 ﻿using DomainShared.Base;
 using DomainShared.Dtos.Chat.Message;
-using Microsoft.AspNetCore.SignalR;
-using ServiceLayer.Hubs.Api;
-using ServiceLayer.Services.User;
 using ElmahCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+using ServiceLayer.Hubs.Api;
 using ServiceLayer.Services.Chat;
+using ServiceLayer.Services.User;
 
 namespace ServiceLayer.Hubs
 {
@@ -52,7 +52,7 @@ namespace ServiceLayer.Hubs
         public async Task SetCurrentChatRoom(Guid? chatRoomId)
         {
             if (chatRoomId != null)
-                _chatHubGroupManager.AddToGroup(Context.ConnectionId, chatRoomId.Value.ToString());
+                _chatHubGroupManager.SetCurrentChatRoom(Context.ConnectionId, chatRoomId.Value.ToString());
         }
 
 
@@ -63,14 +63,11 @@ namespace ServiceLayer.Hubs
         /// </summary>
         /// <param name="id">ChatRoom Id</param>
         /// <returns>Dependent On ChatRoom type ChatRoom's ViewModel</returns>
-        public async Task<object> GetChatRoom(Guid id)
+        public async Task<object> GetChatRoomDetials(Guid id)
         {
             try
             {
-
                 var result = await _chatServices.GetChatRoomAsync(id);
-                //if (result.Success)
-                //SetUserCurrentRoom(id.ToString());
 
                 return new ApiResult<object>(result);
             }
@@ -81,11 +78,18 @@ namespace ServiceLayer.Hubs
             }
         }
 
-        public async Task<ApiResult<MessagesDto>> SendMessage(SendMessageDto sendMessageDto)
+        public async Task<ApiResult<MessagesDto>> SendMessage(string body)
         {
             try
             {
-                return new ApiResult<MessagesDto>(await _chatServices.SendMessageAsync(sendMessageDto));
+                var accessResult = _chatHubGroupManager.GetCurrentChatRoom(Context.ConnectionId);
+                if (accessResult.Failure)
+                    return new ApiResult<MessagesDto>(accessResult.Messages);
+
+                return new ApiResult<MessagesDto>(
+                    await _chatServices.SendMessageAsync(
+                    new SendMessageDto { Body = body, RecieverChatRoomId = new Guid(accessResult.Result) })
+                    );
             }
             catch (Exception ex)
             {

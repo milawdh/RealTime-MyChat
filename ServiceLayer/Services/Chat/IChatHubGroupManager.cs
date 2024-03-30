@@ -19,6 +19,7 @@ namespace ServiceLayer.Services.Chat
         /// <param name="userConnectionId">User Identifier In ChatHub</param>
         /// <param name="groupName">Group Identifier For Users</param>
         void AddToGroup(string userConnectionId, string groupName);
+        void SetCurrentChatRoom(string userConnectionId, string groupName);
 
         /// <summary>
         /// Gets Active Groups
@@ -48,11 +49,14 @@ namespace ServiceLayer.Services.Chat
 
         void SetDisconnected(string userConnectionId);
 
-        public void ChangeUserGroup(string userConnectionId, string perviousGroupName, string newGroupName);
+        public void ChangeUserGroups(string userConnectionId, string perviousGroupName, string newGroupName);
+
+        ServiceResult<string> GetCurrentChatRoom(string userConnectionId);
     }
     public class ChatHubGroupManager : IChatHubGroupManager
     {
         private static Dictionary<string, List<string>> _UserGroups;
+        private static Dictionary<string, string> _UserCurrentChatRoom;
         private static Dictionary<string, List<string>> _GroupUsers;
         private readonly IHubContext<ChatHub, IChatHubApi> _chatHub;
 
@@ -61,6 +65,7 @@ namespace ServiceLayer.Services.Chat
         {
             _UserGroups = _UserGroups ?? new Dictionary<string, List<string>>();
             _GroupUsers = _GroupUsers ?? new Dictionary<string, List<string>>();
+            _UserCurrentChatRoom = _UserCurrentChatRoom ?? new Dictionary<string, string>();
             _chatHub = chatHub;
         }
 
@@ -86,10 +91,36 @@ namespace ServiceLayer.Services.Chat
             _chatHub.Groups.AddToGroupAsync(userConnectionId, groupName).Wait();
         }
 
-        public void ChangeUserGroup(string userConnectionId, string perviousGroupName, string newGroupName)
+        /// <summary>
+        /// Changes User's CurrentChatRoom
+        /// </summary>
+        /// <param name="userConnectionId"></param>
+        /// <param name="perviousGroupName"></param>
+        /// <param name="newGroupName"></param>
+        public void ChangeUserGroups(string userConnectionId, string perviousGroupName, string newGroupName)
         {
             RemoveFromGroup(userConnectionId, perviousGroupName);
             AddToGroup(userConnectionId, newGroupName);
+        }
+
+        /// <summary>
+        /// Sets UserCurrent ChatRoom That is in that!
+        /// </summary>
+        /// <param name="userConnectionId">User Identifier In Hub</param>
+        /// <param name="groupName">Group Identifier For Users</param>
+        public void SetCurrentChatRoom(string userConnectionId, string groupName)
+        {
+            if (_UserCurrentChatRoom.ContainsKey(userConnectionId))
+            {
+                ChangeUserGroups(userConnectionId, _UserCurrentChatRoom[userConnectionId], groupName);
+                _UserCurrentChatRoom[userConnectionId] = groupName;
+            }
+            else
+            {
+                _UserCurrentChatRoom.Add(userConnectionId, groupName);
+                AddToGroup(userConnectionId, groupName);
+            }
+
         }
 
         /// <summary>
@@ -115,12 +146,45 @@ namespace ServiceLayer.Services.Chat
                     _GroupUsers.Remove(groupName);
             }
 
+            if (_UserCurrentChatRoom.ContainsKey(userConnectionId))
+            {
+                _UserCurrentChatRoom.Remove(userConnectionId);
+            }
+
             _chatHub.Groups.RemoveFromGroupAsync(userConnectionId, groupName).Wait();
+        }
+
+        /// <summary>
+        /// Removes All Groups Data When User Is Disconnected
+        /// </summary>
+        /// <param name="userConnectionId">User Identifier In Hub</param>
+        public void SetDisconnected(string userConnectionId)
+        {
+            if (_UserGroups.ContainsKey(userConnectionId))
+            {
+                if (_UserGroups[userConnectionId] is not null)
+                {
+                    //Remove User From All Groups
+                    _UserGroups[userConnectionId].ForEach(x =>
+                    {
+                        if (_GroupUsers.ContainsKey(x))
+                            if (_GroupUsers[x].Any(v => v == userConnectionId))
+                                _GroupUsers[x].Remove(userConnectionId);
+                    });
+
+                    //Remove User's Groups
+                    _UserGroups.Remove(userConnectionId);
+                }
+            }
+
+            //Remove User Current Room
+            if (_UserCurrentChatRoom.ContainsKey(userConnectionId))
+                _UserCurrentChatRoom.Remove(userConnectionId);
         }
 
         #endregion
 
-        #region Get
+        #region Get Value
 
         /// <summary>
         /// Gets Active Groups
@@ -154,16 +218,17 @@ namespace ServiceLayer.Services.Chat
             return new ServiceResult<List<string>>(_UserGroups[userConnectionId]);
         }
 
-        public void SetDisconnected(string userConnectionId)
+        /// <summary>
+        /// Gets User's Current ChatRoom
+        /// </summary>
+        /// <param name="userConnectionId">User Identifier In Hub</param>
+        /// <returns></returns>
+        public ServiceResult<string> GetCurrentChatRoom(string userConnectionId)
         {
-            if (_UserGroups.ContainsKey(userConnectionId))
-            {
-                if (_UserGroups[userConnectionId] is not null)
-                {
-                    _UserGroups[userConnectionId].ForEach(x => _GroupUsers.Remove(x));
-                    _UserGroups.Remove(userConnectionId);
-                }
-            }
+            if (!_UserCurrentChatRoom.ContainsKey(userConnectionId))
+                return new ServiceResult<string>("There is No ChatRoom You're In!");
+
+            return new ServiceResult<string>(_UserCurrentChatRoom[userConnectionId]);
         }
 
         #endregion

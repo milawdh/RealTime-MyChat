@@ -16,10 +16,11 @@ function StartChatConnection() {
     });
 }
 
-chatConnection.on("GetCurrentChatRoom", () => {
-    debugger
-    chatConnection.invoke("SetCurrentChatRoom", chat != null ? chat.id : null);
-})
+chatConnection.on("GetCurrentChatRoom", setCurrentChatRoom)
+
+async function setCurrentChatRoom() {
+   await chatConnection.invoke("SetCurrentChatRoom", chat != null ? chat.id : null);
+}
 
 function StyleDisconnected() {
     document.getElementById('Dimmer').innerHTML = `<div style="position: absolute; left: 50%; top:50%;">
@@ -36,9 +37,9 @@ function StyleConnected() {
     document.body.style.pointerEvents = 'auto'
 }
 
-async function getChatRoom(charoomId) {
+async function getChatRoomDetials(charoomId) {
 
-    return await chatConnection.invoke("GetChatRoom", charoomId).then(function (res) { return res.result; });
+    return await chatConnection.invoke("GetChatRoomDetials", charoomId).then(function (res) { return res.result; });
 }
 
 async function RecieveMessage(message) {
@@ -64,16 +65,14 @@ async function RecieveMessage(message) {
     ShowNotification(messageDto);
 }
 
-async function SendMessageToHub(messageDto) {
-    return await chatConnection.invoke("SendMessage", messageDto).then(function (response) {
+async function SendMessageToHub(messagebody) {
+    return await chatConnection.invoke("SendMessage", messagebody).then(function (response) {
         return response.result
     });
 }
 
 
-
 chatConnection.onclose(function () {
-    $.connection.hub.qs = 'isChat=true';
     StyleDisconnected()
     setTimeout(StartChatConnection, 5000)
 })
