@@ -26,7 +26,7 @@ namespace Services.Repositories
         T GetById(object id);
 
         IQueryable<T> Get(Expression<Func<T, bool>> where = null,
-			Func<IQueryable<T>, IQueryable<T>> defualtInclude = null, Func<IQueryable<T>, IQueryable<T>> includes = null);
+            Func<IQueryable<T>, IQueryable<T>> defualtInclude = null, Func<IQueryable<T>, IQueryable<T>> includes = null);
 
         Task<IQueryable<T>> GetAsync(Expression<Func<T, bool>> where = null,
             Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, params string[] includes);

@@ -51,8 +51,8 @@ namespace DomainShared.Dtos.Chat.Message
         {
             TypeAdapterConfig<TblMessage, MessagesDto>.NewConfig()
             .Map(dest => dest.Sender, src => src.SenderUserId)
-            .Map(dest => dest.SenderUserName, src => src.SenderUser.UserName)
-            .Map(dest => dest.Time, src => src.SendAt.ToLongDateString())
+            .Map(dest => dest.SenderUserName, src => src.SenderUser.Name)
+            .Map(dest => dest.Time, src => src.SendAt.ToLongTimeString() + " " + src.SendAt.ToShortDateString())
             .Map(dest => dest.Status, src => GetMessageStatus(src))
             .Map(dest => dest.RecieverChatRoomId, src => src.RecieverChatRoomId);
         }

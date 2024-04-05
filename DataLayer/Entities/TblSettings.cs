@@ -10,7 +10,7 @@ public partial class TblSettings
 {
     [Key]
     [Column("ID")]
-    public short Id { get; set; }
+    public int Id { get; set; }
 
     public bool ShowOnline { get; set; }
 

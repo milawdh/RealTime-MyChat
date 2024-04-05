@@ -1,6 +1,8 @@
-﻿using Domain.Models;
+﻿using Domain.Enums;
+using Domain.Models;
+using Domain.Profiles;
 using DomainShared.Dtos.Chat.Message;
-using DomainShared.Profiles;
+using DomainShared.Extentions.MapExtentions;
 using DomainShared.Services;
 using Mapster;
 using System;
@@ -27,6 +29,7 @@ namespace DomainShared.Dtos.Chat.ChatRoom
 
         public string NavbarText { get; set; }
         public List<MessagesDto> Messages { get; set; }
+        public ChatRoomType Type { get; set; }
 
         public void ConfigMap()
         {

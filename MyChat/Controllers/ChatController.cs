@@ -4,8 +4,6 @@ using Framework.Api;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ServiceLayer.API;
 using ServiceLayer.Services.User;
 
 namespace MyChat.Controllers

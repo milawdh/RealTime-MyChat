@@ -1,19 +1,13 @@
-﻿using Domain.Models;
+﻿using Domain.CustomExceptions;
+using Domain.Models;
 using DomainShared.Dtos.User;
+using DomainShared.Extentions.Utility;
 using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using ServiceLayer.CustomExceptions;
-using ServiceLayer.Extentions;
-using Services.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Domain.UnitOfWorks;
 using System.Security.Claims;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace ServiceLayer.Services.User
 {

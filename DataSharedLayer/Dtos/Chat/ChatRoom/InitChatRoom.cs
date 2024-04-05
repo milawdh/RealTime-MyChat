@@ -1,11 +1,11 @@
 ﻿using Domain.Enums;
 using Domain.Models;
 using DomainShared.Dtos.Chat.Message;
-using DomainShared.Profiles;
 using DomainShared.Services;
 using Mapster;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +16,10 @@ namespace DomainShared.Dtos.Chat.ChatRoom
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+        [NotMapped]
+        ///<summary>
+        /// Map It With GetChatRoomImage Method
+        /// </summary>
         public string Pic { get; set; }
 
         public int NotSeenMessagesCount { get; set; } = 0;
@@ -24,11 +28,10 @@ namespace DomainShared.Dtos.Chat.ChatRoom
         public void ConfigMap()
         {
             TypeAdapterConfig<TblChatRoom, InitChatRoom>.NewConfig()
+                .IgnoreNonMapped(true)
+                .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.Name, src => src.Type == ChatRoomType.Group ? src.ChatRoomTitle :
                 src.TblUserChatRoomRel.First().User.Name)
-                .Map(dest => dest.Pic, src => src.Type == ChatRoomType.Group ?
-                NavigationProfile.Resources + src.ProfileImage.Url :
-                NavigationProfile.Resources + src.TblUserChatRoomRel.First().User.ProfileImageUrlNavigation.Url)
                 .Map(dest => dest.LastMessage, src => src.TblMessage.OrderBy(x => x.SendAt).LastOrDefault().Adapt<LastMessageDto>());
         }
     }

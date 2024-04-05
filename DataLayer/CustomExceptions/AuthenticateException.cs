@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ServiceLayer.CustomExceptions
+namespace Domain.CustomExceptions
 {
     public class AuthenticateException : Exception
     {

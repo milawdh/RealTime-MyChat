@@ -44,11 +44,13 @@ public partial class TblUsers
 
     public bool IsDeleted { get; set; }
 
+    public string? ConnectionId { get; set; }
+
     public Guid RoleId { get; set; }
 
     public bool IsOnline { get; set; }
 
-    public short SettingsId { get; set; }
+    public int SettingsId { get; set; }
 
     [ForeignKey("ProfileImageUrl")]
     [InverseProperty("TblUsers")]

@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace DomainShared.Services
+namespace DomainShared.Extentions.MapExtentions
 {
     public static class DtoExtentions
     {
@@ -30,7 +30,7 @@ namespace DomainShared.Services
                     break;
                 case Domain.Enums.ChatRoomType.Group:
                     var userNames = chatRoom.TblUserChatRoomRel.Select(i => i.User.UserName).Take(3).ToList();
-                    result = "You, " + String.Join(", ", userNames);
+                    result = "You, " + string.Join(", ", userNames);
                     if (chatRoom.TblUserChatRoomRel.Count > 2)
                         result += "...";
                     break;

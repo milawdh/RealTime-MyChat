@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ServiceLayer.API
+namespace Domain.API
 {
     public class ServiceResult
-	{
+    {
         /// <summary>
         /// Messages
         /// </summary>
@@ -55,28 +55,29 @@ namespace ServiceLayer.API
 
 
     public class ServiceResult<T> : ServiceResult
-	{
-		/// <summary>
-		/// Result Object
-		/// </summary>
-		public T Result { get; set; }
+    {
+        /// <summary>
+        /// Result Object
+        /// </summary>
+        public T Result { get; set; }
 
-		/// <summary>
-		/// Success With Result Object and Optional Message
-		/// </summary>
-		/// <param name="result">Result Object</param>
-		/// <param name="successMessage">Otional Message To Show User</param>
-		public ServiceResult(T result, string successMessage = "Succeed!")
-		{
-			Success = true;
-			Failure = false;
-			Result = result;
-			Messages.Add(successMessage);
-		}
+        /// <summary>
+        /// Success With Result Object and Optional Message
+        /// </summary>
+        /// <param name="result">Result Object</param>
+        /// <param name="successMessage">Otional Message To Show User</param>
+        public ServiceResult(T result, string successMessage = "Succeed!")
+        {
+            Success = true;
+            Failure = false;
+            Result = result;
+            Messages.Add(successMessage);
+        }
 
-		public ServiceResult(List<string> messages) : base(messages) { }
-		public ServiceResult(string message) : base(message) { }
+        public ServiceResult(List<string> messages) : base(messages) { }
+        public ServiceResult(string message) : base(message) { }
 
+        public ServiceResult() : base() { }
 
     }
 }

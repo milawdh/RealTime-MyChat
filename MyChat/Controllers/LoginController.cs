@@ -1,19 +1,7 @@
-﻿using Domain.Models;
-using DomainShared.Base;
-using Microsoft.AspNetCore.Mvc;
-using Services.Services;
-using ServiceLayer.Extentions;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using Mapster;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Text.RegularExpressions;
-using ServiceLayer.API;
+﻿using Microsoft.AspNetCore.Mvc;
 using DomainShared.Dtos.User;
 using Framework.Api;
 using ServiceLayer.Services.User;
-using ElmahCore;
 
 namespace MyChat.Controllers
 {

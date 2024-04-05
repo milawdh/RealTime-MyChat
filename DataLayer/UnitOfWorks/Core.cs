@@ -5,7 +5,7 @@ using Services.Repositories;
 using System.Transactions;
 using static System.Net.Mime.ContentType;
 
-namespace Services.Services
+namespace Domain.UnitOfWorks
 {
     public class Core : IDisposable
     {

@@ -1,7 +1,8 @@
 ﻿using Domain.Enums;
 using Domain.Models;
+using Domain.Profiles;
 using DomainShared.Dtos.Chat.ChatRoom;
-using DomainShared.Profiles;
+
 using DomainShared.Services;
 using Mapster;
 using System;

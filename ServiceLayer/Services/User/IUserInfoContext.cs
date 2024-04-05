@@ -1,12 +1,12 @@
-﻿using Domain.Models;
+﻿using Domain.CustomExceptions;
+using Domain.Models;
 using DomainShared.Dtos.User;
+using DomainShared.Extentions.MapExtentions;
 using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using ServiceLayer.CustomExceptions;
-using ServiceLayer.Extentions;
-using Services.Services;
-using System;
+using DomainShared.Extentions.Query;
+using Domain.UnitOfWorks;
 using System.Security.Claims;
 
 namespace ServiceLayer.Services.User
@@ -29,6 +29,17 @@ namespace ServiceLayer.Services.User
         /// Current User's ChatRooms Without Their Messages
         /// </summary>
         IQueryable<TblChatRoom> ChatRooms { get; }
+
+        /// <summary>
+        /// Current User's Contacts
+        /// </summary>
+        IQueryable<TblUserContacts> UserContacts { get; }
+
+        /// <summary>
+        /// Users That Current User is their contact
+        /// </summary>
+        IQueryable<TblUserContacts> UserIntegratedContacts { get; }
+
     }
 
     public class UserInfoContext : IUserInfoContext
@@ -124,11 +135,28 @@ namespace ServiceLayer.Services.User
             get
             {
                 UserInitDto result = User.Adapt<UserInitDto>();
-                result.ChatRooms = ChatRoomExtentions.GetInitChatRoom(UserId, ChatRoomsWithMessages);
+                result.ChatRooms = ChatRooMapExtentions.GetInitChatRoom(UserId, ChatRoomsWithMessages);
 
                 return result;
             }
         }
+
+        public IQueryable<TblUserContacts> UserContacts
+        {
+            get
+            {
+                return _core.GetUserContactsQuery(UserId);
+            }
+        }
+
+        public IQueryable<TblUserContacts> UserIntegratedContacts
+        {
+            get
+            {
+                return _core.TblUserContacts.Get(x => x.ContactUserId == UserId);
+            }
+        }
+
 
         #endregion
 
@@ -146,7 +174,7 @@ namespace ServiceLayer.Services.User
                     i => i.Include(x => x.TblMessage
                     .Where(x => !x.IsDeleted)
                     .OrderBy(c => c.SendAt))
-                    .ThenInclude(x => x.SenderUser).ThenInclude(x=>x.ProfileImageUrlNavigation)
+                    .ThenInclude(x => x.SenderUser).ThenInclude(x => x.ProfileImageUrlNavigation)
                     .Include(x => x.TblMessage.Where(x => !x.IsDeleted).OrderBy(c => c.SendAt))
                     .Include(x => x.ProfileImage)
                     );
@@ -183,6 +211,8 @@ namespace ServiceLayer.Services.User
 
             }
         }
+
+
 
         #endregion
 

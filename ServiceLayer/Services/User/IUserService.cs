@@ -1,17 +1,13 @@
 ﻿using Domain.Models;
-using DomainShared.Base;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using ServiceLayer.API;
-using ServiceLayer.CustomExceptions;
 using ServiceLayer.Hubs.Api;
 using ServiceLayer.Hubs;
-using Services.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Domain.UnitOfWorks;
+using ServiceLayer.Services.Caching;
+using Domain.Profiles;
+using Framework.CacheManagement;
+using Domain.API;
+using DomainShared.Extentions.Query;
 
 namespace ServiceLayer.Services.User
 {
@@ -19,7 +15,7 @@ namespace ServiceLayer.Services.User
     {
         //TblUsers GetUserByUserName(string userName, Func<IQueryable<TblUsers>, IQueryable<TblUsers>> include = null);
         void SetUserOffline();
-        void SetUserOnline();
+        void SetUserOnline(string connectionId);
     }
     public class UserService : IUserService
     {
@@ -27,13 +23,15 @@ namespace ServiceLayer.Services.User
 
         private readonly Core _core;
         private readonly IUserInfoContext _userInfoContext;
+        private readonly ICacheManager _cache;
         private readonly IHubContext<ChatHub, IChatHubApi> _chatHub;
         public UserService(Core core, IHubContext<ChatHub, IChatHubApi> chatHub,
-            IUserInfoContext userInfoContext)
+            IUserInfoContext userInfoContext, ICacheManager cache)
         {
             _core = core;
             _chatHub = chatHub;
             _userInfoContext = userInfoContext;
+            _cache = cache;
         }
 
         #endregion
@@ -62,30 +60,29 @@ namespace ServiceLayer.Services.User
         /// <summary>
         /// Sets User Online By Id
         /// </summary>
-        /// <param name="userId">Users Id</param>
-        /// <exception cref="AuthenticateException">occurs when userName was invalid</exception>
-        public void SetUserOnline()
+        /// <param name="connectionId">User's connectionId Id</param>
+        public void SetUserOnline(string connectionId)
         {
-            _userInfoContext.User.IsOnline = true;
+            var user = _userInfoContext.User;
+
+            user.IsOnline = true;
+            user.ConnectionId = connectionId;
+
             _core.Save();
-
-
         }
 
         /// <summary>
         /// Sets User Offline By Id
         /// </summary>
-        /// <param name="userId">Users Id</param>
-        /// <exception cref="AuthenticateException">occurs when userName was invalid</exception>
         public void SetUserOffline()
         {
             var user = _userInfoContext.User;
 
             user.IsOnline = false;
             user.LastOnline = DateTime.Now;
+            user.ConnectionId = null;
+
             _core.Save();
-
-
         }
 
         #endregion
