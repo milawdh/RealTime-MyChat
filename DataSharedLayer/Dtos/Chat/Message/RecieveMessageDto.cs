@@ -1,5 +1,8 @@
 ﻿using Domain.Enums;
+using Domain.Models;
 using DomainShared.Dtos.Chat.ChatRoom;
+using DomainShared.Services;
+using Mapster;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DomainShared.Dtos.Chat.Message
 {
-    public class RecieveMessageDto
+    public class RecieveMessageDto : IHasCustomMap
     {
         /// <summary>
         /// Message Id
@@ -18,7 +21,7 @@ namespace DomainShared.Dtos.Chat.Message
         /// <summary>
         /// Message SenderId
         /// </summary>
-        public Guid Sender { get; set; }
+        public Guid RecieverChatRoomId { get; set; }
 
         /// <summary>
         /// Message SenderName
@@ -35,9 +38,10 @@ namespace DomainShared.Dtos.Chat.Message
         /// </summary>
         public string Time { get; set; }
 
-        /// <summary>
-        /// Message Sender ChatRoom
-        /// </summary>
-        public InitChatRoom SenderChatRoom { get; set; }
+        public void ConfigMap()
+        {
+            TypeAdapterConfig<TblMessage, RecieveMessageDto>.NewConfig()
+                .Map(dest => dest.Time, src => src.SendAt.ToLongTimeString() + " " + src.SendAt.ToShortDateString());
+        }
     }
 }

@@ -101,6 +101,7 @@ let populateChatList = () => {
         });
 };
 function CreateChatListItem(elem) {
+
     let statusClass = elem.lastMessage.status < 2 ? "far" : "fas";
     let unreadClass = elem.lastMessage.status < 2 ? "unread" : "";
 
@@ -109,7 +110,7 @@ function CreateChatListItem(elem) {
         id="Ch${elem.id}" onclick="generateMessageArea(this, '${elem.id}')">
 			<img src="${elem.pic}" alt="Profile Photo" class="img-fluid rounded-circle mr-2" style="height:50px;">
 			<div class="w-50">
-				<div class="name">${elem.name}</div>
+				<div class="name" id="ChLastMessageName${elem.id}">${elem.name}</div>
 				<div class="small last-message" id="ChLastMessage${elem.id}">
                 ${elem.lastMessage.SenderUserName === user.name
             ? '<i class="' + statusClass + ' fa-check-circle mr-1"></i>'
@@ -120,13 +121,12 @@ function CreateChatListItem(elem) {
 			</div>
 			<div class="flex-grow-1 text-right">
 				<div class="small time" id="ChTime${elem.id}" >${elem.lastMessage.time}</div>
-                <div id="ChReadDiv${elem.id}">
-				${elem.notSeenMessagesCount > 0 ?
-            '<div class="badge badge-success badge-pill small" id="unread-count">' +
-            elem.notSeenMessagesCount +
-            "</div>"
-            : ""
-             }
+
+    <div id="ChReadDiv${elem.id}" ${elem.notSeenMessagesCount <= 0 ? "hidden" : ""}>
+        <div class="badge badge-success badge-pill small"
+        id="ChRead-count${elem.id}">
+            ${elem.notSeenMessagesCount}
+            </div>
                 </div>
 			</div>
 		</div>
@@ -155,6 +155,7 @@ let addDateToMessageArea = (date) => {
 };
 
 let addMessageToMessageArea = (msg) => {
+    debugger
     let msgDate = mDate(msg.time).getDate();
     if (lastDate != msgDate) {
         addDateToMessageArea(msgDate);
@@ -187,17 +188,18 @@ let addMessageToMessageArea = (msg) => {
 				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.Id})">Forward</a></li>
                 `
             :
-            `
-				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.Id})">Forward</a></li>`
+            `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.Id})">Forward</a></li>`
         }
 			</ul>
 		</div>
 		</div>
-		${chat.isGroup ? htmlForGroup : ""}
+		<a href="#">
+        ${chat.type == 9 ? msg.senderUserName : ""}
+        </a>
 		<div class="d-flex flex-row">
 			<div class="body m-1 mr-2">${msg.body}</div>
 			<div class="time ml-auto small text-right flex-shrink-0 align-self-end text-muted" style="width:75px;">
-				${mDate(msg.time).getTime()}
+				${msg.time.split(' ')[0]}
 				${msg.sender === user.id ? sendStatus : ""}
 			</div>
 		</div>
@@ -212,10 +214,12 @@ let addMessageToMessageArea = (msg) => {
 
 let generateMessageArea = async (elem, chatId) => {
 
-    chat = await getChatRoomDetials(chatId);
+    chat = await GetChatRoomDetails(chatId);
     await setCurrentChatRoom();
 
-    document.getElementById(`ChReadDiv${chatId}`).innerHTML = ''
+    document.getElementById(`ChReadDiv${chatId}`).setAttribute("hidden", "")
+    document.getElementById(`ChRead-count${chatId}`).innerText = 0;
+
     mClassList(DOM.inputArea).contains("d-none", (elem) =>
         elem.remove("d-none").add("d-flex")
     );

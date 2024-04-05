@@ -8,7 +8,6 @@ StartChatConnection()
 
 
 function StartChatConnection() {
-
     chatConnection.start().then(function () {
         StyleConnected()
     }).catch(function (err) {
@@ -16,10 +15,8 @@ function StartChatConnection() {
     });
 }
 
-chatConnection.on("GetCurrentChatRoom", setCurrentChatRoom)
-
 async function setCurrentChatRoom() {
-   await chatConnection.invoke("SetCurrentChatRoom", chat != null ? chat.id : null);
+    await chatConnection.invoke("SetCurrentChatRoom", chat != null ? chat.id : null);
 }
 
 function StyleDisconnected() {
@@ -37,45 +34,71 @@ function StyleConnected() {
     document.body.style.pointerEvents = 'auto'
 }
 
-async function getChatRoomDetials(charoomId) {
-
-    return await chatConnection.invoke("GetChatRoomDetials", charoomId).then(function (res) { return res.result; });
+async function GetChatRoomDetails(charoomId) {
+    return await chatConnection.invoke("GetChatRoomDetails", charoomId).then(function (res) { return res.result; });
 }
 
 async function RecieveMessage(message) {
-    debugger
 
     var messageDto = message.result;
-    document.getElementById("ChTime" + messageDto.recieverChatRoomId).innerText = messageDto.time
-    document.getElementById("ChLastMessage" + messageDto.recieverChatRoomId).innerText = formatLength(messageDto.body, 12);
-
-    var chatRoomView = document.getElementById("Ch" + messageDto.recieverChatRoomId)
-    document.getElementById("Ch" + messageDto.recieverChatRoomId).remove()
-
-    var AllChatRooms = DOM.chatList.innerHTML
-
-    DOM.chatList.innerHTML = CreateChatListItem(messageDto.senderChatRoom) + AllChatRooms
 
     if (chat != null) {
         if (chat.id == messageDto.recieverChatRoomId) {
             addMessageToMessageArea(messageDto)
-            return;
+            UpdateCurrentChatListItem(messageDto)
         }
     }
-    ShowNotification(messageDto);
 }
+
+async function RecieveNotification(notif) {
+
+    var notifDto = notif.result;
+
+    //ChatList Item Proccess
+    UpdateCurrentChatListItem(notifDto, true)
+
+    //Show Notif
+    ShowNotification(notifDto)
+}
+
 
 async function SendMessageToHub(messagebody) {
-    return await chatConnection.invoke("SendMessage", messagebody).then(function (response) {
+    var messageDto = await chatConnection.invoke("SendMessage", messagebody).then(function (response) {
         return response.result
     });
+
+    UpdateCurrentChatListItem(messageDto)
+    return messageDto;
 }
+function UpdateCurrentChatListItem(messageDto, isNotif = false) {
 
+    if (isNotif) {
+        var readCountElement = document.getElementById(`ChRead-count${notifDto.recieverChatRoomId}`)
 
-chatConnection.onclose(function () {
+        var readCount = new Number(readCountElement.innerText) + 1;
+
+        readCountElement.innerText = readCount
+
+        document.getElementById(`ChReadDiv${notifDto.recieverChatRoomId}`).removeAttribute("hidden")
+    }
+
+    document.getElementById(`ChLastMessage${messageDto.recieverChatRoomId}`).innerHTML = formatLength(messageDto.body, 10);
+    document.getElementById(`ChTime${messageDto.recieverChatRoomId}`).innerText = messageDto.time;
+    var item = document.getElementById(`Ch${messageDto.recieverChatRoomId}`).outerHTML
+
+    document.getElementById(`Ch${messageDto.recieverChatRoomId}`).remove()
+
+    var AllChatRooms = DOM.chatList.innerHTML
+    DOM.chatList.innerHTML = item + AllChatRooms
+}
+function chatOnClosed() {
     StyleDisconnected()
     setTimeout(StartChatConnection, 5000)
-})
+}
 
+chatConnection.onclose(chatOnClosed)
+
+chatConnection.on("GetCurrentChatRoom", setCurrentChatRoom)
 chatConnection.on("SetUserInfo", SetUserInfo)
 chatConnection.on("RecieveMessage", RecieveMessage)
+chatConnection.on("RecieveNotification", RecieveNotification)

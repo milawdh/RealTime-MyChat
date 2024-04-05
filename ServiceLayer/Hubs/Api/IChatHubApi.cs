@@ -1,14 +1,16 @@
-﻿using Domain.Models;
-using DomainShared.Base;
+﻿using Domain.Base;
+using Domain.Models;
+
 using DomainShared.Dtos.Chat.Message;
 using DomainShared.Dtos.User;
 
 namespace ServiceLayer.Hubs.Api
 {
-	public interface IChatHubApi
-	{
+    public interface IChatHubApi
+    {
         Task SetUserInfo(UserInitDto userDto);
         Task RecieveMessage(ApiResult<RecieveMessageDto> message);
+        Task RecieveNotification(ApiResult<RecieveMessageNotificationDto> message);
 
         Task GetCurrentChatRoom();
     }

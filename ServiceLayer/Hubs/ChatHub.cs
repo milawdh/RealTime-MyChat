@@ -1,8 +1,9 @@
-﻿using DomainShared.Base;
+﻿using Domain.Base;
 using DomainShared.Dtos.Chat.Message;
 using ElmahCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using ServiceLayer.Hubs.Api;
 using ServiceLayer.Services.Chat;
 using ServiceLayer.Services.User;
@@ -12,8 +13,6 @@ namespace ServiceLayer.Hubs
     [Authorize]
     public class ChatHub : Hub<IChatHubApi>
     {
-        private static Dictionary<Guid, string> UsersChatRooms = new Dictionary<Guid, string>();
-
         private readonly IUserInfoContext _userInfoContext;
         private readonly IUserService _userService;
         private readonly IChatServices _chatServices;
@@ -26,76 +25,62 @@ namespace ServiceLayer.Hubs
             _userInfoContext = webAppContext;
             _userService = userService;
             _chatServices = chatServices;
-
             _chatHubGroupManager = chatHubGroupManager;
         }
 
         public override async Task OnConnectedAsync()
         {
-            try
-            {
-                //Set UserOnline
-                _userService.SetUserOnline();
-                await Clients.Caller.SetUserInfo(_userInfoContext.UserInitiliazeDto);
+            //Set UserOnline
+            _userService.SetUserOnline(Context.ConnectionId);
+            await Clients.Caller.SetUserInfo(_userInfoContext.UserInitiliazeDto);
 
 
-                await base.OnConnectedAsync();
-                //Get User Data
-                await Clients.Caller.GetCurrentChatRoom();
-            }
-            catch (Exception ex)
-            {
-                ElmahExtensions.RaiseError(ex);
-            }
+            await base.OnConnectedAsync();
+            //Get User Data
+            await Clients.Caller.GetCurrentChatRoom();
         }
 
+        #region Chat
+
+        /// <summary>
+        /// Sets User CurrentChatRoom To GroupManagement
+        /// </summary>
+        /// <param name="chatRoomId"></param>
+        /// <returns></returns>
         public async Task SetCurrentChatRoom(Guid? chatRoomId)
         {
             if (chatRoomId != null)
                 _chatHubGroupManager.SetCurrentChatRoom(Context.ConnectionId, chatRoomId.Value.ToString());
         }
 
-
-        #region Chat
-
         /// <summary>
         /// Gets ChatRoom From Current User's ChatRooms With Messages To Converstation
         /// </summary>
         /// <param name="id">ChatRoom Id</param>
         /// <returns>Dependent On ChatRoom type ChatRoom's ViewModel</returns>
-        public async Task<object> GetChatRoomDetials(Guid id)
+        public async Task<object> GetChatRoomDetails(Guid id)
         {
-            try
-            {
-                var result = await _chatServices.GetChatRoomAsync(id);
+            var result = await _chatServices.GetChatRoomAsync(id);
 
-                return new ApiResult<object>(result);
-            }
-            catch (Exception ex)
-            {
-                ElmahExtensions.RaiseError(ex);
-                return new ApiResult<object>("Couldn't Get Chatroom!");
-            }
+            return new ApiResult<object>(result);
         }
 
+        /// <summary>
+        /// Sends Message To User CurrentChatRoom That Setted in GroupManager
+        /// </summary>
+        /// <param name="body"></param>
+        /// <returns></returns>
         public async Task<ApiResult<MessagesDto>> SendMessage(string body)
         {
-            try
-            {
-                var accessResult = _chatHubGroupManager.GetCurrentChatRoom(Context.ConnectionId);
-                if (accessResult.Failure)
-                    return new ApiResult<MessagesDto>(accessResult.Messages);
+            var accessResult = _chatHubGroupManager.GetCurrentChatRoom(Context.ConnectionId);
+            if (accessResult.Failure)
+                return new ApiResult<MessagesDto>(accessResult.Messages);
 
-                return new ApiResult<MessagesDto>(
-                    await _chatServices.SendMessageAsync(
-                    new SendMessageDto { Body = body, RecieverChatRoomId = new Guid(accessResult.Result) })
-                    );
-            }
-            catch (Exception ex)
-            {
-                ElmahExtensions.RaiseError(ex);
-                return new ApiResult<MessagesDto>("Message Not Sent");
-            }
+            //Context.c
+            return new ApiResult<MessagesDto>(
+                await _chatServices.SendMessageAsync(
+                new SendMessageDto { Body = body, RecieverChatRoomId = new Guid(accessResult.Result) })
+                );
         }
 
         #endregion
@@ -106,8 +91,9 @@ namespace ServiceLayer.Hubs
             _userService.SetUserOffline();
             _chatHubGroupManager.SetDisconnected(Context.ConnectionId);
 
+            if (exception != null)
+                ElmahExtensions.RaiseError(exception);
 
-            ElmahExtensions.RaiseError(exception);
             await base.OnDisconnectedAsync(exception);
         }
     }

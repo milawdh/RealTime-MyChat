@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNet.SignalR;
+﻿using Domain.API;
 using Microsoft.AspNetCore.SignalR;
-using ServiceLayer.API;
 using ServiceLayer.Hubs;
 using ServiceLayer.Hubs.Api;
 using System;
@@ -52,14 +51,16 @@ namespace ServiceLayer.Services.Chat
         public void ChangeUserGroups(string userConnectionId, string perviousGroupName, string newGroupName);
 
         ServiceResult<string> GetCurrentChatRoom(string userConnectionId);
+
+        Dictionary<string, string> GetUsersCurrentChatRoomDict();
     }
     public class ChatHubGroupManager : IChatHubGroupManager
     {
         private static Dictionary<string, List<string>> _UserGroups;
         private static Dictionary<string, string> _UserCurrentChatRoom;
         private static Dictionary<string, List<string>> _GroupUsers;
-        private readonly IHubContext<ChatHub, IChatHubApi> _chatHub;
 
+        private readonly IHubContext<ChatHub, IChatHubApi> _chatHub;
 
         public ChatHubGroupManager(IHubContext<ChatHub, IChatHubApi> chatHub)
         {
@@ -228,8 +229,16 @@ namespace ServiceLayer.Services.Chat
             if (!_UserCurrentChatRoom.ContainsKey(userConnectionId))
                 return new ServiceResult<string>("There is No ChatRoom You're In!");
 
-            return new ServiceResult<string>(_UserCurrentChatRoom[userConnectionId]);
+            return new ServiceResult<string>
+            {
+                Messages = new(),
+                Success = true,
+                Failure = false,
+                Result = _UserCurrentChatRoom[userConnectionId]
+            };
         }
+
+        public Dictionary<string, string> GetUsersCurrentChatRoomDict() => _UserCurrentChatRoom;
 
         #endregion
 

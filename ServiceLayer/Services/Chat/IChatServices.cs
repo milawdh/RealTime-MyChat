@@ -1,36 +1,29 @@
-﻿using Domain.Enums;
+﻿using Domain.API;
+using Domain.Base;
+using Domain.Enums;
 using Domain.Models;
-using DomainShared.Base;
 using DomainShared.Dtos.Chat.ChatRoom;
 using DomainShared.Dtos.Chat.Message;
-using DomainShared.Profiles;
+using DomainShared.Extentions.Utility;
+using DomainShared.Extentions.MapExtentions;
 using Mapster;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using ServiceLayer.API;
-using ServiceLayer.Extentions;
 using ServiceLayer.Hubs;
 using ServiceLayer.Hubs.Api;
 using ServiceLayer.Services.User;
-using Services.Services;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Domain.UnitOfWorks;
+using DomainShared.Extentions.Query;
 
 namespace ServiceLayer.Services.Chat
 {
     public interface IChatServices
     {
         Task<ServiceResult<MessagesDto>> SendMessageAsync(SendMessageDto messageDto);
-        Task RecieveMessageAsync(MessagesDto message);
+        Task RecieveMessageAsync(TblMessage message);
         Task<ServiceResult<object>> GetChatRoomAsync(Guid id);
 
     }
-
     public class ChatService : IChatServices
     {
         #region Constructor
@@ -39,40 +32,46 @@ namespace ServiceLayer.Services.Chat
         private readonly Core _core;
         private readonly IUserService _userService;
         private readonly IHubContext<ChatHub, IChatHubApi> _chatHub;
+        private readonly IChatHubGroupManager _chatHubGroupManager;
 
         public ChatService(IUserService userService,
             IUserInfoContext userInfoContext,
             Core core,
             IHubContext<ChatHub, IChatHubApi> chatHub
-            )
+,
+            IChatHubGroupManager chatHubGroupManager)
         {
             _userService = userService;
             _userInfoContext = userInfoContext;
             _core = core;
             _chatHub = chatHub;
+            _chatHubGroupManager = chatHubGroupManager;
         }
 
         #endregion
 
         public async Task<ServiceResult<MessagesDto>> SendMessageAsync(SendMessageDto messageDto)
         {
-            if (!_core.TblUserChatRoomRel.Any(x => x.ChatRoomId == messageDto.RecieverChatRoomId && x.UserId == _userInfoContext.UserId))
+            if (!_userInfoContext.ChatRooms.Any(x => x.Id == messageDto.RecieverChatRoomId))
                 return new ServiceResult<MessagesDto>("Invalid ChatRoom!");
 
             TblMessage tblMessage = new()
             {
                 Body = messageDto.Body,
                 RecieverChatRoomId = messageDto.RecieverChatRoomId,
-                SenderUserId = _userInfoContext.UserId
+                SenderUserId = _userInfoContext.UserId,
+                SenderUser = _userInfoContext.User,
             };
 
             _core.TblMessage.Add(tblMessage);
             _core.Save();
 
-            var result = tblMessage.Adapt<MessagesDto>();
-            //TODO : Do it with backTask
 
-            await RecieveMessageAsync(result);
+            MessagesDto result = tblMessage.Adapt<MessagesDto>();
+            result.SenderUserName = _userInfoContext.UserName;
+
+            //TODO : Do it with backTask
+            await RecieveMessageAsync(tblMessage);
             return new ServiceResult<MessagesDto>(result);
         }
 
@@ -116,18 +115,26 @@ namespace ServiceLayer.Services.Chat
         /// </summary>
         /// <param name="messageDto">Message Dto Will Send</param>
         /// <returns>It Sends data from ChatHub</returns>
-        public async Task RecieveMessageAsync(MessagesDto messageDto)
+        public async Task RecieveMessageAsync(TblMessage tblMessage)
         {
-            var userNames = _userInfoContext.ChatRooms
-                .FirstOrDefault(i => i.Id == messageDto.RecieverChatRoomId)!
-                .GetChatRoomUserNames(_userInfoContext.UserId);
+            Dictionary<string, string> dict = _chatHubGroupManager.GetUsersCurrentChatRoomDict();
+
+            var allRecieverUsers = _userInfoContext.ChatRooms.Where(i => i.Id == tblMessage.RecieverChatRoomId)
+                .SelectMany(v => v.TblUserChatRoomRel.Select(c => c.User.ConnectionId)).Where(a => a != null).ToList();
 
 
-            var result = messageDto.Adapt<RecieveMessageDto>();
-            result.SenderChatRoom = ChatRoomExtentions.GetInitChatRoom(_userInfoContext.UserId,
-                _userInfoContext.ChatRoomsWithMessages.FirstOrDefault(i => i.Id == messageDto.RecieverChatRoomId));
+            var willNotifyUsers = allRecieverUsers.Where(c => !dict.ContainsKey(c) || dict[c] != tblMessage.RecieverChatRoomId.ToString())
+                .ToList();
 
-            await _chatHub.Clients.Users(userNames).RecieveMessage(new ApiResult<RecieveMessageDto>(new ServiceResult<RecieveMessageDto>(result)));
+            var notification = tblMessage.GetRecieveMessageNotificationDto();
+
+            var result = tblMessage.Adapt<RecieveMessageDto>();
+
+            await _chatHub.Clients.GroupExcept(tblMessage.RecieverChatRoomId.ToString(), _userInfoContext.User.ConnectionId)
+                .RecieveMessage(new ApiResult<RecieveMessageDto>(new ServiceResult<RecieveMessageDto>(result)));
+
+            await _chatHub.Clients.Clients(willNotifyUsers)
+                .RecieveNotification(new ApiResult<RecieveMessageNotificationDto>(new ServiceResult<RecieveMessageNotificationDto>(notification)));
         }
 
         /// <summary>

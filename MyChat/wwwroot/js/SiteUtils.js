@@ -18,10 +18,8 @@ function SetSelectedContact(parentElement) {
     }
 }
 function formatLength(src, length) {
-    debugger
     var isLong = false;
     var res = "";
-    src = src.split('');
 
     if (src.length > length) {
         isLong = true
@@ -40,15 +38,19 @@ function formatLength(src, length) {
 
     return res;
 }
-function ShowNotification(message) {
+function ShowNotification(notif) {
     UIkit.notification({
         message: `
-        <div dir="rtl" onclick="generateMessageArea(this, '${message.id}',${message.type})" class="d-flex justify-content-end">
-            <span class="_MyFont mx-1">${message.senderUserName}</span>
-            <img class="uk-border-circle" src="${message.senderProfileImage}" width="40"/>
+        <div dir="rtl" onclick="generateMessageArea(this, '${notif.recieverChatRoomId}')" class="d-flex justify-content-end">
+            <span class="_MyFont mx-1">${notif.senderUserName}</span>
+            ${
+            notif.image != null ?
+            `<img class="uk-border-circle" src="${notif.image}" width="40"/>`
+            : ""
+            }
         </div>
         <div>
-        ${formatLength(message.body, 10)}
+        ${notif.body}
         </div>
         `,
         status: 'primary',
