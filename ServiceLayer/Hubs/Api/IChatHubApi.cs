@@ -13,5 +13,6 @@ namespace ServiceLayer.Hubs.Api
         Task RecieveNotification(ApiResult<RecieveMessageNotificationDto> message);
 
         Task GetCurrentChatRoom();
+        Task SetAllMessagesRead();
     }
 }

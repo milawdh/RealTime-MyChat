@@ -23,7 +23,15 @@ namespace MyChat.PipeLine.HubFilters
         // Optional method
         public Task OnConnectedAsync(HubLifetimeContext context, Func<HubLifetimeContext, Task> next)
         {
-            return next(context);
+            try
+            {
+                return next(context);
+            }
+            catch (Exception ex)
+            {
+                ElmahExtensions.RaiseError(ex);
+                throw;
+            }
         }
 
         // Optional method

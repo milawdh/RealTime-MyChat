@@ -1,5 +1,6 @@
 ﻿using Domain.Enums;
 using Domain.Models;
+using Domain.UnitOfWorks;
 using DomainShared.Services;
 using Mapster;
 using System;
@@ -53,16 +54,7 @@ namespace DomainShared.Dtos.Chat.Message
             .Map(dest => dest.Sender, src => src.SenderUserId)
             .Map(dest => dest.SenderUserName, src => src.SenderUser.Name)
             .Map(dest => dest.Time, src => src.SendAt.ToLongTimeString() + " " + src.SendAt.ToShortDateString())
-            .Map(dest => dest.Status, src => GetMessageStatus(src))
             .Map(dest => dest.RecieverChatRoomId, src => src.RecieverChatRoomId);
-        }
-
-        private static MessageStatus GetMessageStatus(TblMessage src)
-        {
-            //TODO
-
-            //var ReadedBys = src.ReadedByList.ReadedByUsers;
-            return /*ReadedBys.Any() ? MessageStatus.Read : */MessageStatus.Sent;
         }
     }
 }

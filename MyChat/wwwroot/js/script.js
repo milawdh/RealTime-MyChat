@@ -200,7 +200,7 @@ let addMessageToMessageArea = (msg) => {
 			<div class="body m-1 mr-2">${msg.body}</div>
 			<div class="time ml-auto small text-right flex-shrink-0 align-self-end text-muted" style="width:75px;">
 				${msg.time.split(' ')[0]}
-				${msg.sender === user.id ? sendStatus : ""}
+				${msg.sender === user.id ?  sendStatus : ""}
 			</div>
 		</div>
 	</div>

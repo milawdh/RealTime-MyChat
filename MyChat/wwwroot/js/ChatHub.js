@@ -46,12 +46,12 @@ async function RecieveMessage(message) {
         if (chat.id == messageDto.recieverChatRoomId) {
             addMessageToMessageArea(messageDto)
             UpdateCurrentChatListItem(messageDto)
+            await chatConnection.invoke("SetMessageRead", chat.id);
         }
     }
 }
 
 async function RecieveNotification(notif) {
-
     var notifDto = notif.result;
 
     //ChatList Item Proccess
@@ -61,7 +61,10 @@ async function RecieveNotification(notif) {
     ShowNotification(notifDto)
 }
 
-
+function SetAllMessagesRead() {
+    $('.far').addClass('fas')
+    $('.far').removeClass('far')
+}
 async function SendMessageToHub(messagebody) {
     var messageDto = await chatConnection.invoke("SendMessage", messagebody).then(function (response) {
         return response.result
@@ -73,13 +76,13 @@ async function SendMessageToHub(messagebody) {
 function UpdateCurrentChatListItem(messageDto, isNotif = false) {
 
     if (isNotif) {
-        var readCountElement = document.getElementById(`ChRead-count${notifDto.recieverChatRoomId}`)
+        var readCountElement = document.getElementById(`ChRead-count${messageDto.recieverChatRoomId}`)
 
         var readCount = new Number(readCountElement.innerText) + 1;
 
         readCountElement.innerText = readCount
 
-        document.getElementById(`ChReadDiv${notifDto.recieverChatRoomId}`).removeAttribute("hidden")
+        document.getElementById(`ChReadDiv${messageDto.recieverChatRoomId}`).removeAttribute("hidden")
     }
 
     document.getElementById(`ChLastMessage${messageDto.recieverChatRoomId}`).innerHTML = formatLength(messageDto.body, 10);
@@ -102,3 +105,4 @@ chatConnection.on("GetCurrentChatRoom", setCurrentChatRoom)
 chatConnection.on("SetUserInfo", SetUserInfo)
 chatConnection.on("RecieveMessage", RecieveMessage)
 chatConnection.on("RecieveNotification", RecieveNotification)
+chatConnection.on("SetAllMessagesRead", SetAllMessagesRead)

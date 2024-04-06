@@ -36,12 +36,9 @@ namespace DomainShared.Dtos.Chat.ChatRoom
             TypeAdapterConfig<TblChatRoom, GroupChatRoomDto>.NewConfig()
                 .Map(dest => dest.Name, src => src.ChatRoomTitle)
                 .Map(dest => dest.Pic, src => NavigationProfile.Resources + src.ProfileImage.Url)
-                .Map(dest => dest.Messages, src => GetMessages(src))
                 .Map(dest => dest.NavbarText, src => src.GetNavbarText());
         }
 
-        private List<MessagesDto> GetMessages(TblChatRoom src) =>
-         src.TblMessage.OrderBy(x => x.SendAt).AsQueryable().ProjectToType<MessagesDto>().ToList();
 
     }
 }

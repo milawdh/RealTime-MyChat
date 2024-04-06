@@ -83,6 +83,12 @@ namespace ServiceLayer.Hubs
                 );
         }
 
+        public async Task SetMessageRead(Guid chatRoomId)
+        {
+            if (_userInfoContext.ChatRooms.Any(x => x.Id == chatRoomId))
+                await _chatServices.SetChatRoomAllMessagesRead(chatRoomId);
+        }
+
         #endregion
 
         public override async Task OnDisconnectedAsync(Exception? exception)

@@ -7,18 +7,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace DomainShared.Extentions.Query
 {
     public static class QueryHelper
     {
-        public static IQueryable<TblUserContacts> GetUserContactsQuery(this Core core, Guid userId)
+        private static Core core = new();
+        public static IQueryable<TblUserContacts> GetUserContactsQuery(this Guid userId)
         {
             return core.TblUserContacts.Get(x => x.ContactListOwnerId == userId);
         }
 
-        public static IQueryable<TblUsers> GetPrivateMessageRecieverQuery(this Core core, TblMessage tblMessage)
+        public static IQueryable<TblUsers> GetPrivateMessageRecieverQuery(this TblMessage tblMessage)
         {
             return core.TblUserChatRoomRel
                  .Get(v => v.ChatRoomId == tblMessage.RecieverChatRoomId && v.UserId != tblMessage.SenderUserId,
@@ -36,5 +36,16 @@ namespace DomainShared.Extentions.Query
                       x.ProfileImageId != null ? x.ProfileImage.Url : null);
         }
 
+        public static IQueryable<TblMessage> GetNotSeenMessagesQuery(this TblChatRoom chatRoom, DateTime? lastSeenMessageDate, Guid currentUserId)
+        {
+            if (lastSeenMessageDate is not null)
+            {
+               return chatRoom.TblMessage.Where(x => x.SendAt > lastSeenMessageDate && x.SenderUserId != currentUserId).AsQueryable();
+            }
+            else
+            {
+               return chatRoom.TblMessage.Where(x => x.SenderUserId != currentUserId).AsQueryable();
+            }
+        }
     }
 }

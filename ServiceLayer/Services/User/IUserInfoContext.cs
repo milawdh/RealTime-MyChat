@@ -15,6 +15,7 @@ namespace ServiceLayer.Services.User
     {
         Guid UserId { get; }
         string UserName { get; }
+        string? UserChatHubConnectionId { get; }
         TblUsers User { get; }
         IQueryable<TblPermission> UserPermissions { get; }
         UserInitDto UserInitiliazeDto { get; }
@@ -116,6 +117,14 @@ namespace ServiceLayer.Services.User
             }
         }
 
+        public string? UserChatHubConnectionId
+        {
+            get
+            {
+               return User.ConnectionId;
+            }
+        }
+
         /// <summary>
         /// Current User Main Model
         /// </summary>
@@ -135,7 +144,7 @@ namespace ServiceLayer.Services.User
             get
             {
                 UserInitDto result = User.Adapt<UserInitDto>();
-                result.ChatRooms = ChatRooMapExtentions.GetInitChatRoom(UserId, ChatRoomsWithMessages);
+                result.ChatRooms = ChatRooMapExtentions.MapToInitChatRoom(UserId, ChatRoomsWithMessages);
 
                 return result;
             }
@@ -145,7 +154,7 @@ namespace ServiceLayer.Services.User
         {
             get
             {
-                return _core.GetUserContactsQuery(UserId);
+                return UserId.GetUserContactsQuery();
             }
         }
 

@@ -22,6 +22,8 @@ namespace ServiceLayer.Services.Chat
         Task<ServiceResult<MessagesDto>> SendMessageAsync(SendMessageDto messageDto);
         Task RecieveMessageAsync(TblMessage message);
         Task<ServiceResult<object>> GetChatRoomAsync(Guid id);
+        Task SetMessageRead(Guid chatRoomId, Guid messageId, Guid userId);
+        Task SetChatRoomAllMessagesRead(Guid chatRoomId);
 
     }
     public class ChatService : IChatServices
@@ -65,13 +67,13 @@ namespace ServiceLayer.Services.Chat
 
             _core.TblMessage.Add(tblMessage);
             _core.Save();
-
+            await SetMessageRead(tblMessage.RecieverChatRoomId, tblMessage.Id, _userInfoContext.UserId);
 
             MessagesDto result = tblMessage.Adapt<MessagesDto>();
-            result.SenderUserName = _userInfoContext.UserName;
 
             //TODO : Do it with backTask
             await RecieveMessageAsync(tblMessage);
+
             return new ServiceResult<MessagesDto>(result);
         }
 
@@ -89,8 +91,8 @@ namespace ServiceLayer.Services.Chat
             if (chatRoom is null)
                 return new ServiceResult<PrivateChatRoomDto>("Chat Room Not Found");
 
-            chatRoom.TblUserChatRoomRel = chatRoom.TblUserChatRoomRel.OrderByDescending(x => x.UserId != _userInfoContext.UserId).ToList();
-            return new ServiceResult<PrivateChatRoomDto>(chatRoom.Adapt<PrivateChatRoomDto>());
+            var res = chatRoom.MapToPrivateChatRoomDto(_userInfoContext.UserId);
+            return new ServiceResult<PrivateChatRoomDto>(res);
         }
 
         /// <summary>
@@ -107,7 +109,9 @@ namespace ServiceLayer.Services.Chat
             if (chatRoom is null)
                 return new ServiceResult<GroupChatRoomDto>("Chat Room Not Found");
 
-            return new ServiceResult<GroupChatRoomDto>(chatRoom.Adapt<GroupChatRoomDto>());
+            var result = chatRoom.MapToGroupChatRoomDto(_userInfoContext.UserId);
+
+            return new ServiceResult<GroupChatRoomDto>(result);
         }
 
         /// <summary>
@@ -126,7 +130,7 @@ namespace ServiceLayer.Services.Chat
             var willNotifyUsers = allRecieverUsers.Where(c => !dict.ContainsKey(c) || dict[c] != tblMessage.RecieverChatRoomId.ToString())
                 .ToList();
 
-            var notification = tblMessage.GetRecieveMessageNotificationDto();
+            var notification = tblMessage.MapToRecieveMessageNotificationDto();
 
             var result = tblMessage.Adapt<RecieveMessageDto>();
 
@@ -147,9 +151,12 @@ namespace ServiceLayer.Services.Chat
             if (!_core.TblChatRoom.Any(x => x.Id == id))
                 return new ServiceResult<object>("ChatRoomNot Found");
 
-            await SetMessageRead(id);
+            var chatRoom = _core.TblChatRoom.GetById(id);
 
-            var chatRoomType = _core.TblChatRoom.GetById(id).Type;
+            await SetChatRoomAllMessagesRead(id);
+
+            var chatRoomType = chatRoom.Type;
+
             switch (chatRoomType)
             {
                 case ChatRoomType.Private:
@@ -170,12 +177,13 @@ namespace ServiceLayer.Services.Chat
         }
 
         /// <summary>
-        /// Sets Specified MessageReaded By Current User
+        /// Sets Specified MessageReaded By Specified User
         /// </summary>
         /// <param name="chatRoomId">Message's ChatRoom Id</param>
         /// <param name="messageId">Message Should Set Read</param>
+        /// <param name="userId">Specified User's Id</param>
         /// <returns></returns>
-        public async Task SetMessageRead(Guid chatRoomId, Guid messageId)
+        public async Task SetMessageRead(Guid chatRoomId, Guid messageId, Guid userId)
         {
             _core.TblUserChatRoomRel.Get(i => i.UserId == _userInfoContext.UserId && i.ChatRoomId == chatRoomId)
                 .FirstOrDefault().LastSeenMessageId = messageId;
@@ -187,7 +195,7 @@ namespace ServiceLayer.Services.Chat
         /// </summary>
         /// <param name="chatRoomId">ChatRoom's Id</param>
         /// <returns></returns>
-        public async Task SetMessageRead(Guid chatRoomId)
+        public async Task SetChatRoomAllMessagesRead(Guid chatRoomId)
         {
 
             var map = _core.TblUserChatRoomRel.Get(i => i.UserId == _userInfoContext.UserId && i.ChatRoomId == chatRoomId,
@@ -196,6 +204,8 @@ namespace ServiceLayer.Services.Chat
 
             map.LastSeenMessageId = map?.ChatRoom?.TblMessage?.OrderBy(x => x.SendAt).LastOrDefault()?.Id;
             _core.Save();
+
+            await _chatHub.Clients.GroupExcept(chatRoomId.ToString(), _userInfoContext.UserChatHubConnectionId).SetAllMessagesRead();
         }
     }
 }
