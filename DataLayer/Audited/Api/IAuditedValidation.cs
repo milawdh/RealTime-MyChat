@@ -10,10 +10,19 @@ namespace Domain.Audited.Api
     /// <summary>
     /// Each Entity Will Have Own Validator That it can be called or Not
     /// </summary>
-    /// <typeparam name="TEntity">Entity Model That Interface Implementing Now</typeparam>
-    public interface IAuditedValidation<TEntity>
+    public interface IAuditedValidation
     {
-        ServiceResult ValidateAdd(TEntity entity);
-        ServiceResult ValidateUpdate(TEntity entity);
+        /// <summary>
+        /// Will Invoke on entity adding to DataBase
+        /// </summary>
+        /// <param name="entity">Entity you will validate</param>
+        /// <returns>ValidationResul</returns>
+        ServiceResult ValidateAdd(object entity);
+        /// <summary>
+        /// Will Invoke on entity Updating on DataBase
+        /// </summary>
+        /// <param name="entity">Entity you will validate</param>
+        /// <returns>ValidationResul</returns>
+        ServiceResult ValidateUpdate(object entity);
     }
 }
