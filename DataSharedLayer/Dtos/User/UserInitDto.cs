@@ -1,5 +1,5 @@
 ﻿using Domain.Enums;
-using Domain.Models;
+using Domain.Entities;
 using Domain.Profiles;
 using DomainShared.Dtos.Chat.ChatRoom;
 

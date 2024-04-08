@@ -1,4 +1,4 @@
-﻿using Domain.Models;
+﻿using Domain.Entities;
 using DomainShared.Extentions.Utility;
 using DomainShared.Services;
 using Mapster;

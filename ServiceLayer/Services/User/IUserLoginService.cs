@@ -1,11 +1,11 @@
 ﻿using Domain.CustomExceptions;
-using Domain.Models;
+using Domain.Entities;
 using DomainShared.Dtos.User;
 using DomainShared.Extentions.Utility;
 using Mapster;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Domain.UnitOfWorks;
+using Domain.DataLayer.UnitOfWorks;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 

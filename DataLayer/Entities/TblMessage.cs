@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Domain.JsonFieldModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace Domain.Models;
+namespace Domain.Entities;
 
 public partial class TblMessage
 {

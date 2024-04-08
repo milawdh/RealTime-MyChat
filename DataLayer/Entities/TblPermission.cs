@@ -4,13 +4,13 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace Domain.Models;
+namespace Domain.Entities;
 
 public partial class TblPermission
 {
     [Key]
     [Column("ID")]
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [StringLength(64)]
     [Unicode(false)]

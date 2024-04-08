@@ -4,7 +4,7 @@ using MyChat.PipeLine.HubFilters;
 using ServiceLayer.Services.Caching;
 using ServiceLayer.Services.Chat;
 using ServiceLayer.Services.User;
-using Domain.UnitOfWorks;
+using Domain.DataLayer.UnitOfWorks;
 using System;
 using System.Collections.Generic;
 using System.Linq;

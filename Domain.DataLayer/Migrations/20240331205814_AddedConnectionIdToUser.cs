@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Domain.Migrations
+namespace Domain.DataLayer.Migrations
 {
     /// <inheritdoc />
     public partial class AddedConnectionIdToUser : Migration

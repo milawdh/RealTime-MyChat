@@ -1,5 +1,5 @@
 ﻿using Domain.Base;
-using Domain.Models;
+using Domain.Entities;
 
 using DomainShared.Dtos.Chat.Message;
 using DomainShared.Dtos.User;

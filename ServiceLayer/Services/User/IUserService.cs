@@ -1,8 +1,8 @@
-﻿using Domain.Models;
+﻿using Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
 using ServiceLayer.Hubs.Api;
 using ServiceLayer.Hubs;
-using Domain.UnitOfWorks;
+using Domain.DataLayer.UnitOfWorks;
 using ServiceLayer.Services.Caching;
 using Domain.Profiles;
 using Framework.CacheManagement;

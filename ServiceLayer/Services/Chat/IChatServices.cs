@@ -1,7 +1,7 @@
 ﻿using Domain.API;
 using Domain.Base;
 using Domain.Enums;
-using Domain.Models;
+using Domain.Entities;
 using DomainShared.Dtos.Chat.ChatRoom;
 using DomainShared.Dtos.Chat.Message;
 using DomainShared.Extentions.Utility;
@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using ServiceLayer.Hubs;
 using ServiceLayer.Hubs.Api;
 using ServiceLayer.Services.User;
-using Domain.UnitOfWorks;
+using Domain.DataLayer.UnitOfWorks;
 using DomainShared.Extentions.Query;
 
 namespace ServiceLayer.Services.Chat

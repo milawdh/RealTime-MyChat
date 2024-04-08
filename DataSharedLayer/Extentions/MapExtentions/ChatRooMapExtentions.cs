@@ -1,8 +1,8 @@
 ﻿using Azure;
 using Domain.Enums;
-using Domain.Models;
+using Domain.Entities;
 using Domain.Profiles;
-using Domain.UnitOfWorks;
+using Domain.DataLayer.UnitOfWorks;
 using DomainShared.Dtos.Chat.ChatRoom;
 using DomainShared.Dtos.Chat.Message;
 using DomainShared.Extentions.Query;

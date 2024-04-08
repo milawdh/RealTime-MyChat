@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataSharedLayer\DomainShared.csproj" />
+    <ProjectReference Include="..\Domain.DataLayer\Domain.DataLayer.csproj" />
   </ItemGroup>
 
 </Project>

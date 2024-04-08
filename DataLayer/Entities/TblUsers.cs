@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace Domain.Models;
+namespace Domain.Entities;
 
 [Index("Tell", Name = "IX_TblUsers_Tell", IsUnique = true)]
 public partial class TblUsers

@@ -3,14 +3,39 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Domain.Migrations
+namespace Domain.DataLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedMessageReadedBy : Migration
+    public partial class ReadedByToJsonField : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "MessageReadByUserMap");
+
+            migrationBuilder.AddColumn<string>(
+                name: "ReadedByList",
+                table: "TblMessage",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropColumn(
+                name: "ReadedByList",
+                table: "TblMessage");
+
+            migrationBuilder.AddColumn<bool>(
+                name: "IsRead",
+                table: "TblMessage",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
+
             migrationBuilder.CreateTable(
                 name: "MessageReadByUserMap",
                 columns: table => new
@@ -39,13 +64,6 @@ namespace Domain.Migrations
                 name: "IX_MessageReadByUserMap_MessageId",
                 table: "MessageReadByUserMap",
                 column: "MessageId");
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "MessageReadByUserMap");
         }
     }
 }

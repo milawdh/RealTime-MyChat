@@ -1,6 +1,6 @@
 ﻿using Domain.Enums;
-using Domain.Models;
-using Domain.UnitOfWorks;
+using Domain.Entities;
+using Domain.DataLayer.UnitOfWorks;
 using DomainShared.Services;
 using Mapster;
 using System;

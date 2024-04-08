@@ -1,11 +1,12 @@
-﻿using Domain.Models;
+﻿using Domain.Entities;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Services.Repositories;
 using System.Transactions;
 using static System.Net.Mime.ContentType;
 
-namespace Domain.UnitOfWorks
+namespace Domain.DataLayer.UnitOfWorks
 {
     public class Core : IDisposable
     {

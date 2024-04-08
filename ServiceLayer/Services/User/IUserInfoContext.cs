@@ -1,13 +1,14 @@
 ﻿using Domain.CustomExceptions;
-using Domain.Models;
+using Domain.Entities;
 using DomainShared.Dtos.User;
 using DomainShared.Extentions.MapExtentions;
 using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using DomainShared.Extentions.Query;
-using Domain.UnitOfWorks;
+using Domain.DataLayer.UnitOfWorks;
 using System.Security.Claims;
+using Domain.Entities;
 
 namespace ServiceLayer.Services.User
 {
