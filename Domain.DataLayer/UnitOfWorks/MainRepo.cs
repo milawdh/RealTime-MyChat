@@ -10,138 +10,178 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Services.Repositories
 {
-    public class MainRepo<T> : IMainRepo<T> where T : class
+    public class MainRepo<TEntity> : IMainRepo<TEntity> where TEntity : class
     {
         private readonly MyChatContext _context;
-        private readonly DbSet<T> _dbSet;
+        private readonly DbSet<TEntity> _dbSet;
 
         public MainRepo(MyChatContext context)
         {
             _context = context;
-            _dbSet = _context.Set<T>();
+            _dbSet = _context.Set<TEntity>();
         }
 
 
-        public virtual EntityEntry Add(T entity)
+        public virtual EntityEntry<TEntity> Add(TEntity entity)
         {
-            return _dbSet.Add(entity);
+            return _context.Add(entity);
         }
 
-        public virtual async Task<EntityEntry> AddAsync(T entity)
+        public virtual async Task<EntityEntry<TEntity>> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
-            return await _dbSet.AddAsync(entity);
+            return await _context.AddAsync(entity);
         }
 
-        public virtual bool Update(T entity)
+        public virtual void AddRange(IEnumerable<TEntity> entities)
+        {
+            _context.AddRange(entities);
+        }
+
+        public virtual void AddRange(params TEntity[] entities)
+        {
+            _context.AddRange(entities.ToArray());
+        }
+
+        public virtual EntityEntry<TEntity> Update(TEntity entity)
         {
             dynamic model = entity;
             _dbSet.Local.FindEntry(model.Id)
             .State = EntityState.Detached;
             _dbSet.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
-            return true;
+            return _context.Update(entity);
         }
 
-        public virtual bool Delete(T entity)
+        public virtual void UpdateRange(IEnumerable<TEntity> entities)
+        {
+            _context.UpdateRange(entities);
+        }
+
+        public virtual void UpdateRange(params TEntity[] entities)
+        {
+            _context.UpdateRange(entities);
+        }
+
+        public virtual EntityEntry<TEntity> Delete(TEntity entity)
         {
             try
             {
                 if (_context.Entry(entity).State == EntityState.Detached)
                     _dbSet.Attach(entity);
-                _dbSet.Remove(entity);
-                return true;
+
+                return _context.Remove(entity);
             }
             catch
             {
-                return false;
+                return _context.Entry(entity);
             }
         }
 
-        public virtual bool DeleteById(object id)
+        public virtual EntityEntry<TEntity> DeleteById(object id)
         {
-            try
-            {
-                T entity = _dbSet.Find(id);
-                return entity != null && Delete(entity);
-            }
-            catch
-            {
-                return false;
-            }
+
+            TEntity entity = _dbSet.Find(id);
+            return Delete(entity);
         }
 
-        public virtual async Task<bool> DeleteByIdAsync(object id)
+        public virtual async Task<EntityEntry<TEntity>> DeleteByIdAsync(object id)
         {
-            try
-            {
-                T entity = await _dbSet.FindAsync(id);
-                return entity != null && Delete(entity);
-            }
-            catch
-            {
-                return false;
-            }
+            TEntity entity = _dbSet.Find(id);
+            return Delete(entity);
+
         }
 
-        public virtual async Task<IQueryable<T>> GetAsync(Expression<Func<T, bool>> where = null,
-            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, params string[] includes)
+        public virtual async Task<IQueryable<TEntity>> GetAsync(
+            Expression<Func<TEntity, bool>> where = null,
+            Func<IQueryable<TEntity>, Task<IQueryable<TEntity>>> defualtIncludeAsync = null,
+            Func<IQueryable<TEntity>, Task<IQueryable<TEntity>>> includesAsync = null,
+            bool igonoreGlobalQuery = false,
+            bool hasSplitQuery = false)
         {
+            IQueryable<TEntity> query = _dbSet;
+            if (igonoreGlobalQuery)
+                query = _dbSet.IgnoreQueryFilters();
 
 
-            IQueryable<T> query = _dbSet;
             if (where != null)
                 query = query.Where(where);
-            if (orderBy != null)
-                query = orderBy(query);
-            if (includes != null)
-                foreach (string i in includes)
-                    query = query.Include(i);
+
+            if (defualtIncludeAsync != null)
+            {
+                if (hasSplitQuery)
+                    query = await defualtIncludeAsync(query.AsSplitQuery());
+                else
+                    query = await defualtIncludeAsync(query.AsSingleQuery());
+            }
+
+            if (includesAsync != null)
+            {
+                if (hasSplitQuery)
+                    query = await includesAsync(query.AsSplitQuery());
+                else
+                    query = await includesAsync(query.AsSingleQuery());
+            }
+
             return query;
         }
 
-        public virtual bool Any(Expression<Func<T, bool>> where = null)
+        public virtual bool Any(Expression<Func<TEntity, bool>> where = null)
         {
             if (where != null)
                 return _dbSet.Any(where);
             return false;
         }
 
-        public virtual async Task<bool> AnyAsync(Expression<Func<T, bool>> where = null)
+        public virtual async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> where = null)
         {
             if (where != null)
                 return await _dbSet.AnyAsync(where);
             return false;
         }
 
-        public virtual T GetById(object id)
+        public virtual TEntity GetById(object id)
         {
             return _dbSet.Find(id);
         }
 
-        public virtual async Task<T> GetByIdAsync(object id)
+        public virtual async Task<TEntity> GetByIdAsync(object id)
         {
             return await _dbSet.FindAsync(id);
         }
 
-        public virtual T SingleOrDefault(Expression<Func<T, bool>> where = null)
+        public virtual TEntity FirstOrDefualt(Expression<Func<TEntity, bool>> where = null,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>> includes = null)
         {
+            IQueryable<TEntity> query = _dbSet;
+
+            if (includes != null)
+                query = includes(query);
+
             if (where != null)
-                return _dbSet.FirstOrDefault(where);
+                return query.FirstOrDefault(where);
+
             return null;
         }
 
-        public virtual async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> where = null)
+        public virtual async Task<TEntity> FirstOrDefualtAsync(Expression<Func<TEntity, bool>> where = null,
+            Func<IQueryable<TEntity>, Task<IQueryable<TEntity>>> includesAsync = null)
         {
+            IQueryable<TEntity> query = _dbSet;
+
+            if (includesAsync != null)
+                query = await includesAsync(query);
+
             if (where != null)
-                return await _dbSet.FirstOrDefaultAsync(where);
+                return await query.FirstOrDefaultAsync(where);
+
             return null;
         }
 
-        public IQueryable<T> Get(Expression<Func<T, bool>> where = null,
-            Func<IQueryable<T>, IQueryable<T>> defualtInclude = null,
-            Func<IQueryable<T>, IQueryable<T>> includes = null)
+        public IQueryable<TEntity> Get(Expression<Func<TEntity, bool>> where = null,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>> defualtInclude = null,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>> includes = null)
         {
-            IQueryable<T> query = _dbSet;
+            IQueryable<TEntity> query = _dbSet;
             if (where != null)
                 query = query.Where(where);
 

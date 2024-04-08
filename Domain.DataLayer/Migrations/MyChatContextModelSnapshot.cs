@@ -67,7 +67,7 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasIndex("ProfileImageId");
 
-                    b.ToTable("TblChatRoom");
+                    b.ToTable("TblChatRoom", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblImage", b =>
@@ -85,7 +85,7 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TblImage");
+                    b.ToTable("TblImage", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblMedia", b =>
@@ -116,7 +116,7 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasIndex("MessageId");
 
-                    b.ToTable("TblMedia");
+                    b.ToTable("TblMedia", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblMessage", b =>
@@ -166,7 +166,7 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasIndex("SenderUserId");
 
-                    b.ToTable("TblMessage");
+                    b.ToTable("TblMessage", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblMyChatIdentifier", b =>
@@ -178,7 +178,7 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasKey("Identifier");
 
-                    b.ToTable("TblMyChatIdentifier");
+                    b.ToTable("TblMyChatIdentifier", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblPermission", b =>
@@ -197,7 +197,7 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TblPermission");
+                    b.ToTable("TblPermission", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblRole", b =>
@@ -218,7 +218,7 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TblRole");
+                    b.ToTable("TblRole", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblRolePermissionRel", b =>
@@ -241,7 +241,7 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("TblRolePermissionRel");
+                    b.ToTable("TblRolePermissionRel", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblSettings", b =>
@@ -268,7 +268,7 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TblSettings");
+                    b.ToTable("TblSettings", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblUserChatRoomRel", b =>
@@ -296,7 +296,7 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TblUserChatRoomRel");
+                    b.ToTable("TblUserChatRoomRel", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblUserContacts", b =>
@@ -315,7 +315,7 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasIndex("ContactUserId");
 
-                    b.ToTable("TblUserContacts");
+                    b.ToTable("TblUserContacts", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblUserImageRel", b =>
@@ -338,7 +338,7 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TblUserImageRel");
+                    b.ToTable("TblUserImageRel", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblUsers", b =>
@@ -427,7 +427,7 @@ namespace Domain.DataLayer.Migrations
                     b.HasIndex(new[] { "Tell" }, "IX_TblUsers_Tell")
                         .IsUnique();
 
-                    b.ToTable("TblUsers");
+                    b.ToTable("TblUsers", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.TblChatRoom", b =>

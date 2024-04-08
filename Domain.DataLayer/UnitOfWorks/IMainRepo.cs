@@ -4,43 +4,46 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 
 namespace Services.Repositories
 {
-    public interface IMainRepo<T> where T : class
+    public interface IMainRepo<TEntity> where TEntity : class
     {
-        EntityEntry Add(T entity);
+        EntityEntry<TEntity> Add(TEntity entity);
+        Task<EntityEntry<TEntity>> AddAsync(TEntity entity, CancellationToken cancellationToken = default);
+        void AddRange(IEnumerable<TEntity> entities);
+        void AddRange(params TEntity[] entities);
+        EntityEntry<TEntity> Update(TEntity entity);
+        void UpdateRange(IEnumerable<TEntity> entities);
+        void UpdateRange(params TEntity[] entities);
+        EntityEntry<TEntity> Delete(TEntity entity);
+        EntityEntry<TEntity> DeleteById(object id);
+        Task<EntityEntry<TEntity>> DeleteByIdAsync(object id);
+        Task<IQueryable<TEntity>> GetAsync(
+            Expression<Func<TEntity, bool>> where = null,
+            Func<IQueryable<TEntity>, Task<IQueryable<TEntity>>> defualtIncludeAsync = null,
+            Func<IQueryable<TEntity>, Task<IQueryable<TEntity>>> includesAsync = null,
+            bool igonoreGlobalQuery = false,
+            bool hasSplitQuery = false);
 
-        Task<EntityEntry> AddAsync(T entity);
+        bool Any(Expression<Func<TEntity, bool>> where = null);
 
-        bool Update(T entity);
+        Task<bool> AnyAsync(Expression<Func<TEntity, bool>> where = null);
 
-        bool Delete(T entity);
+        TEntity GetById(object id);
+        Task<TEntity> GetByIdAsync(object id);
 
-        bool DeleteById(object id);
+        TEntity FirstOrDefualt(Expression<Func<TEntity, bool>> where = null,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>> includes = null);
 
-        Task<bool> DeleteByIdAsync(object id);
+        Task<TEntity> FirstOrDefualtAsync(Expression<Func<TEntity, bool>> where = null,
+            Func<IQueryable<TEntity>, Task<IQueryable<TEntity>>> includesAsync = null);
 
-        T GetById(object id);
-
-        IQueryable<T> Get(Expression<Func<T, bool>> where = null,
-            Func<IQueryable<T>, IQueryable<T>> defualtInclude = null, Func<IQueryable<T>, IQueryable<T>> includes = null);
-
-        Task<IQueryable<T>> GetAsync(Expression<Func<T, bool>> where = null,
-            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, params string[] includes);
-
-        bool Any(Expression<Func<T, bool>> where = null);
-
-        Task<bool> AnyAsync(Expression<Func<T, bool>> where = null);
-
-        Task<T> GetByIdAsync(object id);
-
-        T SingleOrDefault(Expression<Func<T, bool>> where = null);
-
-        Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> where = null);
-
-
+        IQueryable<TEntity> Get(Expression<Func<TEntity, bool>> where = null,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>> defualtInclude = null,
+            Func<IQueryable<TEntity>, IQueryable<TEntity>> includes = null);
     }
 }

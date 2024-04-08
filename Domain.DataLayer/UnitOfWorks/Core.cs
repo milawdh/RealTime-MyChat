@@ -48,9 +48,9 @@ namespace Domain.DataLayer.UnitOfWorks
             _context.SaveChanges();
         }
         public void Dispose() => _context.Dispose();
-        public IDbContextTransaction BeginTransaction() => _context.Database.BeginTransaction();
-        public void CommitTransaction() => _context.Database.CommitTransaction();
-        public void RollBackTransaction() => _context.Database.RollbackTransaction();
+        public IDbContextTransaction BeginTransaction() => _context.BeginTransaction();
+        public void CommitTransaction() => _context.CommitTransaction();
+        public void RollBackTransaction() => _context.RollbackTransaction();
 
         public static void SavePoint(IDbContextTransaction transaction, string point) => transaction.CreateSavepoint(point);
         public static void RollBackToSavePoint(IDbContextTransaction transaction, string point) => transaction.RollbackToSavepoint(point);
