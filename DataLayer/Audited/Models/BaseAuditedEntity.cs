@@ -10,12 +10,16 @@ using Domain.API;
 
 namespace Domain.Audited.Models
 {
+    public interface IBaseAuditedEntity
+    {
+
+    }
     /// <summary>
     /// Base Entity For All Entities that Has Primary Key and Validators for Override
     /// if you don't override them validate will be success at all
     /// </summary>
     /// <typeparam name="TKey">PrimaryKey of Entity</typeparam>
-    public abstract class BaseAuditedEntity<TKey> : IAuditedValidation
+    public abstract class BaseAuditedEntity<TKey> : IAuditedValidation, IBaseAuditedEntity
     {
         [Key]
         [Column("ID")]

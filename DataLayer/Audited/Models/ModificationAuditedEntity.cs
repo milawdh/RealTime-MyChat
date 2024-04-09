@@ -8,13 +8,15 @@ using System.Threading.Tasks;
 
 namespace Domain.Audited.Models
 {
+    public interface IModificationAuditedEntity { }
+
     /// <summary>
     /// Has Base & Add And Update Shadow Properties
     /// </summary>
     /// <typeparam name="TUser">User's Entity</typeparam>
     /// <typeparam name="TUserKey">User's Primary Key</typeparam>
     /// <typeparam name="TKey">Entity's Primary Key</typeparam>
-    public abstract class ModificationAuditedEntity<TUser, TKey> : CreationAuditedEntity<TUser, TKey>
+    public abstract class ModificationAuditedEntity<TUser, TKey> : CreationAuditedEntity<TUser, TKey>, IModificationAuditedEntity
     {
         [ForeignKey("ModifiedById")]
         [DeleteBehavior(DeleteBehavior.NoAction)]

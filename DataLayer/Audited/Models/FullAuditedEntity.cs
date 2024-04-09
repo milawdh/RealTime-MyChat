@@ -10,13 +10,14 @@ using System.Threading.Tasks;
 
 namespace Domain.Audited.Models
 {
+    public interface IFullAuditedEntity { }
     /// <summary>
     /// Has Base & Add & Update And Delete Shadow Properties
     /// </summary>
     /// <typeparam name="TUser">User's Entity</typeparam>
     /// <typeparam name="TUserKey">User's Primary Key</typeparam>
     /// <typeparam name="TKey">Entity's Primary Key</typeparam>
-    public abstract class FullAuditedEntity<TUser, TKey> : ModificationAuditedEntity<TUser, TKey>
+    public abstract class FullAuditedEntity<TUser, TKey> : ModificationAuditedEntity<TUser, TKey> , IFullAuditedEntity
     {
         [ForeignKey("DeleteById")]
         [DeleteBehavior(DeleteBehavior.NoAction)]
