@@ -10,18 +10,26 @@ using System.Threading.Tasks;
 
 namespace Domain.Audited.Models
 {
-    public interface IFullAuditedEntity { }
+    public interface IFullAuditedEntity 
+    {
+        [ForeignKey("DeleteById")]
+        [DeleteBehavior(DeleteBehavior.NoAction)]
+        public TblUsers? DeleteBy { get; set; }
+        public Guid? DeleteById { get; set; }
+        public DateTime? DeleteDate { get; set; }
+
+    }
     /// <summary>
     /// Has Base & Add & Update And Delete Shadow Properties
     /// </summary>
     /// <typeparam name="TUser">User's Entity</typeparam>
     /// <typeparam name="TUserKey">User's Primary Key</typeparam>
     /// <typeparam name="TKey">Entity's Primary Key</typeparam>
-    public abstract class FullAuditedEntity<TUser, TKey> : ModificationAuditedEntity<TUser, TKey> , IFullAuditedEntity
+    public abstract class FullAuditedEntity<TKey> : ModificationAuditedEntity<TKey> , IFullAuditedEntity
     {
         [ForeignKey("DeleteById")]
         [DeleteBehavior(DeleteBehavior.NoAction)]
-        public TUser? DeleteBy { get; set; }
+        public TblUsers? DeleteBy { get; set; }
         public Guid? DeleteById { get; set; }
         public DateTime? DeleteDate { get; set; }
     }

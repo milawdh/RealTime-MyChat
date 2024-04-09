@@ -13,7 +13,7 @@ using ServiceLayer.Hubs;
 using ServiceLayer.Hubs.Api;
 using ServiceLayer.Services.User;
 using Domain.DataLayer.UnitOfWorks;
-using DomainShared.Extentions.Query;
+using Domain.DataLayer.Repository;
 
 namespace ServiceLayer.Services.Chat
 {

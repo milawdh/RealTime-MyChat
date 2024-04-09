@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceLayer", "ServiceLaye
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Framework", "Framework\Framework.csproj", "{8504F668-BFDD-45A8-A09A-77FB40E3164C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.DataLayer", "Domain.DataLayer\Domain.DataLayer.csproj", "{DC1E6CDC-FB78-4023-991B-B3A252837706}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain.DataLayer", "Domain.DataLayer\Domain.DataLayer.csproj", "{DC1E6CDC-FB78-4023-991B-B3A252837706}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -12,7 +12,7 @@ namespace Domain.Audited.Models
 {
     public interface IBaseAuditedEntity
     {
-
+        public bool IsDeleted { get; set; }
     }
     /// <summary>
     /// Base Entity For All Entities that Has Primary Key and Validators for Override

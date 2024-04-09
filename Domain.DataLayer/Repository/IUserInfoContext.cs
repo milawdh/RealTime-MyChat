@@ -1,16 +1,13 @@
 ﻿using Domain.CustomExceptions;
 using Domain.Entities;
-using DomainShared.Dtos.User;
-using DomainShared.Extentions.MapExtentions;
 using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using DomainShared.Extentions.Query;
 using Domain.DataLayer.UnitOfWorks;
 using System.Security.Claims;
 using Domain.Entities;
 
-namespace ServiceLayer.Services.User
+namespace Domain.DataLayer.Repository
 {
     public interface IUserInfoContext
     {
@@ -19,7 +16,6 @@ namespace ServiceLayer.Services.User
         string? UserChatHubConnectionId { get; }
         TblUsers User { get; }
         IQueryable<TblPermission> UserPermissions { get; }
-        UserInitDto UserInitiliazeDto { get; }
 
         /// <summary>
         /// Current User's ChatRooms With Their Messages
@@ -137,25 +133,26 @@ namespace ServiceLayer.Services.User
             }
         }
 
-        /// <summary>
-        /// All Current User's Details for Initializing
-        /// </summary>
-        public UserInitDto UserInitiliazeDto
-        {
-            get
-            {
-                UserInitDto result = User.Adapt<UserInitDto>();
-                result.ChatRooms = ChatRooMapExtentions.MapToInitChatRoom(UserId, ChatRoomsWithMessages);
+        ///// <summary>
+        ///// All Current User's Details for Initializing
+        ///// </summary>
+        //public UserInitDto UserInitiliazeDto
+        //{
+        //    get
+        //    {
+        //        UserInitDto result = User.Adapt<UserInitDto>();
+        //        result.ChatRooms = ChatRooMapExtentions.MapToInitChatRoom(UserId, ChatRoomsWithMessages);
 
-                return result;
-            }
-        }
+        //        return result;
+        //    }
+        //}
 
         public IQueryable<TblUserContacts> UserContacts
         {
             get
             {
-                return UserId.GetUserContactsQuery();
+                //return UserId.GetUserContactsQuery();
+                throw new NotImplementedException();
             }
         }
 

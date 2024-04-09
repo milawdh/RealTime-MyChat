@@ -5,7 +5,6 @@ using Domain.Profiles;
 using Domain.DataLayer.UnitOfWorks;
 using DomainShared.Dtos.Chat.ChatRoom;
 using DomainShared.Dtos.Chat.Message;
-using DomainShared.Extentions.Query;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using static System.Formats.Asn1.AsnWriter;
@@ -24,7 +23,7 @@ namespace DomainShared.Extentions.MapExtentions
         /// <returns></returns>
         public static string? GetChatRoomImage(this IQueryable<TblChatRoom> chatroom, Guid currentUserId)
         {
-            return NavigationProfile.Resources + chatroom.GetChatRoomImageQuery(currentUserId).FirstOrDefault();
+            return NavigationProfile.Resources /*+ chatroom.GetChatRoomImageQuery(currentUserId).FirstOrDefault()*/;
         }
 
         /// <summary>
@@ -58,7 +57,7 @@ namespace DomainShared.Extentions.MapExtentions
              {
                  InitChatRoom res = i.Adapt<InitChatRoom>();
                  var lastSeenMessageDate = i.TblUserChatRoomRel.FirstOrDefault(c => c.UserId == currentUserId)?.LastSeenMessage?.SendAt;
-                 res.NotSeenMessagesCount = i.GetNotSeenMessagesQuery(lastSeenMessageDate, currentUserId).Count();
+                 //res.NotSeenMessagesCount = i.GetNotSeenMessagesQuery(lastSeenMessageDate, currentUserId).Count();
                  res.Pic = i.GetChatRoomImage(currentUserId);
                  return res;
 
@@ -94,14 +93,14 @@ namespace DomainShared.Extentions.MapExtentions
 
             if (chatRoom.Type == ChatRoomType.Private)
             {
-                TblUsers reciever = tblMessage.GetPrivateMessageRecieverQuery().FirstOrDefault()!;
+                //TblUsers reciever = tblMessage.GetPrivateMessageRecieverQuery().FirstOrDefault()!;
 
-                var recieverContacts = reciever.TblUserContactsContactUser;
+                //var recieverContacts = reciever.TblUserContactsContactUser;
 
-                if (recieverContacts.Any(v => v.ContactUserId == tblMessage.SenderUserId))
-                    notification.SenderUserName = recieverContacts.FirstOrDefault(x => x.ContactUserId == tblMessage.SenderUserId)?.ContactName;
-                else
-                    notification.SenderUserName = tblMessage.SenderUser.UserName;
+                //if (recieverContacts.Any(v => v.ContactUserId == tblMessage.SenderUserId))
+                //    notification.SenderUserName = recieverContacts.FirstOrDefault(x => x.ContactUserId == tblMessage.SenderUserId)?.ContactName;
+                //else
+                //    notification.SenderUserName = tblMessage.SenderUser.UserName;
             }
             else
                 notification.SenderUserName = chatRoom.ChatRoomTitle;

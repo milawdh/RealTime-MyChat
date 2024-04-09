@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,7 +11,9 @@ namespace Domain.Audited.Models
 {
     public interface ICreationAuditedEntity
     {
-
+        public TblUsers CreatedBy { get; set; }
+        public Guid CreatedById { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 
     /// <summary>
@@ -19,11 +22,11 @@ namespace Domain.Audited.Models
     /// <typeparam name="TUser">User's Entity</typeparam>
     /// <typeparam name="TUserKey">User's Primary Key</typeparam>
     /// <typeparam name="TKey">Entity's Primary Key</typeparam>
-    public abstract class CreationAuditedEntity<TUser, TKey> : BaseAuditedEntity<TKey> , ICreationAuditedEntity
+    public abstract class CreationAuditedEntity<TKey> : BaseAuditedEntity<TKey> , ICreationAuditedEntity
     {
         [ForeignKey("CreatedById")]
         [DeleteBehavior(DeleteBehavior.NoAction)]
-        public TUser CreatedBy { get; set; }
+        public TblUsers CreatedBy { get; set; }
         public Guid CreatedById { get; set; }
         public DateTime CreatedDate { get; set; } 
     }

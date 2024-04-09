@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Domain.DataLayer.Contexts;
+using Domain.Entities;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -10,7 +11,11 @@ namespace Domain.DataLayer.UnitOfWorks
 {
     public class Core : IDisposable
     {
-        private readonly MyChatContext _context = new MyChatContext();
+        private readonly MyChatContext _context;
+        public Core(MyChatContext context)
+        {
+            _context = context;   
+        }
         private readonly MainRepo<TblChatRoom> ChatRoom;
         private readonly MainRepo<TblImage> Image;
         private readonly MainRepo<TblMedia> Media;

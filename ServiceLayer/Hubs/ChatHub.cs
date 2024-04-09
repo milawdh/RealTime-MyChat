@@ -1,4 +1,5 @@
 ﻿using Domain.Base;
+using Domain.DataLayer.Repository;
 using DomainShared.Dtos.Chat.Message;
 using ElmahCore;
 using Microsoft.AspNetCore.Authorization;
@@ -32,7 +33,7 @@ namespace ServiceLayer.Hubs
         {
             //Set UserOnline
             _userService.SetUserOnline(Context.ConnectionId);
-            await Clients.Caller.SetUserInfo(_userInfoContext.UserInitiliazeDto);
+            //await Clients.Caller.SetUserInfo(_userInfoContext.UserInitiliazeDto);
 
 
             await base.OnConnectedAsync();

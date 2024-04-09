@@ -3,24 +3,18 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Xml;
 using Domain.DataLayer.Contexts.Base;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace Domain.Entities;
+namespace Domain.DataLayer.Contexts;
 
 public partial class MyChatContext : AppBaseDbContex
 {
-    public MyChatContext() : base()
-    {
-    }
-
     public MyChatContext(DbContextOptions<MyChatContext> options)
         : base(options)
     {
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=localhost,1433;Initial Catalog=MyChatDb_New;Integrated Security=True;Trust Server Certificate=True");
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
 

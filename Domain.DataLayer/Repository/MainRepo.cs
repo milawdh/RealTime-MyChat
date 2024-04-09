@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.DataLayer.Contexts;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -69,7 +70,7 @@ namespace Services.Repositories
                 if (_context.Entry(entity).State == EntityState.Detached)
                     _dbSet.Attach(entity);
 
-                return _context.Remove(entity);
+                return _context.RemoveForce(entity);
             }
             catch
             {

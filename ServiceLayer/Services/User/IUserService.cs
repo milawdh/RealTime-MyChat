@@ -7,7 +7,7 @@ using ServiceLayer.Services.Caching;
 using Domain.Profiles;
 using Framework.CacheManagement;
 using Domain.API;
-using DomainShared.Extentions.Query;
+using Domain.DataLayer.Repository;
 
 namespace ServiceLayer.Services.User
 {

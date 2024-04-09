@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Domain.DataLayer.UnitOfWorks;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
+using Domain.DataLayer.Repository;
 
 namespace ServiceLayer.Services.User
 {
