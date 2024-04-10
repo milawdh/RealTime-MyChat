@@ -2,28 +2,32 @@
 
 namespace MyChat.Profiles
 {
-	public static class MiddlewareProfile
-	{
-		public static IApplicationBuilder UseMiddlewareProfile(this IApplicationBuilder app)
-		{
-			//In Development
-			if (WebApplication.Create().Environment.IsDevelopment())
-			{
-				app.UseExceptionHandler("/Home/Error");
-				app.UseHsts();
-			}
+    public static class MiddlewareProfile
+    {
+        public static IApplicationBuilder UseMiddlewareProfile(this IApplicationBuilder app)
+        {
+            //In Development
+            if (WebApplication.Create().Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
+            }
 
 
-			app.UseHttpsRedirection();
-			app.UseStaticFiles();
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
-			app.UseRouting();
+            app.UseRouting();
             app.UseAuthentication();
-			app.UseAuthorization();
+            app.UseAuthorization();
 
             app.UseElmah();
-
-			return app;
-		}
-	}
+            app.Use(async (c, n) =>
+            {
+                
+                await n(c);
+            });
+            return app;
+        }
+    }
 }

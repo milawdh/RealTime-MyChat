@@ -38,6 +38,13 @@ namespace Domain.DataLayer.Repository
         /// </summary>
         IQueryable<TblUserContacts> UserIntegratedContacts { get; }
 
+        /// <summary>
+        /// Gets Current User's data With Custom Query
+        /// </summary>
+        /// <param name="custom">Custom Query</param>
+        /// <returns></returns>
+        /// <exception cref="AuthenticateException">If UserName Was Not Found In Database It Occurs</exception>
+        public IQueryable<TblUsers> GetUser(Func<IQueryable<TblUsers>, IQueryable<TblUsers>> custom = null);
     }
 
     public class UserInfoContext : IUserInfoContext
@@ -46,11 +53,18 @@ namespace Domain.DataLayer.Repository
 
         private readonly HttpContext HttpContext;
         private readonly Core _core;
+        private readonly Guid? _userId;
 
         public UserInfoContext(IHttpContextAccessor httpContextAccessor, Core core)
         {
             HttpContext = httpContextAccessor.HttpContext;
             _core = core;
+        }
+
+        public UserInfoContext(Core core, Guid userId)
+        {
+            _core = core;
+            _userId = userId;
         }
 
         #endregion
@@ -93,10 +107,15 @@ namespace Domain.DataLayer.Repository
         {
             get
             {
-                var userName = HttpContext.User.Claims.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
-                if (!_core.TblUsers.Any(i => i.UserName == userName))
-                    throw new AuthenticateException("UserName Not Found");
-                return _core.TblUsers.Get(i => i.UserName == userName).FirstOrDefault()!.Id;
+                if (_userId is null)
+                {
+                    var userName = HttpContext.User.Claims.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
+                    if (!_core.TblUsers.Any(i => i.UserName == userName))
+                        throw new AuthenticateException("UserName Not Found");
+
+                    return _core.TblUsers.Get(i => i.UserName == userName).Select(x => x.Id).FirstOrDefault();
+                }
+                return _userId.Value;
             }
         }
 
@@ -107,10 +126,7 @@ namespace Domain.DataLayer.Repository
         {
             get
             {
-                var userName = HttpContext.User.Claims.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
-                if (!_core.TblUsers.Any(i => i.UserName == userName))
-                    throw new AuthenticateException("UserName Not Found");
-                return _core.TblUsers.Get(i => i.UserName == userName).FirstOrDefault()!.UserName;
+                return _core.TblUsers.Get(i => i.Id == UserId).Select(x => x.UserName).FirstOrDefault();
             }
         }
 
@@ -118,7 +134,7 @@ namespace Domain.DataLayer.Repository
         {
             get
             {
-               return User.ConnectionId;
+                return User.ConnectionId;
             }
         }
 
@@ -129,30 +145,17 @@ namespace Domain.DataLayer.Repository
         {
             get
             {
-                return GetUser();
+                return GetUser().FirstOrDefault();
             }
         }
 
-        ///// <summary>
-        ///// All Current User's Details for Initializing
-        ///// </summary>
-        //public UserInitDto UserInitiliazeDto
-        //{
-        //    get
-        //    {
-        //        UserInitDto result = User.Adapt<UserInitDto>();
-        //        result.ChatRooms = ChatRooMapExtentions.MapToInitChatRoom(UserId, ChatRoomsWithMessages);
 
-        //        return result;
-        //    }
-        //}
 
         public IQueryable<TblUserContacts> UserContacts
         {
             get
             {
-                //return UserId.GetUserContactsQuery();
-                throw new NotImplementedException();
+                return _core.TblUserContacts.Get(x => x.ContactListOwnerId == UserId);
             }
         }
 
@@ -210,7 +213,7 @@ namespace Domain.DataLayer.Repository
         {
             get
             {
-                TblRole tblRole = _core.TblUsers.Get(where: i => i.UserName == this.UserName,
+                TblRole tblRole = _core.TblUsers.Get(where: i => i.UserName == UserName,
                     defualtInclude: i => i.Include(x => x.Role).ThenInclude(x => x.TblRolePermissionRel).ThenInclude(x => x.Permission))
                     .FirstOrDefault()!.Role;
 
@@ -218,8 +221,6 @@ namespace Domain.DataLayer.Repository
 
             }
         }
-
-
 
         #endregion
 
@@ -233,16 +234,11 @@ namespace Domain.DataLayer.Repository
         /// <param name="custom">Custom Query</param>
         /// <returns></returns>
         /// <exception cref="AuthenticateException">If UserName Was Not Found In Database It Occurs</exception>
-        private TblUsers GetUser(Func<IQueryable<TblUsers>, IQueryable<TblUsers>> custom = null)
+        public IQueryable<TblUsers> GetUser(Func<IQueryable<TblUsers>, IQueryable<TblUsers>> custom = null)
         {
-            string userName = HttpContext.User.Claims.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
-            if (!_core.TblUsers.Any(i => i.UserName == userName))
-                throw new AuthenticateException("UserName Not Found");
-            TblUsers tblUsers = _core.TblUsers.Get(where: i => i.UserName == userName,
+            return _core.TblUsers.Get(where: i => i.Id == UserId,
                 defualtInclude: UserDefualtInclude,
-                includes: custom).FirstOrDefault()!;
-
-            return tblUsers;
+                includes: custom);
         }
 
         /// <summary>

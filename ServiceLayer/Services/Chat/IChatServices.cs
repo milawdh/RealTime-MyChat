@@ -91,7 +91,7 @@ namespace ServiceLayer.Services.Chat
             if (chatRoom is null)
                 return new ServiceResult<PrivateChatRoomDto>("Chat Room Not Found");
 
-            var res = chatRoom.MapToPrivateChatRoomDto(_userInfoContext.UserId);
+            var res = chatRoom.MapToPrivateChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId);
             return new ServiceResult<PrivateChatRoomDto>(res);
         }
 
@@ -109,7 +109,7 @@ namespace ServiceLayer.Services.Chat
             if (chatRoom is null)
                 return new ServiceResult<GroupChatRoomDto>("Chat Room Not Found");
 
-            var result = chatRoom.MapToGroupChatRoomDto(_userInfoContext.UserId);
+            var result = chatRoom.MapToGroupChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId);
 
             return new ServiceResult<GroupChatRoomDto>(result);
         }
@@ -130,7 +130,7 @@ namespace ServiceLayer.Services.Chat
             var willNotifyUsers = allRecieverUsers.Where(c => !dict.ContainsKey(c) || dict[c] != tblMessage.RecieverChatRoomId.ToString())
                 .ToList();
 
-            var notification = tblMessage.MapToRecieveMessageNotificationDto();
+            var notification = tblMessage.MapToRecieveMessageNotificationDto(_core);
 
             var result = tblMessage.Adapt<RecieveMessageDto>();
 

@@ -46,8 +46,7 @@ namespace Services.Repositories
         public virtual EntityEntry<TEntity> Update(TEntity entity)
         {
             dynamic model = entity;
-            _dbSet.Local.FindEntry(model.Id)
-            .State = EntityState.Detached;
+            _dbSet.Local.FindEntry(model.Id).State = EntityState.Detached;
             _dbSet.Attach(entity);
             _context.Entry(entity).State = EntityState.Modified;
             return _context.Update(entity);
@@ -180,7 +179,9 @@ namespace Services.Repositories
 
         public IQueryable<TEntity> Get(Expression<Func<TEntity, bool>> where = null,
             Func<IQueryable<TEntity>, IQueryable<TEntity>> defualtInclude = null,
-            Func<IQueryable<TEntity>, IQueryable<TEntity>> includes = null)
+            Func<IQueryable<TEntity>, IQueryable<TEntity>> includes = null,
+            bool igonoreGlobalQuery = false,
+            bool hasSplitQuery = false)
         {
             IQueryable<TEntity> query = _dbSet;
             if (where != null)
@@ -191,6 +192,23 @@ namespace Services.Repositories
 
             if (includes != null)
                 query = includes(query);
+
+            if (defualtInclude != null)
+            {
+                if (hasSplitQuery)
+                    query = defualtInclude(query.AsSplitQuery());
+                else
+                    query = defualtInclude(query.AsSingleQuery());
+            }
+
+            if (includes != null)
+            {
+                if (hasSplitQuery)
+                    query = includes(query.AsSplitQuery());
+                else
+                    query = includes(query.AsSingleQuery());
+            }
+
             return query;
         }
     }

@@ -1,6 +1,7 @@
 ﻿using Domain.Base;
 using Domain.DataLayer.Repository;
 using DomainShared.Dtos.Chat.Message;
+using DomainShared.Extentions.MapExtentions;
 using ElmahCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -33,11 +34,14 @@ namespace ServiceLayer.Hubs
         {
             //Set UserOnline
             _userService.SetUserOnline(Context.ConnectionId);
-            //await Clients.Caller.SetUserInfo(_userInfoContext.UserInitiliazeDto);
 
+            //Send User's Data To Client
+            var userIniDto = _userInfoContext.User.MapToUserInitDto(_userInfoContext.ChatRoomsWithMessages);
+            await Clients.Caller.SetUserInfo(userIniDto);
 
             await base.OnConnectedAsync();
-            //Get User Data
+
+            //Get User Data From Client
             await Clients.Caller.GetCurrentChatRoom();
         }
 

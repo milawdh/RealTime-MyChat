@@ -5,6 +5,7 @@ using ServiceLayer.Services.User;
 using Domain.DataLayer.UnitOfWorks;
 using Domain.DataLayer.Repository;
 using Domain.DataLayer.Contexts;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ServiceLayer.Profiles
 {
@@ -14,7 +15,7 @@ namespace ServiceLayer.Profiles
         {
             services.AddScoped<Core>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IUserInfoContext, UserInfoContext>();
+            services.AddScoped<IUserInfoContext>(sp=> new UserInfoContext(sp.GetRequiredService<IHttpContextAccessor>(), sp.GetRequiredService<Core>()));
 
             services.AddScoped<MyChatContextFactory>();
             services.AddScoped(sp => sp.GetRequiredService<MyChatContextFactory>().CreateDbContext());

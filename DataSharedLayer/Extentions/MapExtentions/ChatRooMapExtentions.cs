@@ -8,13 +8,13 @@ using DomainShared.Dtos.Chat.Message;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using static System.Formats.Asn1.AsnWriter;
+using Services.Repositories;
+using Domain.DataLayer.Helpers;
 
 namespace DomainShared.Extentions.MapExtentions
 {
     public static class ChatRooMapExtentions
     {
-        private static Core _core = new();
-
         /// <summary>
         /// Gets ChatRoomImage With a query from DataBase For notification Or ChatRoom Init Item
         /// </summary>
@@ -23,7 +23,7 @@ namespace DomainShared.Extentions.MapExtentions
         /// <returns></returns>
         public static string? GetChatRoomImage(this IQueryable<TblChatRoom> chatroom, Guid currentUserId)
         {
-            return NavigationProfile.Resources /*+ chatroom.GetChatRoomImageQuery(currentUserId).FirstOrDefault()*/;
+            return NavigationProfile.Resources + chatroom.GetChatRoomImageQuery(currentUserId).FirstOrDefault();
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace DomainShared.Extentions.MapExtentions
         /// <param name="chatRooms">User Chat Rooms</param>
         /// <param name="currentUserId">CurrentUserId</param>
         /// <returns></returns>
-        public static List<InitChatRoom> MapToInitChatRoom(Guid currentUserId, IEnumerable<TblChatRoom> chatRooms)
+        public static List<InitChatRoom> MapToInitChatRoom(this IEnumerable<TblChatRoom> chatRooms, Guid currentUserId)
         {
             var result =
              chatRooms
@@ -73,16 +73,16 @@ namespace DomainShared.Extentions.MapExtentions
         /// <param name="currentUserId">Current UserId</param>
         /// <param name="chatRooms">Chat Room Entity</param>
         /// <returns></returns>
-        public static InitChatRoom MapToInitChatRoom(Guid currentUserId, TblChatRoom chatRoom)
+        public static InitChatRoom MapToInitChatRoom(this TblChatRoom chatRoom, Guid currentUserId)
         {
-            return MapToInitChatRoom(currentUserId, new List<TblChatRoom>() { chatRoom }).FirstOrDefault();
+            return MapToInitChatRoom(new List<TblChatRoom>() { chatRoom }, currentUserId).FirstOrDefault();
         }
 
-        public static RecieveMessageNotificationDto MapToRecieveMessageNotificationDto(this TblMessage tblMessage)
+        public static RecieveMessageNotificationDto MapToRecieveMessageNotificationDto(this TblMessage tblMessage, Core core)
         {
             var notification = tblMessage.Adapt<RecieveMessageNotificationDto>();
 
-            TblChatRoom chatRoom = _core.TblChatRoom.Get(x => x.Id == tblMessage.RecieverChatRoomId,
+            TblChatRoom chatRoom = core.TblChatRoom.Get(x => x.Id == tblMessage.RecieverChatRoomId,
                                      includes: v => v.Include(x => x.TblUserChatRoomRel).ThenInclude(x => x.User).ThenInclude(x => x.ProfileImageUrlNavigation))
                                     .FirstOrDefault();
 
@@ -93,14 +93,14 @@ namespace DomainShared.Extentions.MapExtentions
 
             if (chatRoom.Type == ChatRoomType.Private)
             {
-                //TblUsers reciever = tblMessage.GetPrivateMessageRecieverQuery().FirstOrDefault()!;
+                TblUsers reciever = tblMessage.GetPrivateMessageRecieverQuery(core.TblUserChatRoomRel.Get());
 
-                //var recieverContacts = reciever.TblUserContactsContactUser;
+                var recieverContacts = reciever.TblUserContactsContactUser;
 
-                //if (recieverContacts.Any(v => v.ContactUserId == tblMessage.SenderUserId))
-                //    notification.SenderUserName = recieverContacts.FirstOrDefault(x => x.ContactUserId == tblMessage.SenderUserId)?.ContactName;
-                //else
-                //    notification.SenderUserName = tblMessage.SenderUser.UserName;
+                if (recieverContacts.Any(v => v.ContactUserId == tblMessage.SenderUserId))
+                    notification.SenderUserName = recieverContacts.FirstOrDefault(x => x.ContactUserId == tblMessage.SenderUserId)?.ContactName;
+                else
+                    notification.SenderUserName = tblMessage.SenderUser.UserName;
             }
             else
                 notification.SenderUserName = chatRoom.ChatRoomTitle;
@@ -128,9 +128,9 @@ namespace DomainShared.Extentions.MapExtentions
             }
         }
 
-        public static List<MessagesDto> GetChatRoomMessageDtos(this TblChatRoom chatRoom, Guid currentUserId)
+        public static List<MessagesDto> GetChatRoomMessageDtos(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> chatRoomMapRepo, Guid currentUserId)
         {
-            IQueryable<TblUserChatRoomRel> map = _core.TblUserChatRoomRel.Get(x => x.ChatRoomId == chatRoom.Id && x.UserId != currentUserId,
+            IQueryable<TblUserChatRoomRel> map = chatRoomMapRepo.Get(x => x.ChatRoomId == chatRoom.Id && x.UserId != currentUserId,
             includes: x => x.Include(v => v.LastSeenMessage));
 
             return chatRoom.TblMessage.OrderBy(x => x.SendAt).Select(src =>
@@ -141,20 +141,20 @@ namespace DomainShared.Extentions.MapExtentions
                }).ToList();
         }
 
-        public static GroupChatRoomDto MapToGroupChatRoomDto(this TblChatRoom chatRoom, Guid currentUserId)
+        public static GroupChatRoomDto MapToGroupChatRoomDto(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> chatRoomMapRepo, Guid currentUserId)
         {
             var result = chatRoom.Adapt<GroupChatRoomDto>();
-            result.Messages = chatRoom.GetChatRoomMessageDtos(currentUserId);
+            result.Messages = chatRoom.GetChatRoomMessageDtos(chatRoomMapRepo, currentUserId);
 
             return result;
         }
 
-        public static PrivateChatRoomDto MapToPrivateChatRoomDto(this TblChatRoom chatRoom, Guid currentUserId)
+        public static PrivateChatRoomDto MapToPrivateChatRoomDto(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> chatRoomMapRepo, Guid currentUserId)
         {
             chatRoom.TblUserChatRoomRel = chatRoom.TblUserChatRoomRel.OrderByDescending(x => x.UserId != currentUserId).ToList();
             var res = chatRoom.Adapt<PrivateChatRoomDto>();
 
-            res.Messages = chatRoom.GetChatRoomMessageDtos(currentUserId);
+            res.Messages = chatRoom.GetChatRoomMessageDtos(chatRoomMapRepo, currentUserId);
 
             return res;
         }

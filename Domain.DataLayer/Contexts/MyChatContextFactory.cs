@@ -18,7 +18,7 @@ namespace Domain.DataLayer.Contexts
         public MyChatContext CreateDbContext()
         {
             var context = _dbContextFactory.CreateDbContext();
-            //context.UserInfoContext = _userInfoContext;
+            context.UserInfoContext = _userInfoContext;
             return context;
         }
     }

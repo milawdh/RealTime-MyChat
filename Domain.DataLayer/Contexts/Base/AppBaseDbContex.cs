@@ -26,7 +26,7 @@ namespace Domain.DataLayer.Contexts.Base
 
         public virtual EntityEntry<TEntity> Add<TEntity>(TEntity entity) where TEntity : class
         {
-            if (entity is ICreationAuditedEntity)
+            if (entity is ICreationAuditedEntity && Entry(entity).State == EntityState.Added)
             {
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = UserInfoContext.UserId;
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = UserInfoContext.User;
@@ -35,24 +35,27 @@ namespace Domain.DataLayer.Contexts.Base
 
             return base.Add(entity);
         }
-        public virtual ValueTask<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
+        public virtual async Task<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
         {
-            if (entity is ICreationAuditedEntity)
+            if (entity is ICreationAuditedEntity && Entry(entity).State == EntityState.Added)
             {
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = UserInfoContext.UserId;
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = UserInfoContext.User;
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
             }
-            return base.AddAsync(entity, cancellationToken);
+            return await base.AddAsync(entity, cancellationToken);
         }
 
         public virtual void AddRange<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
             foreach (var entity in entities.Where(x => x is ICreationAuditedEntity))
             {
-                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = UserInfoContext.UserId;
-                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = UserInfoContext.User;
-                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
+                if (Entry(entity).State == EntityState.Added)
+                {
+                    Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = UserInfoContext.UserId;
+                    Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = UserInfoContext.User;
+                    Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
+                }
             }
 
             Set<TEntity>().AddRange(entities);
@@ -62,9 +65,12 @@ namespace Domain.DataLayer.Contexts.Base
         {
             foreach (var entity in entities.Where(x => x is ICreationAuditedEntity))
             {
-                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = UserInfoContext.UserId;
-                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = UserInfoContext.User;
-                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
+                if (Entry(entity).State == EntityState.Added)
+                {
+                    Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = UserInfoContext.UserId;
+                    Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = UserInfoContext.User;
+                    Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
+                }
             }
             Set<TEntity>().AddRange(entities);
         }
@@ -72,7 +78,7 @@ namespace Domain.DataLayer.Contexts.Base
 
         public virtual EntityEntry<TEntity> Update<TEntity>(TEntity entity) where TEntity : class
         {
-            if (entity is IModificationAuditedEntity)
+            if (entity is IModificationAuditedEntity && Entry(entity).State == EntityState.Modified && Entry(entity).State != EntityState.Detached)
             {
                 Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = UserInfoContext.UserId;
                 Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = UserInfoContext.User;
@@ -86,9 +92,12 @@ namespace Domain.DataLayer.Contexts.Base
         {
             foreach (var entity in entities.Where(x => x is IModificationAuditedEntity))
             {
-                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = UserInfoContext.UserId;
-                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = UserInfoContext.User;
-                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedDate)).CurrentValue = DateTime.Now;
+                if (Entry(entity).State == EntityState.Modified && Entry(entity).State != EntityState.Detached)
+                {
+                    Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = UserInfoContext.UserId;
+                    Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = UserInfoContext.User;
+                    Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedDate)).CurrentValue = DateTime.Now;
+                }
             }
             Set<TEntity>().UpdateRange(entities);
         }
@@ -97,9 +106,12 @@ namespace Domain.DataLayer.Contexts.Base
         {
             foreach (var entity in entities.Where(x => x is IModificationAuditedEntity))
             {
-                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = UserInfoContext.UserId;
-                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = UserInfoContext.User;
-                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedDate)).CurrentValue = DateTime.Now;
+                if (Entry(entity).State == EntityState.Modified && Entry(entity).State != EntityState.Detached)
+                {
+                    Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = UserInfoContext.UserId;
+                    Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = UserInfoContext.User;
+                    Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedDate)).CurrentValue = DateTime.Now;
+                }
             }
             Set<TEntity>().UpdateRange(entities);
         }
@@ -107,6 +119,16 @@ namespace Domain.DataLayer.Contexts.Base
         public virtual EntityEntry<TEntity> RemoveForce<TEntity>(TEntity entity) where TEntity : class
         {
             return base.Remove(entity);
+        }
+
+        public virtual void RemoveRangeForce<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
+        {
+            Set<TEntity>().RemoveRange(entities);
+        }
+
+        public virtual void RemoveRangeForce<TEntity>(params TEntity[] entities) where TEntity : class
+        {
+            Set<TEntity>().RemoveRange(entities);
         }
 
         public virtual ServiceResult<EntityEntry<TEntity>> Reomve<TEntity>(TEntity entity) where TEntity : class
@@ -141,16 +163,6 @@ namespace Domain.DataLayer.Contexts.Base
                 Entry(entity).Property(nameof(IBaseAuditedEntity.IsDeleted)).CurrentValue = true;
             }
             return new ServiceResult();
-        }
-
-        public virtual void RemoveRangeForce<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
-        {
-            Set<TEntity>().RemoveRange(entities);
-        }
-
-        public virtual void RemoveRangeForce<TEntity>(params TEntity[] entities) where TEntity : class
-        {
-            Set<TEntity>().RemoveRange(entities);
         }
 
         public virtual DbSet<TEntity> Set<TEntity>() where TEntity : class
