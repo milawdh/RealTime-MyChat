@@ -3,6 +3,7 @@ using MyChat.Profiles;
 using ServiceLayer.Hubs;
 using Microsoft.EntityFrameworkCore;
 using Domain.DataLayer.Contexts;
+using Domain.DataLayer.Contexts.Base;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,8 +14,8 @@ builder.Services.RegisterInversionOfControlls();
 builder.Services.RegisterMapsterConfiguration();
 #endregion
 
-builder.Services.AddPooledDbContextFactory<MyChatContext>(
-    o => o.UseSqlServer(builder.Configuration["Data Source=localhost,1433;Initial Catalog=MyChatDb_New;Integrated Security=True;Trust Server Certificate=True"]));
+builder.Services.AddPooledDbContextFactory<AppBaseDbContex>(
+    o => o.UseSqlServer("Data Source=localhost,1433;Initial Catalog=MyChatDb_New;Integrated Security=True;Trust Server Certificate=True"));
 
 var app = builder.Build();
 

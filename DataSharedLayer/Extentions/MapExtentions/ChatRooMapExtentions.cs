@@ -57,7 +57,7 @@ namespace DomainShared.Extentions.MapExtentions
              {
                  InitChatRoom res = i.Adapt<InitChatRoom>();
                  var lastSeenMessageDate = i.TblUserChatRoomRel.FirstOrDefault(c => c.UserId == currentUserId)?.LastSeenMessage?.SendAt;
-                 //res.NotSeenMessagesCount = i.GetNotSeenMessagesQuery(lastSeenMessageDate, currentUserId).Count();
+                 res.NotSeenMessagesCount = i.GetNotSeenMessagesQuery(lastSeenMessageDate, currentUserId).Count();
                  res.Pic = i.GetChatRoomImage(currentUserId);
                  return res;
 

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,60 +18,86 @@ namespace Domain.DataLayer.Contexts.Base
 {
     public class AppBaseDbContex : DbContext
     {
-        public IUserInfoContext UserInfoContext;
-
-        public AppBaseDbContex(DbContextOptions<MyChatContext> options)
+        public UserInfoContext User { get; set; }
+        public AppBaseDbContex(DbContextOptions<AppBaseDbContex> options)
         : base(options)
         {
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            var assembly = Assembly.GetAssembly(typeof(TblChatRoom));
+            modelBuilder.ApplyConfigurationsFromAssembly(assembly);
+            LoadEntities(modelBuilder, "Domain.Entities");
+
+        }
+
+        protected void LoadEntities(ModelBuilder modelBuilder, string nameSpace)
+        {
+            var model = modelBuilder.Model;
+
+            var entityMethod = typeof(ModelBuilder).GetMethod("Entity", new Type[] { });
+
+            var entityTypes = model.GetEntityTypes().Where(x => x.ClrType.Namespace.StartsWith(nameSpace)).Select(x => x.ClrType).ToList();
+
+            entityTypes.ForEach(t =>
+            {
+                entityMethod.MakeGenericMethod(t).Invoke(modelBuilder, new object[] { });
+            });
+        }
+
         public virtual EntityEntry<TEntity> Add<TEntity>(TEntity entity) where TEntity : class
         {
-            if (entity is ICreationAuditedEntity && Entry(entity).State == EntityState.Added)
-            {
-                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = UserInfoContext.UserId;
-                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = UserInfoContext.User;
-                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
-            }
 
-            return base.Add(entity);
+            Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = User.UserId;
+            //Entry(entity).Property("CreatedBy").CurrentValue = UserInfoContext.User;
+            Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
+
+            return Set<TEntity>().Add(entity);
         }
         public virtual async Task<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
         {
             if (entity is ICreationAuditedEntity && Entry(entity).State == EntityState.Added)
             {
-                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = UserInfoContext.UserId;
-                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = UserInfoContext.User;
+                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = User.UserId;
+                //Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = userId;
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
             }
             return await base.AddAsync(entity, cancellationToken);
         }
-
+        public virtual TEntity GetById<TEntity>(object id) where TEntity : class
+        {
+            return Set<TEntity>().Find(id);
+        }
         public virtual void AddRange<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
             foreach (var entity in entities.Where(x => x is ICreationAuditedEntity))
             {
-                if (Entry(entity).State == EntityState.Added)
-                {
-                    Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = UserInfoContext.UserId;
-                    Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = UserInfoContext.User;
-                    Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
-                }
+                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = User.UserId;
+                //Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = userId.User;
+                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
             }
 
             Set<TEntity>().AddRange(entities);
         }
-
+        public virtual bool Any<TEntity>(Func<TEntity, bool> predicate) where TEntity : class
+        {
+            return Set<TEntity>().Any(predicate);
+        }
         public virtual void AddRange<TEntity>(params TEntity[] entities) where TEntity : class
         {
             foreach (var entity in entities.Where(x => x is ICreationAuditedEntity))
             {
-                if (Entry(entity).State == EntityState.Added)
-                {
-                    Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = UserInfoContext.UserId;
-                    Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = UserInfoContext.User;
-                    Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
-                }
+                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = User.UserId;
+                //Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = userId.User;
+                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
             }
             Set<TEntity>().AddRange(entities);
         }
@@ -78,26 +105,23 @@ namespace Domain.DataLayer.Contexts.Base
 
         public virtual EntityEntry<TEntity> Update<TEntity>(TEntity entity) where TEntity : class
         {
-            if (entity is IModificationAuditedEntity && Entry(entity).State == EntityState.Modified && Entry(entity).State != EntityState.Detached)
+            if (entity is IModificationAuditedEntity)
             {
-                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = UserInfoContext.UserId;
-                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = UserInfoContext.User;
+                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = User.UserId;
+                //Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = userId.User;
                 Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedDate)).CurrentValue = DateTime.Now;
             }
 
-            return Update(entity);
+            return Set<TEntity>().Update(entity);
         }
 
         public virtual void UpdateRange<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
             foreach (var entity in entities.Where(x => x is IModificationAuditedEntity))
             {
-                if (Entry(entity).State == EntityState.Modified && Entry(entity).State != EntityState.Detached)
-                {
-                    Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = UserInfoContext.UserId;
-                    Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = UserInfoContext.User;
-                    Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedDate)).CurrentValue = DateTime.Now;
-                }
+                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = User.UserId;
+                //Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = userId.User;
+                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedDate)).CurrentValue = DateTime.Now;
             }
             Set<TEntity>().UpdateRange(entities);
         }
@@ -106,12 +130,9 @@ namespace Domain.DataLayer.Contexts.Base
         {
             foreach (var entity in entities.Where(x => x is IModificationAuditedEntity))
             {
-                if (Entry(entity).State == EntityState.Modified && Entry(entity).State != EntityState.Detached)
-                {
-                    Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = UserInfoContext.UserId;
-                    Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = UserInfoContext.User;
-                    Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedDate)).CurrentValue = DateTime.Now;
-                }
+                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = User.UserId;
+                //Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = userId.User;
+                Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedDate)).CurrentValue = DateTime.Now;
             }
             Set<TEntity>().UpdateRange(entities);
         }
@@ -165,10 +186,6 @@ namespace Domain.DataLayer.Contexts.Base
             return new ServiceResult();
         }
 
-        public virtual DbSet<TEntity> Set<TEntity>() where TEntity : class
-        {
-            return base.Set<TEntity>();
-        }
         public virtual IDbContextTransaction BeginTransaction()
         {
             return Database.BeginTransaction();

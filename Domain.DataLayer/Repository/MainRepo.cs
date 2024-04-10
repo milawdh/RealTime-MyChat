@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.DataLayer.Contexts;
+using Domain.DataLayer.Contexts.Base;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -13,10 +14,10 @@ namespace Services.Repositories
 {
     public class MainRepo<TEntity> : IMainRepo<TEntity> where TEntity : class
     {
-        private readonly MyChatContext _context;
+        private readonly AppBaseDbContex _context;
         private readonly DbSet<TEntity> _dbSet;
 
-        public MainRepo(MyChatContext context)
+        public MainRepo(AppBaseDbContex context)
         {
             _context = context;
             _dbSet = _context.Set<TEntity>();
@@ -69,7 +70,7 @@ namespace Services.Repositories
                 if (_context.Entry(entity).State == EntityState.Detached)
                     _dbSet.Attach(entity);
 
-                return _context.RemoveForce(entity);
+                return _context.Remove(entity);
             }
             catch
             {

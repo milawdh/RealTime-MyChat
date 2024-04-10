@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Domain.DataLayer.UnitOfWorks;
 using System.Security.Claims;
 using Domain.Entities;
+using Domain.DataLayer.Contexts;
+using Domain.DataLayer.Contexts.Base;
 
 namespace Domain.DataLayer.Repository
 {
@@ -52,19 +54,29 @@ namespace Domain.DataLayer.Repository
         #region Cunstructor
 
         private readonly HttpContext HttpContext;
-        private readonly Core _core;
-        private readonly Guid? _userId;
+        private readonly Core core;
+        private static string? _userName;
+        private readonly DbSet<TblUsers> tblUsers;
+        private readonly DbSet<TblUserContacts> tblUserContacts;
+        private readonly DbSet<TblChatRoom> chatRooms;
+        private readonly DbSet<TblUserChatRoomRel> tblUserChatRooms;
 
-        public UserInfoContext(IHttpContextAccessor httpContextAccessor, Core core)
+        public UserInfoContext(IHttpContextAccessor httpContextAccessor, AppBaseDbContex context)
         {
             HttpContext = httpContextAccessor.HttpContext;
-            _core = core;
+            tblUsers = context.Set<TblUsers>();
+            tblUserContacts = context.Set<TblUserContacts>();
+            chatRooms = context.Set<TblChatRoom>();
+            tblUserChatRooms = context.Set<TblUserChatRoomRel>();
         }
 
-        public UserInfoContext(Core core, Guid userId)
+        public UserInfoContext(AppBaseDbContex context, string userName)
         {
-            _core = core;
-            _userId = userId;
+            tblUsers = context.Set<TblUsers>();
+            tblUserContacts = context.Set<TblUserContacts>();
+            chatRooms = context.Set<TblChatRoom>();
+            tblUserChatRooms = context.Set<TblUserChatRoomRel>();
+            _userName = userName;
         }
 
         #endregion
@@ -107,15 +119,8 @@ namespace Domain.DataLayer.Repository
         {
             get
             {
-                if (_userId is null)
-                {
-                    var userName = HttpContext.User.Claims.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
-                    if (!_core.TblUsers.Any(i => i.UserName == userName))
-                        throw new AuthenticateException("UserName Not Found");
 
-                    return _core.TblUsers.Get(i => i.UserName == userName).Select(x => x.Id).FirstOrDefault();
-                }
-                return _userId.Value;
+                return tblUsers.Where(i => i.UserName == UserName).Select(x => x.Id).FirstOrDefault();
             }
         }
 
@@ -126,7 +131,16 @@ namespace Domain.DataLayer.Repository
         {
             get
             {
-                return _core.TblUsers.Get(i => i.Id == UserId).Select(x => x.UserName).FirstOrDefault();
+                if (_userName is null)
+                {
+                    var userName = HttpContext.User.Claims.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
+                    if (!tblUsers.Any(i => i.UserName == userName))
+                        throw new AuthenticateException("UserName Not Found");
+
+                    _userName = userName;
+                    return tblUsers.Where(i => i.Id == UserId).Select(x => x.UserName).FirstOrDefault();
+                }
+                return _userName;
             }
         }
 
@@ -155,7 +169,7 @@ namespace Domain.DataLayer.Repository
         {
             get
             {
-                return _core.TblUserContacts.Get(x => x.ContactListOwnerId == UserId);
+                return tblUserContacts.Where(x => x.ContactListOwnerId == UserId);
             }
         }
 
@@ -163,7 +177,7 @@ namespace Domain.DataLayer.Repository
         {
             get
             {
-                return _core.TblUserContacts.Get(x => x.ContactUserId == UserId);
+                return tblUserContacts.Where(x => x.ContactUserId == UserId);
             }
         }
 
@@ -213,8 +227,8 @@ namespace Domain.DataLayer.Repository
         {
             get
             {
-                TblRole tblRole = _core.TblUsers.Get(where: i => i.UserName == UserName,
-                    defualtInclude: i => i.Include(x => x.Role).ThenInclude(x => x.TblRolePermissionRel).ThenInclude(x => x.Permission))
+                TblRole tblRole = tblUsers.Where(i => i.UserName == UserName)
+                    .Include(x => x.Role).ThenInclude(x => x.TblRolePermissionRel).ThenInclude(x => x.Permission)
                     .FirstOrDefault()!.Role;
 
                 return tblRole.TblRolePermissionRel.Select(i => i.Permission).AsQueryable();
@@ -236,9 +250,11 @@ namespace Domain.DataLayer.Repository
         /// <exception cref="AuthenticateException">If UserName Was Not Found In Database It Occurs</exception>
         public IQueryable<TblUsers> GetUser(Func<IQueryable<TblUsers>, IQueryable<TblUsers>> custom = null)
         {
-            return _core.TblUsers.Get(where: i => i.Id == UserId,
-                defualtInclude: UserDefualtInclude,
-                includes: custom);
+            var query = tblUsers.Where(i => i.Id == UserId);
+            query = UserDefualtInclude(query);
+            if (custom != null)
+                query = custom(query);
+            return query;
         }
 
         /// <summary>
@@ -249,13 +265,12 @@ namespace Domain.DataLayer.Repository
         /// <exception cref="AuthenticateException">If UserName Was Not Found In Database It Occurs</exception>
         private IQueryable<TblChatRoom> GetChatRooms(Func<IQueryable<TblChatRoom>, IQueryable<TblChatRoom>> custom = null)
         {
-            var tblChatRooms = _core.TblChatRoom.Get(
-                where: i => i.TblUserChatRoomRel.Select(x => x.UserId).Contains(UserId),
-                defualtInclude: ChatRoomDefualtQuery,
-                includes: custom
-                );
 
-            return tblChatRooms;
+            var query = chatRooms.Where(i => i.TblUserChatRoomRel.Select(x => x.UserId).Contains(UserId));
+            query = ChatRoomDefualtQuery(query);
+            if (custom != null)
+                query = custom(query);
+            return query;
         }
 
         #endregion

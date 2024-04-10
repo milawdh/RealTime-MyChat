@@ -1,4 +1,5 @@
 ﻿using Domain.DataLayer.Contexts;
+using Domain.DataLayer.Contexts.Base;
 using Domain.Entities;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +10,10 @@ using static System.Net.Mime.ContentType;
 
 namespace Domain.DataLayer.UnitOfWorks
 {
-    public class Core : IDisposable
+    public class Core
     {
-        private readonly MyChatContext _context;
-        public Core(MyChatContext context)
+        private readonly AppBaseDbContex _context;
+        public Core(AppBaseDbContex context)
         {
             _context = context;   
         }
@@ -47,12 +48,15 @@ namespace Domain.DataLayer.UnitOfWorks
         public MainRepo<TblUsers> TblUsers => Users ?? new(_context);
 
 
-
+        public void MarkAsChanged<TEntity>(TEntity entity) where TEntity : class
+        {
+            _context.Update(entity);
+        }
         public void Save()
         {
             _context.SaveChanges();
         }
-        public void Dispose() => _context.Dispose();
+        public void Dispose() { }
         public IDbContextTransaction BeginTransaction() => _context.BeginTransaction();
         public void CommitTransaction() => _context.CommitTransaction();
         public void RollBackTransaction() => _context.RollbackTransaction();

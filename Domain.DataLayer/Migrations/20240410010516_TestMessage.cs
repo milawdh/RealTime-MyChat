@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Domain.DataLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class TestMessage : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -63,7 +63,7 @@ namespace Domain.DataLayer.Migrations
                 name: "TblSettings",
                 columns: table => new
                 {
-                    ID = table.Column<short>(type: "smallint", nullable: false)
+                    ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ShowOnline = table.Column<bool>(type: "bit", nullable: false),
                     ShowLastSeen = table.Column<bool>(type: "bit", nullable: false),
@@ -115,9 +115,10 @@ namespace Domain.DataLayer.Migrations
                     LastOnline = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
                     ProfileImageUrl = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValue: new Guid("4c271239-f0c1-ee11-b6e1-44af2843979e")),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    ConnectionId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValue: new Guid("0c621b69-cebb-ee11-b6e1-44af2843979e")),
                     IsOnline = table.Column<bool>(type: "bit", nullable: false),
-                    SettingsId = table.Column<short>(type: "smallint", nullable: false, defaultValue: (short)1)
+                    SettingsId = table.Column<int>(type: "int", nullable: false, defaultValue: 1)
                 },
                 constraints: table =>
                 {
@@ -244,9 +245,14 @@ namespace Domain.DataLayer.Migrations
                     SendAt = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
                     EditedAt = table.Column<DateTime>(type: "datetime", nullable: true),
                     IsEdited = table.Column<bool>(type: "bit", nullable: false),
-                    IsRead = table.Column<bool>(type: "bit", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    IsFromSystem = table.Column<bool>(type: "bit", nullable: false)
+                    IsFromSystem = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedById = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ModifiedById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DeleteById = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    DeleteDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -266,27 +272,19 @@ namespace Domain.DataLayer.Migrations
                         column: x => x.SenderUserId,
                         principalTable: "TblUsers",
                         principalColumn: "ID");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TblUserChatRoomRel",
-                columns: table => new
-                {
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newsequentialid())"),
-                    ChatRoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TblUserChatRoomRel", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_TblUserChatRoomRel_TblChatRoom",
-                        column: x => x.ChatRoomId,
-                        principalTable: "TblChatRoom",
+                        name: "FK_TblMessage_TblUsers_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "TblUsers",
                         principalColumn: "ID");
                     table.ForeignKey(
-                        name: "FK_TblUserChatRoomRel_TblUsers",
-                        column: x => x.UserId,
+                        name: "FK_TblMessage_TblUsers_DeleteById",
+                        column: x => x.DeleteById,
+                        principalTable: "TblUsers",
+                        principalColumn: "ID");
+                    table.ForeignKey(
+                        name: "FK_TblMessage_TblUsers_ModifiedById",
+                        column: x => x.ModifiedById,
                         principalTable: "TblUsers",
                         principalColumn: "ID");
                 });
@@ -310,6 +308,35 @@ namespace Domain.DataLayer.Migrations
                         principalTable: "TblMessage",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TblUserChatRoomRel",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newsequentialid())"),
+                    ChatRoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastSeenMessageId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TblUserChatRoomRel", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_TblUserChatRoomRel_TblChatRoom",
+                        column: x => x.ChatRoomId,
+                        principalTable: "TblChatRoom",
+                        principalColumn: "ID");
+                    table.ForeignKey(
+                        name: "FK_TblUserChatRoomRel_TblMessage_LastSeenMessageId",
+                        column: x => x.LastSeenMessageId,
+                        principalTable: "TblMessage",
+                        principalColumn: "ID");
+                    table.ForeignKey(
+                        name: "FK_TblUserChatRoomRel_TblUsers",
+                        column: x => x.UserId,
+                        principalTable: "TblUsers",
+                        principalColumn: "ID");
                 });
 
             migrationBuilder.CreateIndex(
@@ -336,6 +363,21 @@ namespace Domain.DataLayer.Migrations
                 name: "IX_TblMedia_MessageId",
                 table: "TblMedia",
                 column: "MessageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TblMessage_CreatedById",
+                table: "TblMessage",
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TblMessage_DeleteById",
+                table: "TblMessage",
+                column: "DeleteById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TblMessage_ModifiedById",
+                table: "TblMessage",
+                column: "ModifiedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TblMessage_RecieverChatRoomId",
@@ -366,6 +408,11 @@ namespace Domain.DataLayer.Migrations
                 name: "IX_TblUserChatRoomRel_ChatRoomId",
                 table: "TblUserChatRoomRel",
                 column: "ChatRoomId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TblUserChatRoomRel_LastSeenMessageId",
+                table: "TblUserChatRoomRel",
+                column: "LastSeenMessageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TblUserChatRoomRel_UserId",
@@ -433,10 +480,10 @@ namespace Domain.DataLayer.Migrations
                 name: "TblUserImageRel");
 
             migrationBuilder.DropTable(
-                name: "TblMessage");
+                name: "TblPermission");
 
             migrationBuilder.DropTable(
-                name: "TblPermission");
+                name: "TblMessage");
 
             migrationBuilder.DropTable(
                 name: "TblChatRoom");

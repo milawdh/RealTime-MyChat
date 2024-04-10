@@ -2,17 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Audited.Models;
 using Domain.JsonFieldModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblMessage
+public partial class TblMessage : FullAuditedEntity<Guid>
 {
-    [Key]
-    [Column("ID")]
-    public Guid Id { get; set; }
-
     public Guid? ReplyId { get; set; }
 
     [StringLength(1024)]

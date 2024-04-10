@@ -6,6 +6,10 @@ using Domain.DataLayer.UnitOfWorks;
 using Domain.DataLayer.Repository;
 using Domain.DataLayer.Contexts;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using Domain.DataLayer.Contexts.Base;
+using Domain.Entities;
+using System.Reflection;
 
 namespace ServiceLayer.Profiles
 {
@@ -13,12 +17,12 @@ namespace ServiceLayer.Profiles
     {
         public static void RegisterInversionOfControlls(this IServiceCollection services)
         {
-            services.AddScoped<Core>();
+            services.AddScoped<Core>(sp => new Core(sp.GetRequiredService<AppBaseDbContex>()));
+            services.AddScoped<DbContextFactory>();
+            services.AddScoped(sp => sp.GetRequiredService<DbContextFactory>().CreateDbContext());
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IUserInfoContext>(sp=> new UserInfoContext(sp.GetRequiredService<IHttpContextAccessor>(), sp.GetRequiredService<Core>()));
+            services.AddScoped<IUserInfoContext>(sp => new UserInfoContext(sp.GetRequiredService<IHttpContextAccessor>(), sp.GetRequiredService<AppBaseDbContex>()));
 
-            services.AddScoped<MyChatContextFactory>();
-            services.AddScoped(sp => sp.GetRequiredService<MyChatContextFactory>().CreateDbContext());
 
             services.AddSingleton<ChatHubPipeLine>();
             services.AddScoped<IUserLoginService, UserLoginService>();

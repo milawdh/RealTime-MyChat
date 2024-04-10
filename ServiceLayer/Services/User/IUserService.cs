@@ -68,6 +68,7 @@ namespace ServiceLayer.Services.User
             user.IsOnline = true;
             user.ConnectionId = connectionId;
 
+            _core.MarkAsChanged(user);
             _core.Save();
         }
 
@@ -82,6 +83,7 @@ namespace ServiceLayer.Services.User
             user.LastOnline = DateTime.Now;
             user.ConnectionId = null;
 
+            _core.MarkAsChanged(user);
             _core.Save();
         }
 

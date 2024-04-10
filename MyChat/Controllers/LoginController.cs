@@ -2,16 +2,19 @@
 using DomainShared.Dtos.User;
 using Framework.Api;
 using ServiceLayer.Services.User;
+using Domain.DataLayer.UnitOfWorks;
 
 namespace MyChat.Controllers
 {
     public class LoginController : CustomBaseApiController
     {
         private readonly IUserLoginService _userLoginService;
+        private readonly Core core;
 
-        public LoginController(IUserLoginService userLoginService)
+        public LoginController(IUserLoginService userLoginService,Core core)
         {
             _userLoginService = userLoginService;
+            this.core = core;
         }
         public IActionResult Index()
         {
@@ -29,7 +32,10 @@ namespace MyChat.Controllers
             return View();
         }
 
-
+        public IActionResult Test(Guid id)
+        {
+            return Ok(core.TblMessage.Delete(core.TblMessage.GetById(id)));
+        }
 
         //Actions
         [ValidateAntiForgeryToken, HttpPost]
