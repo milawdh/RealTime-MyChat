@@ -2,25 +2,22 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Audited.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblRolePermissionRel
+public partial class TblRolePermissionRel : FullAuditedEntity<Guid>
 {
-    [Key]
-    [Column("ID")]
-    public Guid Id { get; set; }
-
     public Guid RoleId { get; set; }
 
     public Guid PermissionId { get; set; }
 
-    [ForeignKey("PermissionId")]
-    [InverseProperty("TblRolePermissionRel")]
+    [ForeignKey(nameof(PermissionId))]
+    [InverseProperty(nameof(TblPermission.TblRolePermissionRels))]
     public virtual TblPermission Permission { get; set; } = null!;
 
-    [ForeignKey("RoleId")]
-    [InverseProperty("TblRolePermissionRel")]
+    [ForeignKey(nameof(RoleId))]
+    [InverseProperty(nameof(TblRole.TblRolePermissionRels))]
     public virtual TblRole Role { get; set; } = null!;
 }

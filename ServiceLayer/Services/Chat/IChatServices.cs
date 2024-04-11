@@ -61,8 +61,8 @@ namespace ServiceLayer.Services.Chat
             {
                 Body = messageDto.Body,
                 RecieverChatRoomId = messageDto.RecieverChatRoomId,
-                SenderUserId = _userInfoContext.UserId,
-                SenderUser = _userInfoContext.User,
+                CreatedById = _userInfoContext.UserId,
+                CreatedBy = _userInfoContext.User,
             };
 
             _core.TblMessage.Add(tblMessage);
@@ -124,7 +124,7 @@ namespace ServiceLayer.Services.Chat
             Dictionary<string, string> dict = _chatHubGroupManager.GetUsersCurrentChatRoomDict();
 
             var allRecieverUsers = _userInfoContext.ChatRooms.Where(i => i.Id == tblMessage.RecieverChatRoomId)
-                .SelectMany(v => v.TblUserChatRoomRel.Select(c => c.User.ConnectionId)).Where(a => a != null).ToList();
+                .SelectMany(v => v.TblUserChatRoomRels.Select(c => c.User.ConnectionId)).Where(a => a != null).ToList();
 
 
             var willNotifyUsers = allRecieverUsers.Where(c => !dict.ContainsKey(c) || dict[c] != tblMessage.RecieverChatRoomId.ToString())
@@ -199,10 +199,10 @@ namespace ServiceLayer.Services.Chat
         {
 
             var map = _core.TblUserChatRoomRel.Get(i => i.UserId == _userInfoContext.UserId && i.ChatRoomId == chatRoomId,
-                includes: x => x.Include(c => c.ChatRoom).ThenInclude(v => v.TblMessage))
+                includes: x => x.Include(c => c.ChatRoom).ThenInclude(v => v.TblMessages))
                  .FirstOrDefault();
 
-            map.LastSeenMessageId = map?.ChatRoom?.TblMessage?.OrderBy(x => x.SendAt).LastOrDefault()?.Id;
+            map.LastSeenMessageId = map?.ChatRoom?.TblMessages?.OrderBy(x => x.CreatedDate).LastOrDefault()?.Id;
             _core.Save();
 
             await _chatHub.Clients.GroupExcept(chatRoomId.ToString(), _userInfoContext.UserChatHubConnectionId).SetAllMessagesRead();

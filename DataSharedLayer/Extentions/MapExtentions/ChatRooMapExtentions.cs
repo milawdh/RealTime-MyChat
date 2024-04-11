@@ -35,7 +35,7 @@ namespace DomainShared.Extentions.MapExtentions
         public static string? GetChatRoomImage(this TblChatRoom chatroom, Guid currentUserId)
         {
             return NavigationProfile.Resources + (chatroom.Type == ChatRoomType.Private ?
-                     chatroom.TblUserChatRoomRel.Where(i => i.UserId != currentUserId)
+                     chatroom.TblUserChatRoomRels.Where(i => i.UserId != currentUserId)
                     .Select(v => v.User.ProfileImageUrlNavigation.Url)
                     .FirstOrDefault()
                     :
@@ -52,11 +52,11 @@ namespace DomainShared.Extentions.MapExtentions
         {
             var result =
              chatRooms
-             .OrderByDescending(x => x.TblMessage.OrderBy(c => c.SendAt).Last().SendAt)
+             .OrderByDescending(x => x.TblMessages.OrderBy(c => c.CreatedDate).Last().CreatedDate)
              .Select(i =>
              {
                  InitChatRoom res = i.Adapt<InitChatRoom>();
-                 var lastSeenMessageDate = i.TblUserChatRoomRel.FirstOrDefault(c => c.UserId == currentUserId)?.LastSeenMessage?.SendAt;
+                 var lastSeenMessageDate = i.TblUserChatRoomRels.FirstOrDefault(c => c.UserId == currentUserId)?.LastSeenMessage?.CreatedDate;
                  res.NotSeenMessagesCount = i.GetNotSeenMessagesQuery(lastSeenMessageDate, currentUserId).Count();
                  res.Pic = i.GetChatRoomImage(currentUserId);
                  return res;
@@ -83,24 +83,24 @@ namespace DomainShared.Extentions.MapExtentions
             var notification = tblMessage.Adapt<RecieveMessageNotificationDto>();
 
             TblChatRoom chatRoom = core.TblChatRoom.Get(x => x.Id == tblMessage.RecieverChatRoomId,
-                                     includes: v => v.Include(x => x.TblUserChatRoomRel).ThenInclude(x => x.User).ThenInclude(x => x.ProfileImageUrlNavigation))
+                                     includes: v => v.Include(x => x.TblUserChatRoomRels).ThenInclude(x => x.User).ThenInclude(x => x.ProfileImageUrlNavigation))
                                     .FirstOrDefault();
 
             //Get Image
             notification.Image =
-                chatRoom.GetChatRoomImage(tblMessage.SenderUserId);
+                chatRoom.GetChatRoomImage(tblMessage.CreatedById);
 
 
             if (chatRoom.Type == ChatRoomType.Private)
             {
-                TblUsers reciever = tblMessage.GetPrivateMessageRecieverQuery(core.TblUserChatRoomRel.Get());
+                TblUser reciever = tblMessage.GetPrivateMessageRecieverQuery(core.TblUserChatRoomRel.Get());
 
-                var recieverContacts = reciever.TblUserContactsContactUser;
+                var recieverContacts = reciever.TblUserContactsContactUsers;
 
-                if (recieverContacts.Any(v => v.ContactUserId == tblMessage.SenderUserId))
-                    notification.SenderUserName = recieverContacts.FirstOrDefault(x => x.ContactUserId == tblMessage.SenderUserId)?.ContactName;
+                if (recieverContacts.Any(v => v.ContactUserId == tblMessage.CreatedById))
+                    notification.SenderUserName = recieverContacts.FirstOrDefault(x => x.ContactUserId == tblMessage.CreatedById)?.ContactName;
                 else
-                    notification.SenderUserName = tblMessage.SenderUser.UserName;
+                    notification.SenderUserName = tblMessage.CreatedBy.UserName;
             }
             else
                 notification.SenderUserName = chatRoom.ChatRoomTitle;
@@ -117,11 +117,11 @@ namespace DomainShared.Extentions.MapExtentions
                     return MessageStatus.Sent;
 
                 return
-                    map.FirstOrDefault().LastSeenMessage.SendAt >= message.SendAt ? MessageStatus.Read : MessageStatus.Sent;
+                    map.FirstOrDefault().LastSeenMessage.CreatedDate >= message.CreatedDate ? MessageStatus.Read : MessageStatus.Sent;
             }
             else
             {
-                if (map.Any(x => x.LastSeenMessage.SendAt >= message.SendAt))
+                if (map.Any(x => x.LastSeenMessage.CreatedDate >= message.CreatedDate))
                     return MessageStatus.Read;
 
                 return MessageStatus.Sent;
@@ -133,7 +133,7 @@ namespace DomainShared.Extentions.MapExtentions
             IQueryable<TblUserChatRoomRel> map = chatRoomMapRepo.Get(x => x.ChatRoomId == chatRoom.Id && x.UserId != currentUserId,
             includes: x => x.Include(v => v.LastSeenMessage));
 
-            return chatRoom.TblMessage.OrderBy(x => x.SendAt).Select(src =>
+            return chatRoom.TblMessages.OrderBy(x => x.CreatedDate).Select(src =>
                {
                    var res = src.Adapt<MessagesDto>();
                    res.Status = src.GetMessageStatus(map);
@@ -151,7 +151,7 @@ namespace DomainShared.Extentions.MapExtentions
 
         public static PrivateChatRoomDto MapToPrivateChatRoomDto(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> chatRoomMapRepo, Guid currentUserId)
         {
-            chatRoom.TblUserChatRoomRel = chatRoom.TblUserChatRoomRel.OrderByDescending(x => x.UserId != currentUserId).ToList();
+            chatRoom.TblUserChatRoomRels = chatRoom.TblUserChatRoomRels.OrderByDescending(x => x.UserId != currentUserId).ToList();
             var res = chatRoom.Adapt<PrivateChatRoomDto>();
 
             res.Messages = chatRoom.GetChatRoomMessageDtos(chatRoomMapRepo, currentUserId);

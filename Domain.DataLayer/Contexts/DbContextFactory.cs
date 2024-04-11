@@ -24,7 +24,7 @@ namespace Domain.DataLayer.Contexts
         public AppBaseDbContex CreateDbContext()
         {
             var context = _dbContextFactory.CreateDbContext();
-            if (context.Any<TblUsers>(x => x.UserName == _userName))
+            if (context.Any<TblUser>(x => x.UserName == _userName))
                 context.User = new UserInfoContext(context, _userName);
             return context;
         }

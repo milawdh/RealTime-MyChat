@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Audited.Models;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblMedia
+public partial class TblMedia : FullAuditedEntity<Guid>
 {
     [Key]
     [Column("ID")]
@@ -20,10 +21,7 @@ public partial class TblMedia
     [StringLength(128)]
     public string Url { get; set; } = null!;
 
-    [Column(TypeName = "datetime")]
-    public DateTime DateCreated { get; set; }
-
-    [ForeignKey("MessageId")]
-    [InverseProperty("TblMedia")]
+    [ForeignKey(nameof(MessageId))]
+    [InverseProperty(nameof(TblMessage.TblMedias))]
     public virtual TblMessage Message { get; set; } = null!;
 }

@@ -31,8 +31,8 @@ namespace DomainShared.Dtos.Chat.ChatRoom
                 .IgnoreNonMapped(true)
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.Name, src => src.Type == ChatRoomType.Group ? src.ChatRoomTitle :
-                src.TblUserChatRoomRel.First().User.Name)
-                .Map(dest => dest.LastMessage, src => src.TblMessage.OrderBy(x => x.SendAt).LastOrDefault().Adapt<LastMessageDto>());
+                src.TblUserChatRoomRels.First().User.Name)
+                .Map(dest => dest.LastMessage, src => src.TblMessages.OrderBy(x => x.CreatedDate).LastOrDefault().Adapt<LastMessageDto>());
         }
     }
 }

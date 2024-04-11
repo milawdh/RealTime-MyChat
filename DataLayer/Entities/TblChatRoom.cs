@@ -9,14 +9,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblChatRoom
+public partial class TblChatRoom : FullAuditedEntity<Guid>
 {
-    [Key]
-    [Column("ID")]
-    public Guid Id { get; set; }
-
-    public Guid OwnerId { get; set; }
-
     public Guid? ParentId { get; set; }
 
     [Required]
@@ -34,29 +28,28 @@ public partial class TblChatRoom
 
     public Guid? ProfileImageId { get; set; }
 
-    [InverseProperty("Parent")]
+    [InverseProperty(nameof(Parent))]
     public virtual ICollection<TblChatRoom> InverseParent { get; set; } = new List<TblChatRoom>();
 
-    [ForeignKey("MyChatId")]
-    [InverseProperty("TblChatRoom")]
+    [ForeignKey(nameof(MyChatId))]
+    [InverseProperty(nameof(TblMyChatIdentifier.TblChatRooms))]
     public virtual TblMyChatIdentifier? MyChat { get; set; }
 
-    [ForeignKey("OwnerId")]
-    [InverseProperty("TblChatRoom")]
-    public virtual TblUsers Owner { get; set; } = null!;
+    [InverseProperty(nameof(TblUser.TblChatRooms))]
+    public virtual TblUser CreatedBy { get; set; } = null!;
 
-    [ForeignKey("ParentId")]
-    [InverseProperty("InverseParent")]
+    [ForeignKey(nameof(ParentId))]
+    [InverseProperty(nameof(InverseParent))]
     public virtual TblChatRoom? Parent { get; set; }
 
-    [ForeignKey("ProfileImageId")]
-    [InverseProperty("TblChatRoom")]
+    [ForeignKey(nameof(ProfileImageId))]
+    [InverseProperty(nameof(TblImage.TblChatRooms))]
     public virtual TblImage? ProfileImage { get; set; }
 
-    [InverseProperty("RecieverChatRoom")]
-    public virtual ICollection<TblMessage> TblMessage { get; set; } = new List<TblMessage>();
+    [InverseProperty(nameof(TblMessage.RecieverChatRoom))]
+    public virtual ICollection<TblMessage> TblMessages { get; set; } = new List<TblMessage>();
 
-    [InverseProperty("ChatRoom")]
-    public virtual ICollection<TblUserChatRoomRel> TblUserChatRoomRel { get; set; } = new List<TblUserChatRoomRel>();
+    [InverseProperty(nameof(TblUserChatRoomRel.ChatRoom))]
+    public virtual ICollection<TblUserChatRoomRel> TblUserChatRoomRels { get; set; } = new List<TblUserChatRoomRel>();
 
 }

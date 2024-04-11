@@ -17,12 +17,12 @@ namespace Domain.Configs
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
 
             builder.HasOne(d => d.Permission)
-                .WithMany(p => p.TblRolePermissionRel)
+                .WithMany(p => p.TblRolePermissionRels)
                 .HasForeignKey(e => e.PermissionId)
                 .HasConstraintName("FK_TblRolePermissionRel_TblPermission");
 
             builder.HasOne(d => d.Role)
-                .WithMany(p => p.TblRolePermissionRel)
+                .WithMany(p => p.TblRolePermissionRels)
                 .HasForeignKey(e => e.RoleId)
                 .HasConstraintName("FK_TblRolePermissionRel_TblRole");
         }

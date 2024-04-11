@@ -2,25 +2,22 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Audited.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblImage
+public partial class TblImage : FullAuditedEntity<Guid>
 {
-    [Key]
-    [Column("ID")]
-    public Guid Id { get; set; }
-
     [StringLength(128)]
     public string Url { get; set; } = null!;
 
-    [InverseProperty("ProfileImage")]
-    public virtual ICollection<TblChatRoom> TblChatRoom { get; set; } = new List<TblChatRoom>();
+    [InverseProperty(nameof(TblChatRoom.ProfileImage))]
+    public virtual ICollection<TblChatRoom> TblChatRooms { get; set; } = new List<TblChatRoom>();
 
-    [InverseProperty("ImageUrlNavigation")]
-    public virtual ICollection<TblUserImageRel> TblUserImageRel { get; set; } = new List<TblUserImageRel>();
+    [InverseProperty(nameof(TblUserImageRel.ImageUrlNavigation))]
+    public virtual ICollection<TblUserImageRel> TblUserImageRels { get; set; } = new List<TblUserImageRel>();
 
-    [InverseProperty("ProfileImageUrlNavigation")]
-    public virtual ICollection<TblUsers> TblUsers { get; set; } = new List<TblUsers>();
+    [InverseProperty(nameof(TblUser.ProfileImageUrlNavigation))]
+    public virtual ICollection<TblUser> TblUsers { get; set; } = new List<TblUser>();
 }

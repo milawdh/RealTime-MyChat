@@ -10,14 +10,14 @@ namespace Domain.Configs
         public void Configure(EntityTypeBuilder<TblChatRoom> builder)
         {
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
-            builder.Property(e => e.OwnerId).HasDefaultValueSql("(newsequentialid())");
+            builder.Property(e => e.CreatedById).HasDefaultValueSql("(newsequentialid())");
 
-            builder.HasOne(d => d.MyChat).WithMany(p => p.TblChatRoom)
+            builder.HasOne(d => d.MyChat).WithMany(p => p.TblChatRooms)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK_TblChatRoom_TblMyChatIdentifier");
 
-            builder.HasOne(d => d.Owner).WithMany(p => p.TblChatRoom)
-                    .HasForeignKey(e => e.OwnerId)
+            builder.HasOne(d => d.CreatedBy).WithMany(p => p.TblChatRooms)
+                    .HasForeignKey(e => e.CreatedById)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_TblChatRoom_TblUsers");
 
@@ -26,7 +26,7 @@ namespace Domain.Configs
 
             builder.Property(e => e.Type).HasConversion<short>();
 
-            builder.HasOne(d => d.ProfileImage).WithMany(p => p.TblChatRoom)
+            builder.HasOne(d => d.ProfileImage).WithMany(p => p.TblChatRooms)
                 .HasForeignKey(e => e.ProfileImageId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("FK_TblChatRoom_TblImage");

@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Configs
 {
-    public class TblUsersConfig : IEntityTypeConfiguration<TblUsers>
+    public class TblUsersConfig : IEntityTypeConfiguration<TblUser>
     {
-        public void Configure(EntityTypeBuilder<TblUsers> builder)
+        public void Configure(EntityTypeBuilder<TblUser> builder)
         {
             builder.HasQueryFilter(q => !q.IsDeleted);
 
@@ -21,7 +21,7 @@ namespace Domain.Configs
             builder.Property(e => e.LastOnline).HasDefaultValueSql("(getdate())");
             builder.Property(e => e.ProfileImageUrl).HasDefaultValue(new Guid("4c271239-f0c1-ee11-b6e1-44af2843979e"));
             builder.Property(e => e.RoleId).HasDefaultValue(new Guid("0c621b69-cebb-ee11-b6e1-44af2843979e"));
-            builder.Property(e => e.SettingsId).HasDefaultValue((short)1);
+            builder.Property(e => e.SettingId).HasDefaultValue((short)1);
 
             builder.HasOne(d => d.ProfileImageUrlNavigation).WithMany(p => p.TblUsers)
                 .HasForeignKey(e => e.ProfileImageUrl)
@@ -33,8 +33,8 @@ namespace Domain.Configs
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TblUsers_TblRole");
 
-            builder.HasOne(d => d.Settings).WithMany(p => p.TblUsers)
-                .HasForeignKey(e => e.SettingsId)
+            builder.HasOne(d => d.Setting).WithMany(p => p.TblUsers)
+                .HasForeignKey(e => e.SettingId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TblUsers_TblSettings");
 

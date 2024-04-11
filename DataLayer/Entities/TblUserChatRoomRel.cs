@@ -2,29 +2,25 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Audited.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblUserChatRoomRel
+public partial class TblUserChatRoomRel : FullAuditedEntity<Guid>
 {
-    [Key]
-    [Column("ID")]
-    public Guid Id { get; set; }
-
     public Guid ChatRoomId { get; set; }
 
     public Guid UserId { get; set; }
 
-
     public TblMessage LastSeenMessage { get; set; } = null;
     public Guid? LastSeenMessageId { get; set; }
 
-    [ForeignKey("ChatRoomId")]
-    [InverseProperty("TblUserChatRoomRel")]
+    [ForeignKey(nameof(ChatRoomId))]
+    [InverseProperty(nameof(TblChatRoom.TblUserChatRoomRels))]
     public virtual TblChatRoom ChatRoom { get; set; } = null!;
 
-    [ForeignKey("UserId")]
-    [InverseProperty("TblUserChatRoomRel")]
-    public virtual TblUsers User { get; set; } = null!;
+    [ForeignKey(nameof(UserId))]
+    [InverseProperty(nameof(TblUser.TblUserChatRoomRels))]
+    public virtual TblUser User { get; set; } = null!;
 }

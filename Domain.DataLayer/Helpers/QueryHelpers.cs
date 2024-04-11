@@ -13,11 +13,11 @@ namespace Domain.DataLayer.Helpers
 {
     public static class QueryHelpers
     {
-        public static TblUsers GetPrivateMessageRecieverQuery(this TblMessage tblMessage, IQueryable<TblUserChatRoomRel> chatRoomMap)
+        public static TblUser GetPrivateMessageRecieverQuery(this TblMessage tblMessage, IQueryable<TblUserChatRoomRel> chatRoomMap)
         {
             return chatRoomMap
-                 .Where(v => v.ChatRoomId == tblMessage.RecieverChatRoomId && v.UserId != tblMessage.SenderUserId)
-                 .Include(v => v.User).ThenInclude(c => c.TblUserContactsContactUser)
+                 .Where(v => v.ChatRoomId == tblMessage.RecieverChatRoomId && v.UserId != tblMessage.CreatedById)
+                 .Include(v => v.User).ThenInclude(c => c.TblUserContactsContactUsers)
                  .Select(v => v.User).FirstOrDefault();
         }
 
@@ -25,7 +25,7 @@ namespace Domain.DataLayer.Helpers
         {
             return chatroom.Select(x =>
                       x.Type == ChatRoomType.Private ?
-                      x.TblUserChatRoomRel.Where(i => i.UserId != currentUserId)
+                      x.TblUserChatRoomRels.Where(i => i.UserId != currentUserId)
                      .Select(v => v.User.ProfileImageUrlNavigation.Url).FirstOrDefault()
                      :
                       x.ProfileImageId != null ? x.ProfileImage.Url : null).FirstOrDefault();
@@ -35,11 +35,11 @@ namespace Domain.DataLayer.Helpers
         {
             if (lastSeenMessageDate is not null)
             {
-                return chatRoom.TblMessage.Where(x => x.SendAt > lastSeenMessageDate && x.SenderUserId != currentUserId).AsQueryable();
+                return chatRoom.TblMessages.Where(x => x.CreatedDate > lastSeenMessageDate && x.CreatedById != currentUserId).AsQueryable();
             }
             else
             {
-                return chatRoom.TblMessage.Where(x => x.SenderUserId != currentUserId).AsQueryable();
+                return chatRoom.TblMessages.Where(x => x.CreatedById != currentUserId).AsQueryable();
             }
         }
     }

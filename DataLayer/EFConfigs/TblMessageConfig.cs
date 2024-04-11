@@ -24,19 +24,20 @@ namespace Domain.Configs
             #endregion
 
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
-            builder.Property(e => e.SendAt).HasDefaultValueSql("(getdate())");
+            builder.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
 
-            builder.HasOne(d => d.RecieverChatRoom).WithMany(p => p.TblMessage)
+            builder.HasOne(d => d.RecieverChatRoom).WithMany(p => p.TblMessages)
                     .OnDelete(DeleteBehavior.NoAction)
                     .HasForeignKey(e => e.RecieverChatRoomId)
                     .HasConstraintName("FK_TblMessage_TblChatRoom");
 
-            builder.HasOne(d => d.Reply).WithMany(p => p.InverseReply).HasConstraintName("FK_TblMessage_TblMessage");
+            builder.HasOne(d => d.Reply).WithMany(p => p.InverseReplys).HasConstraintName("FK_TblMessage_TblMessage");
 
-            builder.HasOne(d => d.SenderUser).WithMany(p => p.TblMessage)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasForeignKey(e => e.SenderUserId)
-                    .HasConstraintName("FK_TblMessage_TblUsers");
+            builder.HasOne(d => d.CreatedBy)
+                .WithMany(p => p.TblMessages)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasForeignKey(e => e.CreatedById)
+                .HasConstraintName("FK_TblMessage_TblUsers");
         }
     }
 }

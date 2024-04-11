@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace Domain.Configs
 {
-    public class TblSettingsConfig : IEntityTypeConfiguration<TblSettings>
+    public class TblSettingsConfig : IEntityTypeConfiguration<TblSetting>
     {
-        public void Configure(EntityTypeBuilder<TblSettings> builder)
+        public void Configure(EntityTypeBuilder<TblSetting> builder)
         {
             builder.Property(e => e.ShowPhoneNumber).HasComment("0 NoBody\r\n1 MyContacts\r\n2 EveryBody\r\n");
         }

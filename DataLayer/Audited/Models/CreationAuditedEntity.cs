@@ -11,7 +11,7 @@ namespace Domain.Audited.Models
 {
     public interface ICreationAuditedEntity
     {
-        public TblUsers CreatedBy { get; set; }
+        public TblUser CreatedBy { get; set; }
         public Guid CreatedById { get; set; }
         public DateTime CreatedDate { get; set; }
     }
@@ -26,8 +26,9 @@ namespace Domain.Audited.Models
     {
         [ForeignKey("CreatedById")]
         [DeleteBehavior(DeleteBehavior.NoAction)]
-        public TblUsers CreatedBy { get; set; }
+        public virtual TblUser CreatedBy { get; set; }
         public Guid CreatedById { get; set; }
+        [Column(TypeName = "datetime")]
         public DateTime CreatedDate { get; set; } 
     }
 }

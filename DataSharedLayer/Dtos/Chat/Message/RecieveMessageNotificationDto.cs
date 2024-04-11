@@ -22,7 +22,7 @@ namespace DomainShared.Dtos.Chat.Message
         {
             TypeAdapterConfig<TblMessage, RecieveMessageNotificationDto>
                .NewConfig()
-                .Map(dest => dest.Time, src => src.SendAt.ToLongTimeString() + " " + src.SendAt.ToShortDateString())
+                .Map(dest => dest.Time, src => src.CreatedDate.ToLongTimeString() + " " + src.CreatedDate.ToShortDateString())
                .Map(dest => dest.Body, src => src.Body.FormatLength(10));
         }
     }

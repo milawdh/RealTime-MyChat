@@ -17,7 +17,7 @@ namespace DomainShared.Extentions.MapExtentions
             switch (chatRoom.Type)
             {
                 case Domain.Enums.ChatRoomType.Private:
-                    var user = chatRoom.TblUserChatRoomRel.FirstOrDefault()!.User;
+                    var user = chatRoom.TblUserChatRoomRels.FirstOrDefault()!.User;
                     if (user.IsOnline)
                         result = "Online";
                     else
@@ -29,9 +29,9 @@ namespace DomainShared.Extentions.MapExtentions
                     }
                     break;
                 case Domain.Enums.ChatRoomType.Group:
-                    var userNames = chatRoom.TblUserChatRoomRel.Select(i => i.User.UserName).Take(3).ToList();
+                    var userNames = chatRoom.TblUserChatRoomRels.Select(i => i.User.UserName).Take(3).ToList();
                     result = "You, " + string.Join(", ", userNames);
-                    if (chatRoom.TblUserChatRoomRel.Count > 2)
+                    if (chatRoom.TblUserChatRoomRels.Count > 2)
                         result += "...";
                     break;
                 case Domain.Enums.ChatRoomType.Channel:

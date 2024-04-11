@@ -17,12 +17,12 @@ namespace Domain.Configs
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
 
             builder.HasOne(d => d.ImageUrlNavigation)
-                .WithMany(p => p.TblUserImageRel)
+                .WithMany(p => p.TblUserImageRels)
                 .HasForeignKey(e => e.ImageUrl)
                 .HasConstraintName("FK_TblUserImageRel_TblImage");
 
             builder.HasOne(d => d.User)
-                .WithMany(p => p.TblUserImageRel)
+                .WithMany(p => p.TblUserImageRels)
                 .HasForeignKey(e => e.UserId)
                 .HasConstraintName("FK_TblUserImageRel_TblUsers");
         }

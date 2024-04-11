@@ -2,16 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Audited.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblSettings
+public partial class TblSetting : FullAuditedEntity<int>
 {
-    [Key]
-    [Column("ID")]
-    public int Id { get; set; }
-
     public bool ShowOnline { get; set; }
 
     public bool ShowLastSeen { get; set; }
@@ -26,6 +23,6 @@ public partial class TblSettings
     /// </summary>
     public short ShowPhoneNumber { get; set; }
 
-    [InverseProperty("Settings")]
-    public virtual ICollection<TblUsers> TblUsers { get; set; } = new List<TblUsers>();
+    [InverseProperty(nameof(TblUser.Setting))]
+    public virtual ICollection<TblUser> TblUsers { get; set; } = new List<TblUser>();
 }

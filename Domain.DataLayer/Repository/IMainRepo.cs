@@ -45,7 +45,7 @@ namespace Services.Repositories
         IQueryable<TEntity> Get(Expression<Func<TEntity, bool>> where = null,
             Func<IQueryable<TEntity>, IQueryable<TEntity>> defualtInclude = null,
             Func<IQueryable<TEntity>, IQueryable<TEntity>> includes = null,
-            bool igonoreGlobalQuery = false,
-            bool hasSplitQuery = false);
+            bool igonoreGlobalQuery = true,
+            bool hasSplitQuery = true);
     }
 }

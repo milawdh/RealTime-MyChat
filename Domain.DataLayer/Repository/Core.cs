@@ -25,11 +25,11 @@ namespace Domain.DataLayer.UnitOfWorks
         private readonly MainRepo<TblPermission> Permission;
         private readonly MainRepo<TblRole> Role;
         private readonly MainRepo<TblRolePermissionRel> RolePermissionRel;
-        private readonly MainRepo<TblSettings> Settings;
+        private readonly MainRepo<TblSetting> Settings;
         private readonly MainRepo<TblUserChatRoomRel> UserChatRoomRel;
         private readonly MainRepo<TblUserContacts> UserContacts;
         private readonly MainRepo<TblUserImageRel> UserImageRel;
-        private readonly MainRepo<TblUsers> Users;
+        private readonly MainRepo<TblUser> Users;
 
 
 
@@ -41,11 +41,11 @@ namespace Domain.DataLayer.UnitOfWorks
         public MainRepo<TblPermission> TblPermission => Permission ?? new(_context);
         public MainRepo<TblRole> TblRole => Role ?? new(_context);
         public MainRepo<TblRolePermissionRel> TblRolePermissionRel => RolePermissionRel ?? new(_context);
-        public MainRepo<TblSettings> TblSettings => Settings ?? new(_context);
+        public MainRepo<TblSetting> TblSettings => Settings ?? new(_context);
         public MainRepo<TblUserChatRoomRel> TblUserChatRoomRel => UserChatRoomRel ?? new(_context);
         public MainRepo<TblUserContacts> TblUserContacts => UserContacts ?? new(_context);
         public MainRepo<TblUserImageRel> TblUserImageRel => UserImageRel ?? new(_context);
-        public MainRepo<TblUsers> TblUsers => Users ?? new(_context);
+        public MainRepo<TblUser> TblUsers => Users ?? new(_context);
 
 
         public void MarkAsChanged<TEntity>(TEntity entity) where TEntity : class

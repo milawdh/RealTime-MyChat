@@ -16,7 +16,7 @@ namespace Domain.DataLayer.Repository
         Guid UserId { get; }
         string UserName { get; }
         string? UserChatHubConnectionId { get; }
-        TblUsers User { get; }
+        TblUser User { get; }
         IQueryable<TblPermission> UserPermissions { get; }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Domain.DataLayer.Repository
         /// <param name="custom">Custom Query</param>
         /// <returns></returns>
         /// <exception cref="AuthenticateException">If UserName Was Not Found In Database It Occurs</exception>
-        public IQueryable<TblUsers> GetUser(Func<IQueryable<TblUsers>, IQueryable<TblUsers>> custom = null);
+        public IQueryable<TblUser> GetUser(Func<IQueryable<TblUser>, IQueryable<TblUser>> custom = null);
     }
 
     public class UserInfoContext : IUserInfoContext
@@ -56,7 +56,7 @@ namespace Domain.DataLayer.Repository
         private readonly HttpContext HttpContext;
         private readonly Core core;
         private static string? _userName;
-        private readonly DbSet<TblUsers> tblUsers;
+        private readonly DbSet<TblUser> tblUsers;
         private readonly DbSet<TblUserContacts> tblUserContacts;
         private readonly DbSet<TblChatRoom> chatRooms;
         private readonly DbSet<TblUserChatRoomRel> tblUserChatRooms;
@@ -64,7 +64,7 @@ namespace Domain.DataLayer.Repository
         public UserInfoContext(IHttpContextAccessor httpContextAccessor, AppBaseDbContex context)
         {
             HttpContext = httpContextAccessor.HttpContext;
-            tblUsers = context.Set<TblUsers>();
+            tblUsers = context.Set<TblUser>();
             tblUserContacts = context.Set<TblUserContacts>();
             chatRooms = context.Set<TblChatRoom>();
             tblUserChatRooms = context.Set<TblUserChatRoomRel>();
@@ -72,7 +72,7 @@ namespace Domain.DataLayer.Repository
 
         public UserInfoContext(AppBaseDbContex context, string userName)
         {
-            tblUsers = context.Set<TblUsers>();
+            tblUsers = context.Set<TblUser>();
             tblUserContacts = context.Set<TblUserContacts>();
             chatRooms = context.Set<TblChatRoom>();
             tblUserChatRooms = context.Set<TblUserChatRoomRel>();
@@ -91,14 +91,14 @@ namespace Domain.DataLayer.Repository
             get
             {
                 return
-                i => i.Include(x => x.TblUserChatRoomRel.OrderByDescending(x => x.UserId != UserId)).ThenInclude(x => x.User);
+                i => i.Include(x => x.TblUserChatRoomRels.OrderByDescending(x => x.UserId != UserId)).ThenInclude(x => x.User);
             }
         }
 
         /// <summary>
         /// TblUser DefualtIncludes
         /// </summary>
-        private Func<IQueryable<TblUsers>, IQueryable<TblUsers>> UserDefualtInclude
+        private Func<IQueryable<TblUser>, IQueryable<TblUser>> UserDefualtInclude
         {
             get
             {
@@ -155,7 +155,7 @@ namespace Domain.DataLayer.Repository
         /// <summary>
         /// Current User Main Model
         /// </summary>
-        public TblUsers User
+        public TblUser User
         {
             get
             {
@@ -169,7 +169,7 @@ namespace Domain.DataLayer.Repository
         {
             get
             {
-                return tblUserContacts.Where(x => x.ContactListOwnerId == UserId);
+                return tblUserContacts.Where(x => x.CreatedById == UserId);
             }
         }
 
@@ -195,11 +195,11 @@ namespace Domain.DataLayer.Repository
             get
             {
                 return GetChatRooms(
-                    i => i.Include(x => x.TblMessage
+                    i => i.Include(x => x.TblMessages
                     .Where(x => !x.IsDeleted)
-                    .OrderBy(c => c.SendAt))
-                    .ThenInclude(x => x.SenderUser).ThenInclude(x => x.ProfileImageUrlNavigation)
-                    .Include(x => x.TblMessage.Where(x => !x.IsDeleted).OrderBy(c => c.SendAt))
+                    .OrderBy(c => c.CreatedDate))
+                    .ThenInclude(x => x.CreatedBy).ThenInclude(x => x.ProfileImageUrlNavigation)
+                    .Include(x => x.TblMessages.Where(x => !x.IsDeleted).OrderBy(c => c.CreatedDate))
                     .Include(x => x.ProfileImage)
                     );
             }
@@ -228,10 +228,10 @@ namespace Domain.DataLayer.Repository
             get
             {
                 TblRole tblRole = tblUsers.Where(i => i.UserName == UserName)
-                    .Include(x => x.Role).ThenInclude(x => x.TblRolePermissionRel).ThenInclude(x => x.Permission)
+                    .Include(x => x.Role).ThenInclude(x => x.TblRolePermissionRels).ThenInclude(x => x.Permission)
                     .FirstOrDefault()!.Role;
 
-                return tblRole.TblRolePermissionRel.Select(i => i.Permission).AsQueryable();
+                return tblRole.TblRolePermissionRels.Select(i => i.Permission).AsQueryable();
 
             }
         }
@@ -248,7 +248,7 @@ namespace Domain.DataLayer.Repository
         /// <param name="custom">Custom Query</param>
         /// <returns></returns>
         /// <exception cref="AuthenticateException">If UserName Was Not Found In Database It Occurs</exception>
-        public IQueryable<TblUsers> GetUser(Func<IQueryable<TblUsers>, IQueryable<TblUsers>> custom = null)
+        public IQueryable<TblUser> GetUser(Func<IQueryable<TblUser>, IQueryable<TblUser>> custom = null)
         {
             var query = tblUsers.Where(i => i.Id == UserId);
             query = UserDefualtInclude(query);
@@ -266,7 +266,7 @@ namespace Domain.DataLayer.Repository
         private IQueryable<TblChatRoom> GetChatRooms(Func<IQueryable<TblChatRoom>, IQueryable<TblChatRoom>> custom = null)
         {
 
-            var query = chatRooms.Where(i => i.TblUserChatRoomRel.Select(x => x.UserId).Contains(UserId));
+            var query = chatRooms.Where(i => i.TblUserChatRoomRels.Select(x => x.UserId).Contains(UserId));
             query = ChatRoomDefualtQuery(query);
             if (custom != null)
                 query = custom(query);

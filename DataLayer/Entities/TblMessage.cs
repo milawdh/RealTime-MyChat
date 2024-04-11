@@ -15,39 +15,26 @@ public partial class TblMessage : FullAuditedEntity<Guid>
     [StringLength(1024)]
     public string Body { get; set; } = null!;
 
-    public Guid SenderUserId { get; set; }
-
     public Guid RecieverChatRoomId { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime SendAt { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime? EditedAt { get; set; }
-
-    public bool IsEdited { get; set; }
-
-    public bool IsDeleted { get; set; }
 
     public bool IsFromSystem { get; set; }
 
     public ICollection<TblUserChatRoomRel> ReadedBys { get; set; }
 
-    [InverseProperty("Reply")]
-    public virtual ICollection<TblMessage> InverseReply { get; set; } = new List<TblMessage>();
+    [InverseProperty(nameof(Reply))]
+    public virtual ICollection<TblMessage> InverseReplys { get; set; } = new List<TblMessage>();
 
-    [ForeignKey("RecieverChatRoomId")]
-    [InverseProperty("TblMessage")]
+    [ForeignKey(nameof(RecieverChatRoomId))]
+    [InverseProperty(nameof(TblChatRoom.TblMessages))]
     public virtual TblChatRoom RecieverChatRoom { get; set; } = null!;
 
-    [ForeignKey("ReplyId")]
-    [InverseProperty("InverseReply")]
+    [ForeignKey(nameof(ReplyId))]
+    [InverseProperty(nameof(InverseReplys))]
     public virtual TblMessage? Reply { get; set; }
 
-    [ForeignKey("SenderUserId")]
-    [InverseProperty("TblMessage")]
-    public virtual TblUsers SenderUser { get; set; } = null!;
+    [InverseProperty(nameof(TblUser.TblMessages))]
+    public virtual TblUser CreatedBy { get; set; } = null!;
 
-    [InverseProperty("Message")]
-    public virtual ICollection<TblMedia> TblMedia { get; set; } = new List<TblMedia>();
+    [InverseProperty(nameof(TblMedia.Message))]
+    public virtual ICollection<TblMedia> TblMedias { get; set; } = new List<TblMedia>();
 }

@@ -16,7 +16,7 @@ namespace Domain.Configs
         {
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
 
-            builder.HasOne(d => d.ChatRoom).WithMany(p => p.TblUserChatRoomRel)
+            builder.HasOne(d => d.ChatRoom).WithMany(p => p.TblUserChatRoomRels)
                 .HasForeignKey(e => e.ChatRoomId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TblUserChatRoomRel_TblChatRoom");
@@ -26,7 +26,7 @@ namespace Domain.Configs
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasForeignKey(e => e.LastSeenMessageId);
 
-            builder.HasOne(d => d.User).WithMany(p => p.TblUserChatRoomRel)
+            builder.HasOne(d => d.User).WithMany(p => p.TblUserChatRoomRels)
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TblUserChatRoomRel_TblUsers");

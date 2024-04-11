@@ -15,7 +15,7 @@ builder.Services.RegisterMapsterConfiguration();
 #endregion
 
 builder.Services.AddPooledDbContextFactory<AppBaseDbContex>(
-    o => o.UseSqlServer("Data Source=localhost,1433;Initial Catalog=MyChatDb_New;Integrated Security=True;Trust Server Certificate=True"));
+    o => o.UseSqlServer("Data Source=localhost,1433;Initial Catalog=Main_MyChatDb;Integrated Security=True;Trust Server Certificate=True"));
 
 var app = builder.Build();
 

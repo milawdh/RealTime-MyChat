@@ -41,7 +41,7 @@ namespace DomainShared.Dtos.Chat.Message
         public void ConfigMap()
         {
             TypeAdapterConfig<TblMessage, RecieveMessageDto>.NewConfig()
-                .Map(dest => dest.Time, src => src.SendAt.ToLongTimeString() + " " + src.SendAt.ToShortDateString());
+                .Map(dest => dest.Time, src => src.CreatedDate.ToLongTimeString() + " " + src.CreatedDate.ToShortDateString());
         }
     }
 }

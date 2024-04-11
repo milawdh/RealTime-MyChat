@@ -14,14 +14,14 @@ namespace Domain.Configs
     {
         public void Configure(EntityTypeBuilder<TblUserContacts> builder)
         {
-            builder.HasKey(table => new { table.ContactListOwnerId, table.ContactName });
+            builder.HasKey(table => new { table.CreatedById, table.ContactName });
 
-            builder.HasOne(d => d.ContactListOwner).WithMany(p => p.TblUserContactsContactListOwner)
-                .HasForeignKey(e => e.ContactListOwnerId)
+            builder.HasOne(d => d.CreatedBy).WithMany(p => p.TblUserContactsContactListCreateds)
+                .HasForeignKey(e => e.CreatedById)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TblUserContacts_TblUsers");
 
-            builder.HasOne(d => d.ContactUser).WithMany(p => p.TblUserContactsContactUser)
+            builder.HasOne(d => d.ContactUser).WithMany(p => p.TblUserContactsContactUsers)
                 .HasForeignKey(e => e.ContactUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TblUserContacts_TblUsers1");

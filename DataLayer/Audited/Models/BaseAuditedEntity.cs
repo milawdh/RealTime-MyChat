@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Domain.Audited.Api;
 using Domain.API;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 
 namespace Domain.Audited.Models
 {

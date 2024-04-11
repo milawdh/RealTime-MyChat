@@ -21,7 +21,7 @@ namespace DomainShared.Extentions.MapExtentions
         /// <param name="ChatRoomsWithMessages">User's AllChatRooms That Indicates Their Messages</param>
         /// <returns>All Current User's Details for Initializing</returns>
 
-        public static UserInitDto MapToUserInitDto(this TblUsers user, IEnumerable<TblChatRoom> ChatRoomsWithMessages)
+        public static UserInitDto MapToUserInitDto(this TblUser user, IEnumerable<TblChatRoom> ChatRoomsWithMessages)
         {
             UserInitDto result = user.Adapt<UserInitDto>();
             result.ChatRooms = ChatRoomsWithMessages.MapToInitChatRoom(user.Id);

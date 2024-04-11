@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Audited.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblPermission
+public partial class TblPermission : FullAuditedEntity<Guid>
 {
     [Key]
     [Column("ID")]
@@ -16,6 +17,6 @@ public partial class TblPermission
     [Unicode(false)]
     public string Name { get; set; } = null!;
 
-    [InverseProperty("Permission")]
-    public virtual ICollection<TblRolePermissionRel> TblRolePermissionRel { get; set; } = new List<TblRolePermissionRel>();
+    [InverseProperty(nameof(TblRolePermissionRel.Permission))]
+    public virtual ICollection<TblRolePermissionRel> TblRolePermissionRels { get; set; } = new List<TblRolePermissionRel>();
 }

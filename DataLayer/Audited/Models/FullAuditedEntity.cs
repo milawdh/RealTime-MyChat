@@ -10,12 +10,13 @@ using System.Threading.Tasks;
 
 namespace Domain.Audited.Models
 {
-    public interface IFullAuditedEntity 
+    public interface IDeleteAuditedEntity 
     {
         [ForeignKey("DeleteById")]
         [DeleteBehavior(DeleteBehavior.NoAction)]
-        public TblUsers? DeleteBy { get; set; }
+        public TblUser? DeleteBy { get; set; }
         public Guid? DeleteById { get; set; }
+        [Column(TypeName = "datetime")]
         public DateTime? DeleteDate { get; set; }
 
     }
@@ -25,12 +26,13 @@ namespace Domain.Audited.Models
     /// <typeparam name="TUser">User's Entity</typeparam>
     /// <typeparam name="TUserKey">User's Primary Key</typeparam>
     /// <typeparam name="TKey">Entity's Primary Key</typeparam>
-    public abstract class FullAuditedEntity<TKey> : ModificationAuditedEntity<TKey> , IFullAuditedEntity
+    public abstract class FullAuditedEntity<TKey> : ModificationAuditedEntity<TKey> , IDeleteAuditedEntity
     {
         [ForeignKey("DeleteById")]
         [DeleteBehavior(DeleteBehavior.NoAction)]
-        public TblUsers? DeleteBy { get; set; }
+        public virtual TblUser? DeleteBy { get; set; }
         public Guid? DeleteById { get; set; }
+        [Column(TypeName = "datetime")]
         public DateTime? DeleteDate { get; set; }
     }
 }

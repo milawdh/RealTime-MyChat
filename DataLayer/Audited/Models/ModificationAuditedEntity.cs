@@ -13,8 +13,9 @@ namespace Domain.Audited.Models
     {
         [ForeignKey("ModifiedById")]
         [DeleteBehavior(DeleteBehavior.NoAction)]
-        public TblUsers? ModifiedBy { get; set; }
+        public TblUser? ModifiedBy { get; set; }
         public Guid? ModifiedById { get; set; }
+        [Column(TypeName = "datetime")]
         public DateTime? ModifiedDate { get; set; }
     }
 
@@ -26,8 +27,9 @@ namespace Domain.Audited.Models
     {
         [ForeignKey("ModifiedById")]
         [DeleteBehavior(DeleteBehavior.NoAction)]
-        public TblUsers? ModifiedBy { get; set; }
+        public virtual TblUser? ModifiedBy { get; set; }
         public Guid? ModifiedById { get; set; }
+        [Column(TypeName = "datetime")]
         public DateTime? ModifiedDate { get; set; }
     }
 }

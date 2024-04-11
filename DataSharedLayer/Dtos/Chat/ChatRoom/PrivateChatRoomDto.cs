@@ -27,13 +27,13 @@ namespace DomainShared.Dtos.Chat.ChatRoom
         {
             TypeAdapterConfig<TblChatRoom, PrivateChatRoomDto>.NewConfig()
                 .Map(i => i.NavbarText, src => src.GetNavbarText())
-                .Map(i => i.Pic, src => NavigationProfile.Resources + src.TblUserChatRoomRel.FirstOrDefault()!.User.ProfileImageUrlNavigation.Url)
+                .Map(i => i.Pic, src => NavigationProfile.Resources + src.TblUserChatRoomRels.FirstOrDefault()!.User.ProfileImageUrlNavigation.Url)
                 .Map(dest => dest.Messages, src => GetMessages(src))
-                .Map(i => i.Name, src => src.TblUserChatRoomRel.FirstOrDefault()!.User.Name);
+                .Map(i => i.Name, src => src.TblUserChatRoomRels.FirstOrDefault()!.User.Name);
         }
 
         private List<MessagesDto> GetMessages(TblChatRoom src) =>
-         src.TblMessage.OrderBy(x => x.SendAt).AsQueryable().ProjectToType<MessagesDto>().ToList();
+         src.TblMessages.OrderBy(x => x.CreatedDate).AsQueryable().ProjectToType<MessagesDto>().ToList();
 
     }
 }

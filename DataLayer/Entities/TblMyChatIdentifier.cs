@@ -13,9 +13,9 @@ public partial class TblMyChatIdentifier
     [Unicode(false)]
     public string Identifier { get; set; } = null!;
 
-    [InverseProperty("MyChat")]
-    public virtual ICollection<TblChatRoom> TblChatRoom { get; set; } = new List<TblChatRoom>();
+    [InverseProperty(nameof(TblChatRoom.MyChat))]
+    public virtual ICollection<TblChatRoom> TblChatRooms { get; set; } = new List<TblChatRoom>();
 
-    [InverseProperty("UserNameNavigation")]
-    public virtual ICollection<TblUsers> TblUsers { get; set; } = new List<TblUsers>();
+    [InverseProperty(nameof(TblUser.UserNameNavigation))]
+    public virtual ICollection<TblUser> TblUsers { get; set; } = new List<TblUser>();
 }

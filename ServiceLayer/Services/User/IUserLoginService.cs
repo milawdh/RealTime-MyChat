@@ -69,7 +69,7 @@ namespace ServiceLayer.Services.User
 
             ValidateUserRegister(registerDto);
 
-            TblUsers user = registerDto.Adapt<TblUsers>();
+            TblUser user = registerDto.Adapt<TblUser>();
             user.Password = user.Password.HashData();
             user.UserName = user.UserName.ToLower();
             _core.TblUsers.Add(user);

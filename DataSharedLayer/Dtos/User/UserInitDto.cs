@@ -32,7 +32,7 @@ namespace DomainShared.Dtos.User
         public void ConfigMap()
         {
             //User Info
-            TypeAdapterConfig<TblUsers, UserInitDto>.NewConfig()
+            TypeAdapterConfig<TblUser, UserInitDto>.NewConfig()
                 .Map(dest => dest.Pic, src => NavigationProfile.Resources + src.ProfileImageUrlNavigation.Url)
                 .Map(dest => dest.Number, src => src.Tell)
                 .Map(dest => dest.Name, src => src.UserName);
