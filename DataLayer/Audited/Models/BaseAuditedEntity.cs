@@ -9,6 +9,7 @@ using Domain.Audited.Api;
 using Domain.API;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
+using Domain.DataLayer.UnitOfWorks;
 
 namespace Domain.Audited.Models
 {
@@ -34,7 +35,7 @@ namespace Domain.Audited.Models
         /// </summary>
         /// <param name="entity">Entity you will validate</param>
         /// <returns>ValidationResul</returns>
-        public virtual ServiceResult ValidateAdd(object entity)
+        public virtual ServiceResult ValidateAdd(object entity, Core core)
         {
             return new ServiceResult();
         }
@@ -44,7 +45,7 @@ namespace Domain.Audited.Models
         /// </summary>
         /// <param name="entity">Entity you will validate</param>
         /// <returns>ValidationResul</returns>
-        public virtual ServiceResult ValidateUpdate(object entity)
+        public virtual ServiceResult ValidateUpdate(object entity, Core core)
         {
             return new ServiceResult();
         }

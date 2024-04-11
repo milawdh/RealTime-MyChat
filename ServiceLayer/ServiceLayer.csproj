@@ -9,7 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DataLayer\Domain.csproj" />
     <ProjectReference Include="..\DataSharedLayer\DomainShared.csproj" />
-    <ProjectReference Include="..\Domain.DataLayer\Domain.DataLayer.csproj" />
     <ProjectReference Include="..\Framework\Framework.csproj" />
   </ItemGroup>
 

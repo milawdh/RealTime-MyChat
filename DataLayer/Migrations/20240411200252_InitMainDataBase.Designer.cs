@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Domain.DataLayer.Migrations
+namespace Domain.Migrations
 {
     [DbContext(typeof(AppBaseDbContex))]
-    [Migration("20240411180852_TestMessage8")]
-    partial class TestMessage8
+    [Migration("20240411200252_InitMainDataBase")]
+    partial class InitMainDataBase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

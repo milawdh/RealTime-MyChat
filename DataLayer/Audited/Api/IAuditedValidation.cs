@@ -1,4 +1,5 @@
 ﻿using Domain.API;
+using Domain.DataLayer.UnitOfWorks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,12 +18,12 @@ namespace Domain.Audited.Api
         /// </summary>
         /// <param name="entity">Entity you will validate</param>
         /// <returns>ValidationResul</returns>
-        ServiceResult ValidateAdd(object entity);
+        ServiceResult ValidateAdd(object entity, Core core);
         /// <summary>
         /// Will Invoke on entity Updating on DataBase
         /// </summary>
         /// <param name="entity">Entity you will validate</param>
         /// <returns>ValidationResul</returns>
-        ServiceResult ValidateUpdate(object entity);
+        ServiceResult ValidateUpdate(object entity, Core core);
     }
 }

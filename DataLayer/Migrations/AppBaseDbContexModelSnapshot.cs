@@ -4,19 +4,16 @@ using Domain.DataLayer.Contexts.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Domain.DataLayer.Migrations
+namespace Domain.Migrations
 {
     [DbContext(typeof(AppBaseDbContex))]
-    [Migration("20240411172051_TestMessage2")]
-    partial class TestMessage2
+    partial class AppBaseDbContexModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -225,9 +222,6 @@ namespace Domain.DataLayer.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsEdited")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsFromSystem")
                         .HasColumnType("bit");
 
@@ -372,8 +366,26 @@ namespace Domain.DataLayer.Migrations
                         .HasColumnName("ID")
                         .HasDefaultValueSql("(newsequentialid())");
 
+                    b.Property<Guid>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<Guid?>("DeleteById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeleteDate")
+                        .HasColumnType("datetime");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<Guid?>("ModifiedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime");
 
                     b.Property<Guid>("PermissionId")
                         .HasColumnType("uniqueidentifier");
@@ -383,6 +395,12 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedById");
+
+                    b.HasIndex("DeleteById");
+
+                    b.HasIndex("ModifiedById");
+
                     b.HasIndex("PermissionId");
 
                     b.HasIndex("RoleId");
@@ -390,7 +408,7 @@ namespace Domain.DataLayer.Migrations
                     b.ToTable("TblRolePermissionRel");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TblSettings", b =>
+            modelBuilder.Entity("Domain.Entities.TblSetting", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -441,7 +459,96 @@ namespace Domain.DataLayer.Migrations
 
                     b.HasIndex("ModifiedById");
 
-                    b.ToTable("TblSettings");
+                    b.ToTable("TblSetting");
+                });
+
+            modelBuilder.Entity("Domain.Entities.TblUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("ID")
+                        .HasDefaultValueSql("(newsequentialid())");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("ConnectionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateSigned")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsOnline")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<DateTime>("LastOnline")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<Guid>("ProfileImageUrl")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("4c271239-f0c1-ee11-b6e1-44af2843979e"));
+
+                    b.Property<Guid>("RoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValue(new Guid("0c621b69-cebb-ee11-b6e1-44af2843979e"));
+
+                    b.Property<int>("SettingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<string>("Tell")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(16)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfileImageUrl");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("SettingId");
+
+                    b.HasIndex("UserName");
+
+                    b.HasIndex(new[] { "Tell" }, "IX_TblUsers_Tell")
+                        .IsUnique();
+
+                    b.ToTable("TblUser");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblUserChatRoomRel", b =>
@@ -579,115 +686,26 @@ namespace Domain.DataLayer.Migrations
                     b.ToTable("TblUserImageRel");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TblUsers", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("ID")
-                        .HasDefaultValueSql("(newsequentialid())");
-
-                    b.Property<string>("Bio")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<string>("ConnectionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DateSigned")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("(getdate())");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsOnline")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<DateTime>("LastOnline")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("(getdate())");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(64)");
-
-                    b.Property<Guid>("ProfileImageUrl")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValue(new Guid("4c271239-f0c1-ee11-b6e1-44af2843979e"));
-
-                    b.Property<Guid>("RoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValue(new Guid("0c621b69-cebb-ee11-b6e1-44af2843979e"));
-
-                    b.Property<int>("SettingsId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
-
-                    b.Property<string>("Tell")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(16)");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(32)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProfileImageUrl");
-
-                    b.HasIndex("RoleId");
-
-                    b.HasIndex("SettingsId");
-
-                    b.HasIndex("UserName");
-
-                    b.HasIndex(new[] { "Tell" }, "IX_TblUsers_Tell")
-                        .IsUnique();
-
-                    b.ToTable("TblUsers");
-                });
-
             modelBuilder.Entity("Domain.Entities.TblChatRoom", b =>
                 {
-                    b.HasOne("Domain.Entities.TblUsers", "CreatedBy")
-                        .WithMany("TblChatRoom")
+                    b.HasOne("Domain.Entities.TblUser", "CreatedBy")
+                        .WithMany("TblChatRooms")
                         .HasForeignKey("CreatedById")
                         .IsRequired()
                         .HasConstraintName("FK_TblChatRoom_TblUsers");
 
-                    b.HasOne("Domain.Entities.TblUsers", "DeleteBy")
+                    b.HasOne("Domain.Entities.TblUser", "DeleteBy")
                         .WithMany()
                         .HasForeignKey("DeleteById")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Domain.Entities.TblUsers", "ModifiedBy")
+                    b.HasOne("Domain.Entities.TblUser", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Domain.Entities.TblMyChatIdentifier", "MyChat")
-                        .WithMany("TblChatRoom")
+                        .WithMany("TblChatRooms")
                         .HasForeignKey("MyChatId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .HasConstraintName("FK_TblChatRoom_TblMyChatIdentifier");
@@ -698,7 +716,7 @@ namespace Domain.DataLayer.Migrations
                         .HasConstraintName("FK_TblChatRoom_TblChatRoom");
 
                     b.HasOne("Domain.Entities.TblImage", "ProfileImage")
-                        .WithMany("TblChatRoom")
+                        .WithMany("TblChatRooms")
                         .HasForeignKey("ProfileImageId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("FK_TblChatRoom_TblImage");
@@ -718,18 +736,18 @@ namespace Domain.DataLayer.Migrations
 
             modelBuilder.Entity("Domain.Entities.TblImage", b =>
                 {
-                    b.HasOne("Domain.Entities.TblUsers", "CreatedBy")
+                    b.HasOne("Domain.Entities.TblUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.TblUsers", "DeleteBy")
+                    b.HasOne("Domain.Entities.TblUser", "DeleteBy")
                         .WithMany()
                         .HasForeignKey("DeleteById")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Domain.Entities.TblUsers", "ModifiedBy")
+                    b.HasOne("Domain.Entities.TblUser", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -743,25 +761,25 @@ namespace Domain.DataLayer.Migrations
 
             modelBuilder.Entity("Domain.Entities.TblMedia", b =>
                 {
-                    b.HasOne("Domain.Entities.TblUsers", "CreatedBy")
+                    b.HasOne("Domain.Entities.TblUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.TblUsers", "DeleteBy")
+                    b.HasOne("Domain.Entities.TblUser", "DeleteBy")
                         .WithMany()
                         .HasForeignKey("DeleteById")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Domain.Entities.TblMessage", "Message")
-                        .WithMany("TblMedia")
+                        .WithMany("TblMedias")
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_TblMedia_TblMessage");
 
-                    b.HasOne("Domain.Entities.TblUsers", "ModifiedBy")
+                    b.HasOne("Domain.Entities.TblUser", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -777,31 +795,31 @@ namespace Domain.DataLayer.Migrations
 
             modelBuilder.Entity("Domain.Entities.TblMessage", b =>
                 {
-                    b.HasOne("Domain.Entities.TblUsers", "CreatedBy")
-                        .WithMany("TblMessage")
+                    b.HasOne("Domain.Entities.TblUser", "CreatedBy")
+                        .WithMany("TblMessages")
                         .HasForeignKey("CreatedById")
                         .IsRequired()
                         .HasConstraintName("FK_TblMessage_TblUsers");
 
-                    b.HasOne("Domain.Entities.TblUsers", "DeleteBy")
+                    b.HasOne("Domain.Entities.TblUser", "DeleteBy")
                         .WithMany()
                         .HasForeignKey("DeleteById")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Domain.Entities.TblUsers", "ModifiedBy")
+                    b.HasOne("Domain.Entities.TblUser", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Domain.Entities.TblChatRoom", "RecieverChatRoom")
-                        .WithMany("TblMessage")
+                        .WithMany("TblMessages")
                         .HasForeignKey("RecieverChatRoomId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_TblMessage_TblChatRoom");
 
                     b.HasOne("Domain.Entities.TblMessage", "Reply")
-                        .WithMany("InverseReply")
+                        .WithMany("InverseReplys")
                         .HasForeignKey("ReplyId")
                         .HasConstraintName("FK_TblMessage_TblMessage");
 
@@ -818,18 +836,18 @@ namespace Domain.DataLayer.Migrations
 
             modelBuilder.Entity("Domain.Entities.TblPermission", b =>
                 {
-                    b.HasOne("Domain.Entities.TblUsers", "CreatedBy")
+                    b.HasOne("Domain.Entities.TblUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.TblUsers", "DeleteBy")
+                    b.HasOne("Domain.Entities.TblUser", "DeleteBy")
                         .WithMany()
                         .HasForeignKey("DeleteById")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Domain.Entities.TblUsers", "ModifiedBy")
+                    b.HasOne("Domain.Entities.TblUser", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -843,18 +861,18 @@ namespace Domain.DataLayer.Migrations
 
             modelBuilder.Entity("Domain.Entities.TblRole", b =>
                 {
-                    b.HasOne("Domain.Entities.TblUsers", "CreatedBy")
+                    b.HasOne("Domain.Entities.TblUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.TblUsers", "DeleteBy")
+                    b.HasOne("Domain.Entities.TblUser", "DeleteBy")
                         .WithMany()
                         .HasForeignKey("DeleteById")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Domain.Entities.TblUsers", "ModifiedBy")
+                    b.HasOne("Domain.Entities.TblUser", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -868,39 +886,61 @@ namespace Domain.DataLayer.Migrations
 
             modelBuilder.Entity("Domain.Entities.TblRolePermissionRel", b =>
                 {
+                    b.HasOne("Domain.Entities.TblUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.TblUser", "DeleteBy")
+                        .WithMany()
+                        .HasForeignKey("DeleteById")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Domain.Entities.TblUser", "ModifiedBy")
+                        .WithMany()
+                        .HasForeignKey("ModifiedById")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("Domain.Entities.TblPermission", "Permission")
-                        .WithMany("TblRolePermissionRel")
+                        .WithMany("TblRolePermissionRels")
                         .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_TblRolePermissionRel_TblPermission");
 
                     b.HasOne("Domain.Entities.TblRole", "Role")
-                        .WithMany("TblRolePermissionRel")
+                        .WithMany("TblRolePermissionRels")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_TblRolePermissionRel_TblRole");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("DeleteBy");
+
+                    b.Navigation("ModifiedBy");
 
                     b.Navigation("Permission");
 
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TblSettings", b =>
+            modelBuilder.Entity("Domain.Entities.TblSetting", b =>
                 {
-                    b.HasOne("Domain.Entities.TblUsers", "CreatedBy")
+                    b.HasOne("Domain.Entities.TblUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.TblUsers", "DeleteBy")
+                    b.HasOne("Domain.Entities.TblUser", "DeleteBy")
                         .WithMany()
                         .HasForeignKey("DeleteById")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Domain.Entities.TblUsers", "ModifiedBy")
+                    b.HasOne("Domain.Entities.TblUser", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -912,21 +952,56 @@ namespace Domain.DataLayer.Migrations
                     b.Navigation("ModifiedBy");
                 });
 
+            modelBuilder.Entity("Domain.Entities.TblUser", b =>
+                {
+                    b.HasOne("Domain.Entities.TblImage", "ProfileImageUrlNavigation")
+                        .WithMany("TblUsers")
+                        .HasForeignKey("ProfileImageUrl")
+                        .IsRequired()
+                        .HasConstraintName("FK_TblUsers_TblImage");
+
+                    b.HasOne("Domain.Entities.TblRole", "Role")
+                        .WithMany("TblUsers")
+                        .HasForeignKey("RoleId")
+                        .IsRequired()
+                        .HasConstraintName("FK_TblUsers_TblRole");
+
+                    b.HasOne("Domain.Entities.TblSetting", "Setting")
+                        .WithMany("TblUsers")
+                        .HasForeignKey("SettingId")
+                        .IsRequired()
+                        .HasConstraintName("FK_TblUsers_TblSettings");
+
+                    b.HasOne("Domain.Entities.TblMyChatIdentifier", "UserNameNavigation")
+                        .WithMany("TblUsers")
+                        .HasForeignKey("UserName")
+                        .IsRequired()
+                        .HasConstraintName("FK_TblUsers_TblMyChatIdentifier");
+
+                    b.Navigation("ProfileImageUrlNavigation");
+
+                    b.Navigation("Role");
+
+                    b.Navigation("Setting");
+
+                    b.Navigation("UserNameNavigation");
+                });
+
             modelBuilder.Entity("Domain.Entities.TblUserChatRoomRel", b =>
                 {
                     b.HasOne("Domain.Entities.TblChatRoom", "ChatRoom")
-                        .WithMany("TblUserChatRoomRel")
+                        .WithMany("TblUserChatRoomRels")
                         .HasForeignKey("ChatRoomId")
                         .IsRequired()
                         .HasConstraintName("FK_TblUserChatRoomRel_TblChatRoom");
 
-                    b.HasOne("Domain.Entities.TblUsers", "CreatedBy")
+                    b.HasOne("Domain.Entities.TblUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.TblUsers", "DeleteBy")
+                    b.HasOne("Domain.Entities.TblUser", "DeleteBy")
                         .WithMany()
                         .HasForeignKey("DeleteById")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -935,13 +1010,13 @@ namespace Domain.DataLayer.Migrations
                         .WithMany("ReadedBys")
                         .HasForeignKey("LastSeenMessageId");
 
-                    b.HasOne("Domain.Entities.TblUsers", "ModifiedBy")
+                    b.HasOne("Domain.Entities.TblUser", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Domain.Entities.TblUsers", "User")
-                        .WithMany("TblUserChatRoomRel")
+                    b.HasOne("Domain.Entities.TblUser", "User")
+                        .WithMany("TblUserChatRoomRels")
                         .HasForeignKey("UserId")
                         .IsRequired()
                         .HasConstraintName("FK_TblUserChatRoomRel_TblUsers");
@@ -961,19 +1036,19 @@ namespace Domain.DataLayer.Migrations
 
             modelBuilder.Entity("Domain.Entities.TblUserContacts", b =>
                 {
-                    b.HasOne("Domain.Entities.TblUsers", "ContactUser")
-                        .WithMany("TblUserContactsContactUser")
+                    b.HasOne("Domain.Entities.TblUser", "ContactUser")
+                        .WithMany("TblUserContactsContactUsers")
                         .HasForeignKey("ContactUserId")
                         .IsRequired()
                         .HasConstraintName("FK_TblUserContacts_TblUsers1");
 
-                    b.HasOne("Domain.Entities.TblUsers", "CreatedBy")
-                        .WithMany("TblUserContactsContactListOwner")
+                    b.HasOne("Domain.Entities.TblUser", "CreatedBy")
+                        .WithMany("TblUserContactsContactListCreateds")
                         .HasForeignKey("CreatedById")
                         .IsRequired()
                         .HasConstraintName("FK_TblUserContacts_TblUsers");
 
-                    b.HasOne("Domain.Entities.TblUsers", "ModifiedBy")
+                    b.HasOne("Domain.Entities.TblUser", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById");
 
@@ -986,31 +1061,31 @@ namespace Domain.DataLayer.Migrations
 
             modelBuilder.Entity("Domain.Entities.TblUserImageRel", b =>
                 {
-                    b.HasOne("Domain.Entities.TblUsers", "CreatedBy")
+                    b.HasOne("Domain.Entities.TblUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatedById")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.TblUsers", "DeleteBy")
+                    b.HasOne("Domain.Entities.TblUser", "DeleteBy")
                         .WithMany()
                         .HasForeignKey("DeleteById")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Domain.Entities.TblImage", "ImageUrlNavigation")
-                        .WithMany("TblUserImageRel")
+                        .WithMany("TblUserImageRels")
                         .HasForeignKey("ImageUrl")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_TblUserImageRel_TblImage");
 
-                    b.HasOne("Domain.Entities.TblUsers", "ModifiedBy")
+                    b.HasOne("Domain.Entities.TblUser", "ModifiedBy")
                         .WithMany()
                         .HasForeignKey("ModifiedById")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Domain.Entities.TblUsers", "User")
-                        .WithMany("TblUserImageRel")
+                    b.HasOne("Domain.Entities.TblUser", "User")
+                        .WithMany("TblUserImageRels")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -1027,105 +1102,70 @@ namespace Domain.DataLayer.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TblUsers", b =>
-                {
-                    b.HasOne("Domain.Entities.TblImage", "ProfileImageUrlNavigation")
-                        .WithMany("TblUsers")
-                        .HasForeignKey("ProfileImageUrl")
-                        .IsRequired()
-                        .HasConstraintName("FK_TblUsers_TblImage");
-
-                    b.HasOne("Domain.Entities.TblRole", "Role")
-                        .WithMany("TblUsers")
-                        .HasForeignKey("RoleId")
-                        .IsRequired()
-                        .HasConstraintName("FK_TblUsers_TblRole");
-
-                    b.HasOne("Domain.Entities.TblSettings", "Settings")
-                        .WithMany("TblUsers")
-                        .HasForeignKey("SettingsId")
-                        .IsRequired()
-                        .HasConstraintName("FK_TblUsers_TblSettings");
-
-                    b.HasOne("Domain.Entities.TblMyChatIdentifier", "UserNameNavigation")
-                        .WithMany("TblUsers")
-                        .HasForeignKey("UserName")
-                        .IsRequired()
-                        .HasConstraintName("FK_TblUsers_TblMyChatIdentifier");
-
-                    b.Navigation("ProfileImageUrlNavigation");
-
-                    b.Navigation("Role");
-
-                    b.Navigation("Settings");
-
-                    b.Navigation("UserNameNavigation");
-                });
-
             modelBuilder.Entity("Domain.Entities.TblChatRoom", b =>
                 {
                     b.Navigation("InverseParent");
 
-                    b.Navigation("TblMessage");
+                    b.Navigation("TblMessages");
 
-                    b.Navigation("TblUserChatRoomRel");
+                    b.Navigation("TblUserChatRoomRels");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblImage", b =>
                 {
-                    b.Navigation("TblChatRoom");
+                    b.Navigation("TblChatRooms");
 
-                    b.Navigation("TblUserImageRel");
+                    b.Navigation("TblUserImageRels");
 
                     b.Navigation("TblUsers");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblMessage", b =>
                 {
-                    b.Navigation("InverseReply");
+                    b.Navigation("InverseReplys");
 
                     b.Navigation("ReadedBys");
 
-                    b.Navigation("TblMedia");
+                    b.Navigation("TblMedias");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblMyChatIdentifier", b =>
                 {
-                    b.Navigation("TblChatRoom");
+                    b.Navigation("TblChatRooms");
 
                     b.Navigation("TblUsers");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblPermission", b =>
                 {
-                    b.Navigation("TblRolePermissionRel");
+                    b.Navigation("TblRolePermissionRels");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblRole", b =>
                 {
-                    b.Navigation("TblRolePermissionRel");
+                    b.Navigation("TblRolePermissionRels");
 
                     b.Navigation("TblUsers");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TblSettings", b =>
+            modelBuilder.Entity("Domain.Entities.TblSetting", b =>
                 {
                     b.Navigation("TblUsers");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TblUsers", b =>
+            modelBuilder.Entity("Domain.Entities.TblUser", b =>
                 {
-                    b.Navigation("TblChatRoom");
+                    b.Navigation("TblChatRooms");
 
-                    b.Navigation("TblMessage");
+                    b.Navigation("TblMessages");
 
-                    b.Navigation("TblUserChatRoomRel");
+                    b.Navigation("TblUserChatRoomRels");
 
-                    b.Navigation("TblUserContactsContactListOwner");
+                    b.Navigation("TblUserContactsContactListCreateds");
 
-                    b.Navigation("TblUserContactsContactUser");
+                    b.Navigation("TblUserContactsContactUsers");
 
-                    b.Navigation("TblUserImageRel");
+                    b.Navigation("TblUserImageRels");
                 });
 #pragma warning restore 612, 618
         }
