@@ -14,6 +14,7 @@ namespace Domain.EFConfigs
         public void Configure(EntityTypeBuilder<TblFileServer> builder)
         {
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+            builder.Property(e => e.IsActive).HasDefaultValue(true);
         }
     }
 }

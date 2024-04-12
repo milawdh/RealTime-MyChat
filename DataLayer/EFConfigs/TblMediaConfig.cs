@@ -24,8 +24,9 @@ namespace Domain.Configs
                 .WithMany(p => p.TblMedias)
                 .HasForeignKey(x => x.FileServerId)
                 .HasConstraintName("FK_TBlMedia_TblFileServer")
-                .OnDelete(DeleteBehavior.NoAction)
-                ;
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Property(x => x.FileServerId).HasDefaultValue(new Guid("3b2eceb8-fbf8-ee11-b6e5-44af284397a1"));
 
             builder.HasOne(d => d.Message)
                 .WithMany(p => p.TblMedias)

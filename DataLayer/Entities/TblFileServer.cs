@@ -17,6 +17,8 @@ namespace Domain.Entities
 
         [InverseProperty(nameof(TblMedia.FileServer))]
         public virtual ICollection<TblMedia> TblMedias { get; set; }
+
+        public bool IsActive { get; set; } = true;
     }
 
 }
