@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblChatRoom : FullAuditedEntity<Guid>
+public partial class TblChatRoom : FullAuditedEntity<TblChatRoom,Guid>
 {
     public Guid? ParentId { get; set; }
 

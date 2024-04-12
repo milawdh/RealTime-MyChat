@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblRolePermissionRel : FullAuditedEntity<Guid>
+public partial class TblRolePermissionRel : FullAuditedEntity<TblRolePermissionRel,Guid>
 {
     public Guid RoleId { get; set; }
 

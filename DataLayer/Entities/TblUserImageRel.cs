@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblUserImageRel : FullAuditedEntity<Guid>
+public partial class TblUserImageRel : FullAuditedEntity<TblUserImageRel,Guid>
 {
     public Guid ImageUrl { get; set; }
 

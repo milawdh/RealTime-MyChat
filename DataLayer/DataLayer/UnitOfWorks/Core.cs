@@ -1,12 +1,7 @@
-﻿using Domain.DataLayer.Contexts;
-using Domain.DataLayer.Contexts.Base;
+﻿using Domain.DataLayer.Contexts.Base;
 using Domain.Entities;
-using Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Services.Repositories;
-using System.Transactions;
-using static System.Net.Mime.ContentType;
 
 namespace Domain.DataLayer.UnitOfWorks
 {

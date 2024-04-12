@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblUserChatRoomRel : FullAuditedEntity<Guid>
+public partial class TblUserChatRoomRel : FullAuditedEntity<TblUserChatRoomRel,Guid>
 {
     public Guid ChatRoomId { get; set; }
 

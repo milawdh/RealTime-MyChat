@@ -14,6 +14,8 @@ namespace Domain.Configs
     {
         public void Configure(EntityTypeBuilder<TblMedia> builder)
         {
+            builder.HasQueryFilter(x => !x.IsDeleted);
+
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
             builder.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
 

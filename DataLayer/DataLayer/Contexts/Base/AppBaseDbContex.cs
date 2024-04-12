@@ -45,7 +45,9 @@ namespace Domain.DataLayer.Contexts.Base
 
             var entityMethod = typeof(ModelBuilder).GetMethod("Entity", new Type[] { });
 
-            var entityTypes = model.GetEntityTypes().Where(x => x.ClrType.Namespace.StartsWith(nameSpace)).Select(x => x.ClrType).ToList();
+            var entityTypes = model.GetEntityTypes()
+                .Where(x => x.ClrType.Namespace.StartsWith(nameSpace)).Where(x => x.ClrType.IsSubclassOf(typeof(Entity<>)))
+                .Select(x => x.ClrType).ToList();
 
             entityTypes.ForEach(t =>
             {
@@ -57,7 +59,6 @@ namespace Domain.DataLayer.Contexts.Base
         {
 
             Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = User.UserId;
-            //Entry(entity).Property("CreatedBy").CurrentValue = UserInfoContext.User;
             Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
 
             return Set<TEntity>().Add(entity);
@@ -67,7 +68,6 @@ namespace Domain.DataLayer.Contexts.Base
             if (entity is ICreationAuditedEntity && Entry(entity).State == EntityState.Added)
             {
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = User.UserId;
-                //Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = userId;
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
             }
             return await base.AddAsync(entity, cancellationToken);
@@ -81,7 +81,6 @@ namespace Domain.DataLayer.Contexts.Base
             foreach (var entity in entities.Where(x => x is ICreationAuditedEntity))
             {
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = User.UserId;
-                //Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = userId.User;
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
             }
 
@@ -96,7 +95,6 @@ namespace Domain.DataLayer.Contexts.Base
             foreach (var entity in entities.Where(x => x is ICreationAuditedEntity))
             {
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = User.UserId;
-                //Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedBy)).CurrentValue = userId.User;
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
             }
             Set<TEntity>().AddRange(entities);
@@ -108,7 +106,6 @@ namespace Domain.DataLayer.Contexts.Base
             if (entity is IModificationAuditedEntity)
             {
                 Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = User.UserId;
-                //Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = userId.User;
                 Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedDate)).CurrentValue = DateTime.Now;
             }
 
@@ -120,7 +117,6 @@ namespace Domain.DataLayer.Contexts.Base
             foreach (var entity in entities.Where(x => x is IModificationAuditedEntity))
             {
                 Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = User.UserId;
-                //Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = userId.User;
                 Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedDate)).CurrentValue = DateTime.Now;
             }
             Set<TEntity>().UpdateRange(entities);
@@ -131,7 +127,6 @@ namespace Domain.DataLayer.Contexts.Base
             foreach (var entity in entities.Where(x => x is IModificationAuditedEntity))
             {
                 Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedById)).CurrentValue = User.UserId;
-                //Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedBy)).CurrentValue = userId.User;
                 Entry(entity).Property(nameof(IModificationAuditedEntity.ModifiedDate)).CurrentValue = DateTime.Now;
             }
             Set<TEntity>().UpdateRange(entities);

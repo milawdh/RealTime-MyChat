@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public class TblUserContacts : IModificationAuditedEntity, ICreationAuditedEntity
+public class TblUserContacts : Entity<TblUserContacts>, IModificationAuditedEntity, ICreationAuditedEntity
 {
     public Guid CreatedById { get; set; }
 

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblMessage : FullAuditedEntity<Guid>
+public partial class TblMessage : FullAuditedEntity<TblMessage,Guid>
 {
     public Guid? ReplyId { get; set; }
 

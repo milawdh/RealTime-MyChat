@@ -26,7 +26,7 @@ namespace Domain.Audited.Models
     /// <typeparam name="TUser">User's Entity</typeparam>
     /// <typeparam name="TUserKey">User's Primary Key</typeparam>
     /// <typeparam name="TKey">Entity's Primary Key</typeparam>
-    public abstract class FullAuditedEntity<TKey> : ModificationAuditedEntity<TKey> , IDeleteAuditedEntity
+    public abstract class FullAuditedEntity<TEntity, TKey> : ModificationAuditedEntity<TEntity, TKey> , IDeleteAuditedEntity where TEntity : class
     {
         [ForeignKey("DeleteById")]
         [DeleteBehavior(DeleteBehavior.NoAction)]

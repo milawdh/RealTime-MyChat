@@ -151,7 +151,7 @@ namespace ServiceLayer.Services.Chat
             if (!_core.TblChatRoom.Any(x => x.Id == id))
                 return new ServiceResult<object>("ChatRoomNot Found");
 
-            var chatRoom = _core.TblChatRoom.GetById(id);
+            var chatRoom = _core.TblChatRoom.FirstOrDefualt(x => x.Id == id);
 
             await SetChatRoomAllMessagesRead(id);
 

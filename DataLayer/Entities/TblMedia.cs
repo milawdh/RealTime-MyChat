@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblMedia : FullAuditedEntity<Guid>
+public partial class TblMedia : FullAuditedEntity<TblMedia, Guid>
 {
     [Key]
     [Column("ID")]

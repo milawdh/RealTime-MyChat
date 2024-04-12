@@ -23,7 +23,7 @@ namespace Domain.Audited.Models
     /// Has Base & Add And Update Shadow Properties
     /// </summary>
     /// <typeparam name="TKey">Entity's Primary Key</typeparam>
-    public abstract class ModificationAuditedEntity<TKey> : CreationAuditedEntity<TKey>, IModificationAuditedEntity
+    public abstract class ModificationAuditedEntity<TEntity,TKey> : CreationAuditedEntity<TEntity, TKey>, IModificationAuditedEntity where TEntity : class
     {
         [ForeignKey("ModifiedById")]
         [DeleteBehavior(DeleteBehavior.NoAction)]

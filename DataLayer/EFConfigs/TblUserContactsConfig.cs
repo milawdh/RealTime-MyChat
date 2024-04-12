@@ -14,6 +14,8 @@ namespace Domain.Configs
     {
         public void Configure(EntityTypeBuilder<TblUserContacts> builder)
         {
+            builder.HasQueryFilter(x => !x.IsDeleted);
+
             builder.HasKey(table => new { table.CreatedById, table.ContactName });
 
             builder.HasOne(d => d.CreatedBy).WithMany(p => p.TblUserContactsContactListCreateds)

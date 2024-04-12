@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Audited.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
 [Index("Tell", Name = "IX_TblUsers_Tell", IsUnique = true)]
-public partial class TblUser
+public partial class TblUser : Entity<TblUser>
 {
     [Key]
     [Column("ID")]
@@ -41,8 +42,6 @@ public partial class TblUser
     public DateTime LastOnline { get; set; }
 
     public Guid ProfileImageUrl { get; set; }
-
-    public bool IsDeleted { get; set; }
 
     public string? ConnectionId { get; set; }
 

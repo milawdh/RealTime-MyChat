@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblSetting : FullAuditedEntity<int>
+public partial class TblSetting : FullAuditedEntity<TblSetting,int>
 {
     public bool ShowOnline { get; set; }
 

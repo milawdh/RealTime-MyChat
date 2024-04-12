@@ -11,7 +11,7 @@ namespace MyChat.Controllers
         private readonly IUserLoginService _userLoginService;
         private readonly Core core;
 
-        public LoginController(IUserLoginService userLoginService,Core core)
+        public LoginController(IUserLoginService userLoginService, Core core)
         {
             _userLoginService = userLoginService;
             this.core = core;
@@ -34,7 +34,7 @@ namespace MyChat.Controllers
 
         public IActionResult Test(Guid id)
         {
-            return Ok(core.TblMessage.Delete(core.TblMessage.GetById(id)));
+            return Ok(core.TblMessage.Reomve(core.TblMessage.FirstOrDefualt(x => x.Id == id)));
         }
 
         //Actions

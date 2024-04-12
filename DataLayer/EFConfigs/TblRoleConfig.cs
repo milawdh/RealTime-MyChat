@@ -14,6 +14,8 @@ namespace Domain.Configs
     {
         public void Configure(EntityTypeBuilder<TblRole> builder)
         {
+            builder.HasQueryFilter(x => !x.IsDeleted);
+
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
         }
     }

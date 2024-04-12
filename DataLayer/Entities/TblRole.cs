@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblRole : FullAuditedEntity<Guid>
+public partial class TblRole : FullAuditedEntity<TblRole,Guid>
 {
     [StringLength(32)]
     public string Name { get; set; } = null!;

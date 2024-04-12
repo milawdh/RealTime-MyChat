@@ -4,6 +4,7 @@ using Domain.DataLayer.Contexts.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domain.Migrations
 {
     [DbContext(typeof(AppBaseDbContex))]
-    partial class AppBaseDbContexModelSnapshot : ModelSnapshot
+    [Migration("20240412003733_AddedSoftDeleteToSomeEntity")]
+    partial class AddedSoftDeleteToSomeEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,7 +92,7 @@ namespace Domain.Migrations
 
                     b.HasIndex("ProfileImageId");
 
-                    b.ToTable("TblChatRoom", (string)null);
+                    b.ToTable("TblChatRoom");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblImage", b =>
@@ -134,7 +137,7 @@ namespace Domain.Migrations
 
                     b.HasIndex("ModifiedById");
 
-                    b.ToTable("TblImage", (string)null);
+                    b.ToTable("TblImage");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblMedia", b =>
@@ -189,7 +192,7 @@ namespace Domain.Migrations
 
                     b.HasIndex("ModifiedById");
 
-                    b.ToTable("TblMedia", (string)null);
+                    b.ToTable("TblMedia");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblMessage", b =>
@@ -249,7 +252,7 @@ namespace Domain.Migrations
 
                     b.HasIndex("ReplyId");
 
-                    b.ToTable("TblMessage", (string)null);
+                    b.ToTable("TblMessage");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblMyChatIdentifier", b =>
@@ -264,7 +267,7 @@ namespace Domain.Migrations
 
                     b.HasKey("Identifier");
 
-                    b.ToTable("TblMyChatIdentifier", (string)null);
+                    b.ToTable("TblMyChatIdentifier");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblPermission", b =>
@@ -310,7 +313,7 @@ namespace Domain.Migrations
 
                     b.HasIndex("ModifiedById");
 
-                    b.ToTable("TblPermission", (string)null);
+                    b.ToTable("TblPermission");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblRole", b =>
@@ -358,7 +361,7 @@ namespace Domain.Migrations
 
                     b.HasIndex("ModifiedById");
 
-                    b.ToTable("TblRole", (string)null);
+                    b.ToTable("TblRole");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblRolePermissionRel", b =>
@@ -408,7 +411,7 @@ namespace Domain.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("TblRolePermissionRel", (string)null);
+                    b.ToTable("TblRolePermissionRel");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblSetting", b =>
@@ -462,7 +465,7 @@ namespace Domain.Migrations
 
                     b.HasIndex("ModifiedById");
 
-                    b.ToTable("TblSetting", (string)null);
+                    b.ToTable("TblSetting");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblUser", b =>
@@ -551,7 +554,7 @@ namespace Domain.Migrations
                     b.HasIndex(new[] { "Tell" }, "IX_TblUsers_Tell")
                         .IsUnique();
 
-                    b.ToTable("TblUser", (string)null);
+                    b.ToTable("TblUser");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblUserChatRoomRel", b =>
@@ -606,7 +609,7 @@ namespace Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TblUserChatRoomRel", (string)null);
+                    b.ToTable("TblUserChatRoomRel");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblUserContacts", b =>
@@ -639,7 +642,7 @@ namespace Domain.Migrations
 
                     b.HasIndex("ModifiedById");
 
-                    b.ToTable("TblUserContacts", (string)null);
+                    b.ToTable("TblUserContacts");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblUserImageRel", b =>
@@ -689,7 +692,7 @@ namespace Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TblUserImageRel", (string)null);
+                    b.ToTable("TblUserImageRel");
                 });
 
             modelBuilder.Entity("Domain.Entities.TblChatRoom", b =>

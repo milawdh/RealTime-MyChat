@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Audited.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-public partial class TblMyChatIdentifier
+public partial class TblMyChatIdentifier : Entity<TblMyChatIdentifier>
 {
     [Key]
     [StringLength(32)]

@@ -14,6 +14,8 @@ namespace Domain.Configs
     {
         public void Configure(EntityTypeBuilder<TblSetting> builder)
         {
+            builder.HasQueryFilter(x => !x.IsDeleted);
+
             builder.Property(e => e.ShowPhoneNumber).HasComment("0 NoBody\r\n1 MyContacts\r\n2 EveryBody\r\n");
         }
     }
