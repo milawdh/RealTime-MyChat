@@ -24,7 +24,6 @@ namespace Domain.Configs
             #endregion
 
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
-            builder.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
 
             builder.HasOne(d => d.RecieverChatRoom).WithMany(p => p.TblMessages)
                     .OnDelete(DeleteBehavior.NoAction)

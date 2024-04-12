@@ -10,11 +10,15 @@ namespace Domain.Entities;
 
 public partial class TblMedia : FullAuditedEntity<TblMedia, Guid>
 {
-    [Key]
-    [Column("ID")]
-    public Guid Id { get; set; }
-
     public MediaType Type { get; set; }
+
+    public string FileName { get; set; }
+    public string FileMimType { get; set; }
+
+    public Guid FileServerId { get; set; }
+    [ForeignKey(nameof(FileServerId))]
+    [InverseProperty(nameof(TblFileServer.TblMedias))]
+    public TblFileServer FileServer { get; set; }
 
     public Guid MessageId { get; set; }
 

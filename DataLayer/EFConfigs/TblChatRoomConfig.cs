@@ -12,7 +12,6 @@ namespace Domain.Configs
             builder.HasQueryFilter(x => !x.IsDeleted);
 
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
-            builder.Property(e => e.CreatedById).HasDefaultValueSql("(newsequentialid())");
 
             builder.HasOne(d => d.MyChat).WithMany(p => p.TblChatRooms)
                     .OnDelete(DeleteBehavior.Cascade)

@@ -17,9 +17,15 @@ namespace Domain.Configs
             builder.HasQueryFilter(x => !x.IsDeleted);
 
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
-            builder.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
 
             builder.Property(e => e.Type).HasConversion<short>();
+
+            builder.HasOne(x => x.FileServer)
+                .WithMany(p => p.TblMedias)
+                .HasForeignKey(x => x.FileServerId)
+                .HasConstraintName("FK_TBlMedia_TblFileServer")
+                .OnDelete(DeleteBehavior.NoAction)
+                ;
 
             builder.HasOne(d => d.Message)
                 .WithMany(p => p.TblMedias)

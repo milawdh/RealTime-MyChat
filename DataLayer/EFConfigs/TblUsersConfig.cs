@@ -20,7 +20,7 @@ namespace Domain.Configs
             builder.Property(e => e.DateSigned).HasDefaultValueSql("(getdate())");
             builder.Property(e => e.LastOnline).HasDefaultValueSql("(getdate())");
             builder.Property(e => e.ProfileImageUrl).HasDefaultValue(new Guid("4c271239-f0c1-ee11-b6e1-44af2843979e"));
-            builder.Property(e => e.RoleId).HasDefaultValue(new Guid("0c621b69-cebb-ee11-b6e1-44af2843979e"));
+            builder.Property(e => e.RoleId).HasDefaultValue(new Guid("62af09e2-6af8-ee11-b6e5-44af284397a1"));
             builder.Property(e => e.SettingId).HasDefaultValue((short)1);
 
             builder.HasOne(d => d.ProfileImageUrlNavigation).WithMany(p => p.TblUsers)

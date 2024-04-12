@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
 
-[Index("Tell", Name = "IX_TblUsers_Tell", IsUnique = true)]
+[Index(nameof(Tell), Name = "IX_TblUsers_Tell", IsUnique = true)]
 public partial class TblUser : Entity<TblUser>
 {
     [Key]
