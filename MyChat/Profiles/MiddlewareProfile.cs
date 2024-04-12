@@ -22,11 +22,7 @@ namespace MyChat.Profiles
             app.UseAuthorization();
 
             app.UseElmah();
-            app.Use(async (c, n) =>
-            {
-                
-                await n(c);
-            });
+            
             return app;
         }
     }

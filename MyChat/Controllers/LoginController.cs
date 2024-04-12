@@ -34,7 +34,8 @@ namespace MyChat.Controllers
 
         public IActionResult Test(Guid id)
         {
-            return Ok(core.TblMessage.Reomve(core.TblMessage.FirstOrDefualt(x => x.Id == id)));
+            var a = core.TblMessage.FirstOrDefualt(x => x.Id == id);
+            return Ok(a);
         }
 
         //Actions

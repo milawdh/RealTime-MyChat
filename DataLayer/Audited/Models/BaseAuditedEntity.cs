@@ -22,7 +22,7 @@ namespace Domain.Audited.Models
 
     public class Entity<TEntity> : AuditedValidation<TEntity>, IBaseAuditedEntity where TEntity : class
     {
-        public bool IsDeleted { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
 
         /// <summary>

@@ -21,7 +21,7 @@ namespace ServiceLayer.Profiles
             services.AddScoped<DbContextFactory>();
             services.AddScoped(sp => sp.GetRequiredService<DbContextFactory>().CreateDbContext());
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IUserInfoContext>(sp => new UserInfoContext(sp.GetRequiredService<IHttpContextAccessor>(), sp.GetRequiredService<AppBaseDbContex>()));
+            services.AddScoped<IUserInfoContext>(sp => new UserInfoContext(sp.GetRequiredService<IHttpContextAccessor>(), new Core(sp.GetRequiredService<AppBaseDbContex>())));
 
 
             services.AddSingleton<ChatHubPipeLine>();

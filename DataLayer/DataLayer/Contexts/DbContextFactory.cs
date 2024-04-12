@@ -25,7 +25,7 @@ namespace Domain.DataLayer.Contexts
         {
             var context = _dbContextFactory.CreateDbContext();
             if (context.Any<TblUser>(x => x.UserName == _userName))
-                context.User = new UserInfoContext(context, _userName);
+                context.User = new UserInfoContext(new Core(context), _userName);
             return context;
         }
     }

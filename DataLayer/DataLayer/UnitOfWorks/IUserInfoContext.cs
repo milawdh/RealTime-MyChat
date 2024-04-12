@@ -56,26 +56,26 @@ namespace Domain.DataLayer.Repository
         private readonly HttpContext HttpContext;
         private readonly Core core;
         private static string? _userName;
-        private readonly DbSet<TblUser> tblUsers;
-        private readonly DbSet<TblUserContacts> tblUserContacts;
-        private readonly DbSet<TblChatRoom> chatRooms;
-        private readonly DbSet<TblUserChatRoomRel> tblUserChatRooms;
+        private readonly IQueryable<TblUser> tblUsers;
+        private readonly IQueryable<TblUserContacts> tblUserContacts;
+        private readonly IQueryable<TblChatRoom> chatRooms;
+        private readonly IQueryable<TblUserChatRoomRel> tblUserChatRooms;
 
-        public UserInfoContext(IHttpContextAccessor httpContextAccessor, AppBaseDbContex context)
+        public UserInfoContext(IHttpContextAccessor httpContextAccessor, Core core)
         {
             HttpContext = httpContextAccessor.HttpContext;
-            tblUsers = context.Set<TblUser>();
-            tblUserContacts = context.Set<TblUserContacts>();
-            chatRooms = context.Set<TblChatRoom>();
-            tblUserChatRooms = context.Set<TblUserChatRoomRel>();
+            tblUsers = core.TblUsers.Get();
+            tblUserContacts = core.TblUserContacts.Get();
+            chatRooms = core.TblChatRoom.Get();
+            tblUserChatRooms = core.TblUserChatRoomRel.Get();
         }
 
-        public UserInfoContext(AppBaseDbContex context, string userName)
+        public UserInfoContext(Core core, string userName)
         {
-            tblUsers = context.Set<TblUser>();
-            tblUserContacts = context.Set<TblUserContacts>();
-            chatRooms = context.Set<TblChatRoom>();
-            tblUserChatRooms = context.Set<TblUserChatRoomRel>();
+            tblUsers = core.TblUsers.Get();
+            tblUserContacts = core.TblUserContacts.Get();
+            chatRooms = core.TblChatRoom.Get();
+            tblUserChatRooms = core.TblUserChatRoomRel.Get();
             _userName = userName;
         }
 
@@ -266,7 +266,7 @@ namespace Domain.DataLayer.Repository
         private IQueryable<TblChatRoom> GetChatRooms(Func<IQueryable<TblChatRoom>, IQueryable<TblChatRoom>> custom = null)
         {
 
-            var query = chatRooms.Where(i => i.TblUserChatRoomRels.Select(x => x.UserId).Contains(UserId));
+            var query = chatRooms;
             query = ChatRoomDefualtQuery(query);
             if (custom != null)
                 query = custom(query);

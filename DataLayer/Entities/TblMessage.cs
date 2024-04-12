@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Audited.Models;
+using Domain.DataLayer.Repository;
 using Domain.JsonFieldModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,4 +38,13 @@ public partial class TblMessage : FullAuditedEntity<TblMessage,Guid>
 
     [InverseProperty(nameof(TblMedia.Message))]
     public virtual ICollection<TblMedia> TblMedias { get; set; } = new List<TblMedia>();
+
+    #region Validations
+
+    public override IQueryable<TblMessage> ValidateGetPermission(IQueryable<TblMessage> entities, IUserInfoContext userInfoContext)
+    {
+        return base.ValidateGetPermission(entities.Where(x => userInfoContext.ChatRooms.Any(v => v.Id == x.RecieverChatRoomId)), userInfoContext);
+    }
+
+    #endregion
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Audited.Models;
+using Domain.DataLayer.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
@@ -25,4 +26,13 @@ public class TblUserContacts : Entity<TblUserContacts>, IModificationAuditedEnti
     public Guid? ModifiedById { get; set; }
     public DateTime? ModifiedDate { get; set; }
     public DateTime CreatedDate { get; set; }
+    #region Validations
+
+    public override IQueryable<TblUserContacts> ValidateGetPermission(IQueryable<TblUserContacts> entities, IUserInfoContext userInfoContext)
+    {
+        return base.ValidateGetPermission(entities.Where(x => x.CreatedById == userInfoContext.UserId || x.ContactUserId == userInfoContext.UserId)
+            , userInfoContext);
+    }
+
+    #endregion
 }
