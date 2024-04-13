@@ -4,6 +4,7 @@ using Domain.DataLayer.Contexts.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domain.Migrations
 {
     [DbContext(typeof(AppBaseDbContex))]
-    partial class AppBaseDbContexModelSnapshot : ModelSnapshot
+    [Migration("20240413001657_RemovedUrlFromMedia")]
+    partial class RemovedUrlFromMedia
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -227,9 +230,6 @@ namespace Domain.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<short>("MediaType")
-                        .HasColumnType("smallint");
-
                     b.Property<Guid>("MessageId")
                         .HasColumnType("uniqueidentifier");
 
@@ -238,6 +238,9 @@ namespace Domain.Migrations
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime");
+
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint");
 
                     b.HasKey("Id");
 

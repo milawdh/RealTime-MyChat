@@ -65,7 +65,7 @@ namespace Domain.DataLayer.Contexts.Base
         }
         public virtual async Task<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
         {
-            if (entity is ICreationAuditedEntity && Entry(entity).State == EntityState.Added)
+            if (entity is ICreationAuditedEntity)
             {
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = User.UserId;
                 Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
@@ -154,6 +154,13 @@ namespace Domain.DataLayer.Contexts.Base
 
             Entry(entity).Property(nameof(IBaseAuditedEntity.IsDeleted)).CurrentValue = true;
 
+            if (entity is IDeleteAuditedEntity)
+            {
+                Entry(entity).Property(nameof(IDeleteAuditedEntity.DeleteById)).CurrentValue = User.UserId;
+                Entry(entity).Property(nameof(IDeleteAuditedEntity.DeleteDate)).CurrentValue = DateTime.Now;
+            }
+
+
             return new ServiceResult<EntityEntry<TEntity>>(Entry(entity));
         }
 
@@ -165,6 +172,12 @@ namespace Domain.DataLayer.Contexts.Base
                     return new ServiceResult<EntityEntry<TEntity>>("Given Object does not Inherit Base Entity");
 
                 Entry(entity).Property(nameof(IBaseAuditedEntity.IsDeleted)).CurrentValue = true;
+
+                if (entity is IDeleteAuditedEntity)
+                {
+                    Entry(entity).Property(nameof(IDeleteAuditedEntity.DeleteById)).CurrentValue = User.UserId;
+                    Entry(entity).Property(nameof(IDeleteAuditedEntity.DeleteDate)).CurrentValue = DateTime.Now;
+                }
             }
             return new ServiceResult();
         }
@@ -177,6 +190,12 @@ namespace Domain.DataLayer.Contexts.Base
                     return new ServiceResult<EntityEntry<TEntity>>("Given Object does not Inherit Base Entity");
 
                 Entry(entity).Property(nameof(IBaseAuditedEntity.IsDeleted)).CurrentValue = true;
+
+                if (entity is IDeleteAuditedEntity)
+                {
+                    Entry(entity).Property(nameof(IDeleteAuditedEntity.DeleteById)).CurrentValue = User.UserId;
+                    Entry(entity).Property(nameof(IDeleteAuditedEntity.DeleteDate)).CurrentValue = DateTime.Now;
+                }
             }
             return new ServiceResult();
         }

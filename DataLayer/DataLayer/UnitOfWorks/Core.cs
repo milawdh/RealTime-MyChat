@@ -1,5 +1,8 @@
-﻿using Domain.DataLayer.Contexts.Base;
+﻿using Domain.API;
+using Domain.DataLayer.Contexts.Base;
 using Domain.Entities;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Services.Repositories;
 
@@ -10,7 +13,7 @@ namespace Domain.DataLayer.UnitOfWorks
         private readonly AppBaseDbContex _context;
         public Core(AppBaseDbContex context)
         {
-            _context = context;   
+            _context = context;
         }
         private readonly MainRepo<TblChatRoom> ChatRoom;
         private readonly MainRepo<TblImage> Image;
@@ -25,6 +28,7 @@ namespace Domain.DataLayer.UnitOfWorks
         private readonly MainRepo<TblUserContacts> UserContacts;
         private readonly MainRepo<TblUserImageRel> UserImageRel;
         private readonly MainRepo<TblUser> Users;
+        private readonly MainRepo<TblFileServer> FileServer;
 
 
 
@@ -41,6 +45,7 @@ namespace Domain.DataLayer.UnitOfWorks
         public MainRepo<TblUserContacts> TblUserContacts => UserContacts ?? new(_context);
         public MainRepo<TblUserImageRel> TblUserImageRel => UserImageRel ?? new(_context);
         public MainRepo<TblUser> TblUsers => Users ?? new(_context);
+        public MainRepo<TblFileServer> TblFileServer => FileServer ?? new(_context);
 
 
         public void MarkAsChanged<TEntity>(TEntity entity) where TEntity : class
@@ -51,6 +56,10 @@ namespace Domain.DataLayer.UnitOfWorks
         {
             _context.SaveChanges();
         }
+
+        public string GetCurrentConnectionString() =>
+            _context.GetCurrentConnectionString();
+
         public void Dispose() { }
         public IDbContextTransaction BeginTransaction() => _context.BeginTransaction();
         public void CommitTransaction() => _context.CommitTransaction();
@@ -59,5 +68,26 @@ namespace Domain.DataLayer.UnitOfWorks
         public static void SavePoint(IDbContextTransaction transaction, string point) => transaction.CreateSavepoint(point);
         public static void RollBackToSavePoint(IDbContextTransaction transaction, string point) => transaction.RollbackToSavepoint(point);
 
+        public ServiceResult<Exception> ExecuteNonQueryCommand(string command)
+        {
+            try
+            {
+                using (SqlConnection sqlConnection = new SqlConnection(GetCurrentConnectionString()))
+                {
+                    sqlConnection.Open();
+                    using (SqlCommand sqlCommand = new SqlCommand(command, sqlConnection))
+                    {
+                        sqlCommand.ExecuteNonQuery();
+                    }
+
+                    sqlConnection.Close();
+                }
+                return new ServiceResult<Exception>();
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResult<Exception>(ex, "An Error occured: " + ex.Message) { Failure = true, Success = false };
+            }
+        }
     }
 }

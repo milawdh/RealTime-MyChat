@@ -13,6 +13,7 @@ namespace Domain.EFConfigs
     {
         public void Configure(EntityTypeBuilder<TblFileServer> builder)
         {
+            builder.HasQueryFilter(x => !x.IsDeleted);
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
             builder.Property(e => e.IsActive).HasDefaultValue(true);
         }

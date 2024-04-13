@@ -18,7 +18,7 @@ namespace Domain.Configs
 
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
 
-            builder.Property(e => e.Type).HasConversion<short>();
+            builder.Property(e => e.MediaType).HasConversion<short>();
 
             builder.HasOne(x => x.FileServer)
                 .WithMany(p => p.TblMedias)
