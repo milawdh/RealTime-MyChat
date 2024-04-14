@@ -144,7 +144,7 @@ namespace ServiceLayer.Services.File
 
         #region Get
         public TblFileServer GetActiveFileServer() =>
-            _core.TblFileServer.Get(x => x.IsActive).LastOrDefault();
+            _core.TblFileServer.Get(x => x.IsActive && !x.IsDeleted).LastOrDefault();
         #endregion
     }
 }

@@ -14,11 +14,6 @@ namespace DomainShared.Dtos.Media
     {
         public MediaType MediaType { get; set; }
 
-        public string FileName { get; set; }
-        public string FileMimType { get; set; }
-
-        public Guid FileServerId { get; set; }
-
         public Guid MessageId { get; set; }
     }
 }
