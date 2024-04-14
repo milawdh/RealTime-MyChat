@@ -28,6 +28,8 @@ namespace DomainShared.Dtos.Chat.Message
         /// </summary>
         public string SenderUserName { get; set; }
 
+        public string? FileApi { get; set; }
+
         /// <summary>
         /// Message Body
         /// </summary>

@@ -1,6 +1,7 @@
 ﻿using Domain.API;
 using Domain.DataLayer.UnitOfWorks;
 using Domain.Entities;
+using Domain.Enums;
 using DomainShared.Dtos.Media;
 using Mapster;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +15,7 @@ namespace ServiceLayer.Services.File
 {
     public interface IMediaServcie
     {
-        ServiceResult<Guid> Add(CreateUpdateMediaDto dto, IFormFile formFile);
+        ServiceResult<Guid> Add(CreateUpdateMediaDto dto);
         ServiceResult Delete(TblMedia tblMedia);
     }
     public class MediaService : IMediaServcie
@@ -29,20 +30,21 @@ namespace ServiceLayer.Services.File
             _fileServerService = fileServerService;
         }
 
-        public ServiceResult<Guid> Add(CreateUpdateMediaDto dto, IFormFile formFile)
+        public ServiceResult<Guid> Add(CreateUpdateMediaDto dto)
         {
             _core.BeginTransaction();
             try
             {
                 TblMedia tblMedia = dto.Adapt<TblMedia>();
                 tblMedia.FileServerId = _fileServerService.GetActiveFileServer().Id;
-                tblMedia.FileName = formFile.FileName;
-                tblMedia.FileMimType = formFile.ContentType;
+                tblMedia.FileName = dto.File.FileName;
+                tblMedia.FileMimType = dto.File.ContentType;
+                tblMedia.MediaType = GetMediaType(dto.File);
 
                 _core.TblMedia.Add(tblMedia);
                 _core.Save();
 
-                var addFileResult = _fileService.Add(formFile, tblMedia);
+                var addFileResult = _fileService.Add(dto.File, tblMedia);
                 if (addFileResult.Failure)
                     return new ServiceResult<Guid>("Error Occured On Saving File!");
 
@@ -51,6 +53,7 @@ namespace ServiceLayer.Services.File
             }
             catch (Exception ex)
             {
+                _core.RollBackTransaction();
                 ElmahCore.ElmahExtensions.RaiseError(ex);
                 return new ServiceResult<Guid>("Error Occured On Media Saving : " + ex.Message);
             }
@@ -65,6 +68,15 @@ namespace ServiceLayer.Services.File
                 _core.Save();
             }
             return new ServiceResult();
+        }
+
+        public MediaType GetMediaType(IFormFile file)
+        {
+            if (file.ContentType.StartsWith("image"))
+                return Domain.Enums.MediaType.Image;
+            if(file.ContentType.StartsWith("video"))
+                return Domain.Enums.MediaType.Video;
+            return MediaType.File;
         }
     }
 }

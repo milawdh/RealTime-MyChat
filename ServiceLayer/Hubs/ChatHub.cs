@@ -4,6 +4,7 @@ using DomainShared.Dtos.Chat.Message;
 using DomainShared.Extentions.MapExtentions;
 using ElmahCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using ServiceLayer.Hubs.Api;
@@ -75,7 +76,7 @@ namespace ServiceLayer.Hubs
         /// </summary>
         /// <param name="body"></param>
         /// <returns></returns>
-        public async Task<ApiResult<MessagesDto>> SendMessage(string body)
+        public async Task<ApiResult<MessagesDto>> SendMessage(string body, IFormFile? file)
         {
             var accessResult = _chatHubGroupManager.GetCurrentChatRoom(Context.ConnectionId);
             if (accessResult.Failure)
@@ -84,7 +85,7 @@ namespace ServiceLayer.Hubs
             //Context.c
             return new ApiResult<MessagesDto>(
                 await _chatServices.SendMessageAsync(
-                new SendMessageDto { Body = body, RecieverChatRoomId = new Guid(accessResult.Result) })
+                new SendMessageDto { Body = body, RecieverChatRoomId = new Guid(accessResult.Result), File = file })
                 );
         }
 

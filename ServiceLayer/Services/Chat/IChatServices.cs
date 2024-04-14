@@ -14,6 +14,7 @@ using ServiceLayer.Hubs.Api;
 using ServiceLayer.Services.User;
 using Domain.DataLayer.UnitOfWorks;
 using Domain.DataLayer.Repository;
+using ServiceLayer.Services.File;
 
 namespace ServiceLayer.Services.Chat
 {
@@ -35,19 +36,21 @@ namespace ServiceLayer.Services.Chat
         private readonly IUserService _userService;
         private readonly IHubContext<ChatHub, IChatHubApi> _chatHub;
         private readonly IChatHubGroupManager _chatHubGroupManager;
+        private readonly IMediaServcie _mediaServcie;
 
         public ChatService(IUserService userService,
             IUserInfoContext userInfoContext,
             Core core,
-            IHubContext<ChatHub, IChatHubApi> chatHub
-,
-            IChatHubGroupManager chatHubGroupManager)
+            IHubContext<ChatHub, IChatHubApi> chatHub,
+            IChatHubGroupManager chatHubGroupManager,
+            IMediaServcie mediaServcie)
         {
             _userService = userService;
             _userInfoContext = userInfoContext;
             _core = core;
             _chatHub = chatHub;
             _chatHubGroupManager = chatHubGroupManager;
+            _mediaServcie = mediaServcie;
         }
 
         #endregion
@@ -57,24 +60,43 @@ namespace ServiceLayer.Services.Chat
             if (!_userInfoContext.ChatRooms.Any(x => x.Id == messageDto.RecieverChatRoomId))
                 return new ServiceResult<MessagesDto>("Invalid ChatRoom!");
 
-            TblMessage tblMessage = new()
+            _core.BeginTransaction();
+            try
             {
-                Body = messageDto.Body,
-                RecieverChatRoomId = messageDto.RecieverChatRoomId,
-                CreatedById = _userInfoContext.UserId,
-                CreatedBy = _userInfoContext.User,
-            };
 
-            _core.TblMessage.Add(tblMessage);
-            _core.Save();
-            await SetMessageRead(tblMessage.RecieverChatRoomId, tblMessage.Id, _userInfoContext.UserId);
+                TblMessage tblMessage = new()
+                {
+                    Body = messageDto.Body,
+                    RecieverChatRoomId = messageDto.RecieverChatRoomId,
+                    CreatedById = _userInfoContext.UserId,
+                    CreatedBy = _userInfoContext.User,
+                };
 
-            MessagesDto result = tblMessage.Adapt<MessagesDto>();
+                _core.TblMessage.Add(tblMessage);
 
-            //TODO : Do it with backTask
-            await RecieveMessageAsync(tblMessage);
+                if (messageDto.File != null)
+                    _mediaServcie.Add(new DomainShared.Dtos.Media.CreateUpdateMediaDto { Message = tblMessage, File = messageDto.File });
 
-            return new ServiceResult<MessagesDto>(result);
+                _core.Save();
+
+                await SetMessageRead(tblMessage.RecieverChatRoomId, tblMessage.Id, _userInfoContext.UserId);
+
+                MessagesDto result = tblMessage.Adapt<MessagesDto>();
+                result.FileApi = "Download?id=" + tblMessage.TblMedias.First().Id;
+
+                //TODO : Do it with backTask
+                await RecieveMessageAsync(tblMessage);
+
+                _core.CommitTransaction();
+                return new ServiceResult<MessagesDto>(result);
+            }
+            catch (Exception ex)
+            {
+                _core.RollBackTransaction();
+                ElmahCore.ElmahExtensions.RaiseError(ex);
+
+                return new ServiceResult<MessagesDto>("An Error Occured in sending Message!");
+            }
         }
 
         /// <summary>
