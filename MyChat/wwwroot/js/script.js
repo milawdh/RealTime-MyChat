@@ -197,10 +197,13 @@ let addMessageToMessageArea = (msg) => {
         ${chat.type == 9 ? msg.senderUserName : ""}
         </a>
 		<div class="d-flex flex-row">
+        ${msg.fileApi != null ?
+            '<a download href="' + msg.fileApi + '">DownloadFile</a>' : ""
+        }
 			<div class="body m-1 mr-2">${msg.body}</div>
 			<div class="time ml-auto small text-right flex-shrink-0 align-self-end text-muted" style="width:75px;">
 				${msg.time.split(' ')[0]}
-				${msg.sender === user.id ?  sendStatus : ""}
+				${msg.sender === user.id ? sendStatus : ""}
 			</div>
 		</div>
 	</div>
@@ -269,14 +272,50 @@ let showChatList = () => {
 let sendMessage = async () => {
     debugger
     let value = DOM.messageInput.value;
-    if (value === "")
+    var file = document.getElementById('message-file-input')
+    if (value === "" && file.value == null)
         return;
 
-    DOM.messageInput.value = "";
+    var sendMessageResult;
 
-    var sendMessageResult = await SendMessageToHub(value);
-    addMessageToMessageArea(sendMessageResult);
-};
+    if (file.value == null) {
+        sendMessageResult = await SendMessageToHub(value);
+        DOM.messageInput.value = "";
+        document.getElementById('message-file-input').files = null
+        document.getElementById('message-file-input').value = null
+        addMessageToMessageArea(sendMessageResult);
+    }
+    else {
+        var dataToSend = new FormData();
+        dataToSend.append("messageBody", DOM.messageInput.value)
+        dataToSend.append("file", file.files[0])
+        document.getElementById('sender-button').onclick = null
+        ShowNotificationText("File is uploading Please Wait!")
+        $.ajax({
+            url: '/Chat/SendMessageWithFile',
+            type: 'POST',
+            data: dataToSend,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                sendMessageResult = data.result;
+                DOM.messageInput.value = "";
+                document.getElementById('message-file-input').files = null
+                document.getElementById('message-file-input').value = null
+                document.getElementById('sender-button').onclick = sendMessage
+                addMessageToMessageArea(sendMessageResult);
+                ShowNotificationText("Message Sent Successfully!")
+            },
+            error: function (data) {
+            }
+        });
+    }
+
+    if (sendMessageResult != null) {
+
+    }
+}
+
 
 let showProfileSettings = () => {
     DOM.profileSettings.style.left = 0;

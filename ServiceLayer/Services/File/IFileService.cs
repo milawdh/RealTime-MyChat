@@ -14,7 +14,7 @@ namespace ServiceLayer.Services.File
 {
     public interface IFileService
     {
-        ServiceResult<byte[]> Get(Guid Id);
+        ServiceResult<byte[]> Get(TblMedia media);
         ServiceResult Delete(TblMedia tblMedia, TblFileServer tblFileServer = null);
         ServiceResult Add(IFormFile file, TblMedia tblMedia, TblFileServer tblFileServer = null);
     }
@@ -34,7 +34,7 @@ namespace ServiceLayer.Services.File
 
             using (FileDbContext fileDbContext = new FileDbContext(fileServer.ConnectionString))
             {
-                if (fileDbContext.TblFiles.Any(x => x.Id == tblMedia.Id))
+                if (fileDbContext.Set<TblFile>().Any(x => x.Id == tblMedia.Id))
                     return new ServiceResult("The File Id Is Already Exist");
 
                 MemoryStream memoryStream = new MemoryStream();
@@ -44,23 +44,23 @@ namespace ServiceLayer.Services.File
                 tblFile.Id = tblMedia.Id;
                 tblFile.Data = memoryStream.ToArray();
 
-                fileDbContext.TblFiles.Add(tblFile);
+                fileDbContext.TblFile.Add(tblFile);
                 fileDbContext.SaveChanges();
             }
 
             return new ServiceResult();
         }
-        
-        public ServiceResult<byte[]> Get(Guid Id)
+
+        public ServiceResult<byte[]> Get(TblMedia media)
         {
             var fileServer = _fileServerService.GetActiveFileServer();
 
             using (FileDbContext fileDbContext = new FileDbContext(fileServer.ConnectionString))
             {
-                if (fileDbContext.TblFiles.Any(x => x.Id == Id))
-                    return new ServiceResult<byte[]>("The File Id Is Already Exist");
+                if (!fileDbContext.TblFile.Any(x => x.Id == media.Id))
+                    return new ServiceResult<byte[]>("The File Id Doesn't Exist");
 
-                return new ServiceResult<byte[]>(fileDbContext.TblFiles.FirstOrDefault(x => x.Id == Id).Data);
+                return new ServiceResult<byte[]>(fileDbContext.TblFile.FirstOrDefault(x => x.Id == media.Id).Data);
             }
         }
 
@@ -70,9 +70,9 @@ namespace ServiceLayer.Services.File
 
             using (FileDbContext fileDbContext = new FileDbContext(fileServer.ConnectionString))
             {
-                if (fileDbContext.TblFiles.Any(f => f.Id == tblMedia.Id))
+                if (fileDbContext.TblFile.Any(f => f.Id == tblMedia.Id))
                 {
-                    fileDbContext.TblFiles.Remove(fileDbContext.TblFiles.FirstOrDefault(x => x.Id == tblMedia.Id));
+                    fileDbContext.TblFile.Remove(fileDbContext.TblFile.FirstOrDefault(x => x.Id == tblMedia.Id));
                     fileDbContext.SaveChanges();
                 }
             }

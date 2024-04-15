@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Audited.Api;
 using Domain.Audited.Models;
 using Domain.DataLayer.Repository;
+using Domain.DataLayer.UnitOfWorks;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -57,7 +58,7 @@ public partial class TblChatRoom : FullAuditedEntity<TblChatRoom,Guid>
 
     #region Validations
 
-    public override IQueryable<TblChatRoom> ValidateGetPermission(IQueryable<TblChatRoom> entities, IUserInfoContext userInfoContext)
+    public override IQueryable<TblChatRoom> ValidateGetPermission(Core core, IQueryable<TblChatRoom> entities, IUserInfoContext userInfoContext)
     {
        return entities.Where(i => i.TblUserChatRoomRels.Select(x => x.UserId).Contains(userInfoContext.UserId));
     }

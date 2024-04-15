@@ -32,31 +32,21 @@ namespace ServiceLayer.Services.File
 
         public ServiceResult<Guid> Add(CreateUpdateMediaDto dto)
         {
-            _core.BeginTransaction();
-            try
-            {
-                TblMedia tblMedia = dto.Adapt<TblMedia>();
-                tblMedia.FileServerId = _fileServerService.GetActiveFileServer().Id;
-                tblMedia.FileName = dto.File.FileName;
-                tblMedia.FileMimType = dto.File.ContentType;
-                tblMedia.MediaType = GetMediaType(dto.File);
+            TblMedia tblMedia = new TblMedia();
+            tblMedia.Message = dto.Message;
+            tblMedia.FileServerId = _fileServerService.GetActiveFileServer().Id;
+            tblMedia.FileName = dto.File.FileName;
+            tblMedia.FileMimType = dto.File.ContentType;
+            tblMedia.MediaType = GetMediaType(dto.File);
 
-                _core.TblMedia.Add(tblMedia);
-                _core.Save();
+            _core.TblMedia.Add(tblMedia);
+            _core.Save();
 
-                var addFileResult = _fileService.Add(dto.File, tblMedia);
-                if (addFileResult.Failure)
-                    return new ServiceResult<Guid>("Error Occured On Saving File!");
+            var addFileResult = _fileService.Add(dto.File, tblMedia);
+            if (addFileResult.Failure)
+                return new ServiceResult<Guid>("Error Occured On Saving File!");
 
-                _core.CommitTransaction();
-                return new ServiceResult<Guid>(tblMedia.Id);
-            }
-            catch (Exception ex)
-            {
-                _core.RollBackTransaction();
-                ElmahCore.ElmahExtensions.RaiseError(ex);
-                return new ServiceResult<Guid>("Error Occured On Media Saving : " + ex.Message);
-            }
+            return new ServiceResult<Guid>(tblMedia.Id);
         }
 
         public ServiceResult Delete(TblMedia tblMedia)
@@ -74,7 +64,7 @@ namespace ServiceLayer.Services.File
         {
             if (file.ContentType.StartsWith("image"))
                 return Domain.Enums.MediaType.Image;
-            if(file.ContentType.StartsWith("video"))
+            if (file.ContentType.StartsWith("video"))
                 return Domain.Enums.MediaType.Video;
             return MediaType.File;
         }

@@ -21,7 +21,7 @@ namespace Domain.DataLayer.Contexts.FileDbContext
             _connectionString = connectionString;
         }
 
-        public virtual DbSet<TblFile> TblFiles { get; set; }
+        public virtual DbSet<TblFile> TblFile { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

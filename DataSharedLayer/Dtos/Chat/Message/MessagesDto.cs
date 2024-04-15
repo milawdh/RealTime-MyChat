@@ -54,6 +54,7 @@ namespace DomainShared.Dtos.Chat.Message
         {
             TypeAdapterConfig<TblMessage, MessagesDto>.NewConfig()
             .Map(dest => dest.Sender, src => src.CreatedById)
+            .Map(dest => dest.FileApi, src => src.TblMedias != null ? src.TblMedias.FirstOrDefault() != null ? "/chat/DownloadMedia?id=" + src.TblMedias.FirstOrDefault().Id : null : null)
             .Map(dest => dest.SenderUserName, src => src.CreatedBy.Name)
             .Map(dest => dest.Time, src => src.CreatedDate.ToLongTimeString() + " " + src.CreatedDate.ToShortDateString())
             .Map(dest => dest.RecieverChatRoomId, src => src.RecieverChatRoomId);

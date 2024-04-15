@@ -32,7 +32,7 @@ namespace Domain.Audited.Api
         /// </summary>
         /// <param name="entities">DbSet's In IQueryable That Will Be Filtered</param>
         /// <returns>A Validated and Filtered Entities Query</returns>
-        public virtual IQueryable<TEntity> ValidateGetPermission(IQueryable<TEntity> entities, IUserInfoContext userInfoContext)
+        public virtual IQueryable<TEntity> ValidateGetPermission(Core core, IQueryable<TEntity> entities, IUserInfoContext userInfoContext)
         {
             return entities;
         }

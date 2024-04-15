@@ -82,7 +82,6 @@ namespace ServiceLayer.Services.Chat
                 await SetMessageRead(tblMessage.RecieverChatRoomId, tblMessage.Id, _userInfoContext.UserId);
 
                 MessagesDto result = tblMessage.Adapt<MessagesDto>();
-                result.FileApi = "Download?id=" + tblMessage.TblMedias.First().Id;
 
                 //TODO : Do it with backTask
                 await RecieveMessageAsync(tblMessage);

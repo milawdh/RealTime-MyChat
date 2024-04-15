@@ -201,6 +201,7 @@ namespace Domain.DataLayer.Repository
                     .ThenInclude(x => x.CreatedBy).ThenInclude(x => x.ProfileImageUrlNavigation)
                     .Include(x => x.TblMessages.Where(x => !x.IsDeleted).OrderBy(c => c.CreatedDate))
                     .Include(x => x.ProfileImage)
+                    .Include(x => x.TblMessages).ThenInclude(x => x.TblMedias)
                     );
             }
         }

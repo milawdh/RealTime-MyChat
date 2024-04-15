@@ -40,9 +40,9 @@ namespace Domain.Audited.Models
         /// </summary>
         /// <param name="entities">DbSet's In IQueryable That Will Be Filtered</param>
         /// <returns>A Validated and Filtered Entities Query</returns>
-        public override IQueryable<TEntity> ValidateGetPermission(IQueryable<TEntity> entities, IUserInfoContext userInfoContext)
+        public override IQueryable<TEntity> ValidateGetPermission(Core core, IQueryable<TEntity> entities, IUserInfoContext userInfoContext)
         {
-            return base.ValidateGetPermission(entities, userInfoContext);
+            return base.ValidateGetPermission(core, entities, userInfoContext);
         }
 
         /// <summary>

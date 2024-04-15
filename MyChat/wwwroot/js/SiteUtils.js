@@ -58,6 +58,14 @@ function ShowNotification(notif) {
         pos: 'top-right'
     })
 }
+function ShowNotificationText(notif) {
+    UIkit.notification({
+        message: `${notif}`,
+        status: 'primary',
+        timeout: 4000,
+        pos: 'top-right'
+    })
+}
 function ShowErrors(errors) {
     for (var i = 0; i < errors.length; i++) {
         UIkit.notification({

@@ -25,7 +25,7 @@ namespace Services.Repositories
         {
             _context = context;
             _entityType = Activator.CreateInstance<TEntity>();
-            Query = _entityType.ValidateGetPermission(_context.Set<TEntity>().AsQueryable(), context.User);
+            Query = _entityType.ValidateGetPermission(new Domain.DataLayer.UnitOfWorks.Core(_context), _context.Set<TEntity>().AsQueryable(), context.User);
         }
 
         #region Add

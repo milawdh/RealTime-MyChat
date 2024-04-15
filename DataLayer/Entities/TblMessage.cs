@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Audited.Models;
 using Domain.DataLayer.Repository;
+using Domain.DataLayer.UnitOfWorks;
 using Domain.JsonFieldModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,9 +42,9 @@ public partial class TblMessage : FullAuditedEntity<TblMessage,Guid>
 
     #region Validations
 
-    public override IQueryable<TblMessage> ValidateGetPermission(IQueryable<TblMessage> entities, IUserInfoContext userInfoContext)
+    public override IQueryable<TblMessage> ValidateGetPermission(Core core ,IQueryable<TblMessage> entities, IUserInfoContext userInfoContext)
     {
-        return base.ValidateGetPermission(entities.Where(x => userInfoContext.ChatRooms.Any(v => v.Id == x.RecieverChatRoomId)), userInfoContext);
+        return base.ValidateGetPermission(core,entities.Where(x => userInfoContext.ChatRooms.Any(v => v.Id == x.RecieverChatRoomId)), userInfoContext);
     }
 
     #endregion

@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="~/Css/style.css">
     <link rel="stylesheet" href="~/Css/uikit.min.css">
     <script src="@Url.Content("~/lib/UIkit/uikit-icons.min.js")" asp-append-version="true"></script>
-    <script src="@Url.Content("~/lib/jquery/dist/jquery.min.js")" asp-append-version="true"></script>
     <script src="@Url.Content("~/js/datastore.js")" asp-append-version="true"></script>
     <script src="@Url.Content("~/js/date-utils.js")" asp-append-version="true"></script>
 </head>
@@ -118,7 +117,8 @@
                     <a href="#"><i class="far fa-smile text-muted px-3" style="font-size:1.5rem;"></i></a>
                     <input type="text" name="message" id="input" placeholder="Type a message"
                            class="flex-grow-1 border-0 px-3 py-2 my-3 rounded shadow-sm">
-                    <i class="fas fa-paper-plane text-muted px-3" style="cursor:pointer;" onclick="sendMessage()"></i>
+                           <input type="file" id="message-file-input" />
+                    <i class="fas fa-paper-plane text-muted px-3" style="cursor:pointer;" id="sender-button" onclick="sendMessage()"></i>
                 </div>
             </div>
         </div>
@@ -1287,13 +1287,11 @@
 
     <!--Modals End-->
 
+    <script src="@Url.Content("~/lib/jquery/dist/jquery.min.js")" asp-append-version="true"></script>
 
     <script src="@Url.Content("~/lib/UIkit/uikit.min.js")"></script>
     <script src="~/lib/UIkit/uikit-icons.min.js"></script>
     <script src="@Url.Content("~/microsoft/signalr/dist/browser/signalr.min.js")"></script>
-
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"
             integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"
@@ -1305,7 +1303,7 @@
     <script src="@Url.Content("~/js/SiteUtils.js")" asp-append-version="true"></script>
 
 
-
+    
 
 
 </body>

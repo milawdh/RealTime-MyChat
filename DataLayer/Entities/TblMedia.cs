@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Domain.Audited.Models;
+using Domain.DataLayer.Repository;
+using Domain.DataLayer.UnitOfWorks;
 using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,4 +29,11 @@ public partial class TblMedia : FullAuditedEntity<TblMedia, Guid>
     [ForeignKey(nameof(MessageId))]
     [InverseProperty(nameof(TblMessage.TblMedias))]
     public virtual TblMessage Message { get; set; } = null!;
+
+
+    public override IQueryable<TblMedia> ValidateGetPermission(Core core, IQueryable<TblMedia> entities, IUserInfoContext userInfoContext)
+    {
+        var medias = core.TblMessage.Get().SelectMany(x => x.TblMedias.Select(x => x.Id)).ToList();
+        return base.ValidateGetPermission(core, entities.Where(x => medias.Contains(x.Id)), userInfoContext);
+    }
 }

@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Domain.DataLayer.Contexts.Base;
 using Domain.Entities;
 using System.Reflection;
+using ServiceLayer.Services.File;
 
 namespace ServiceLayer.Profiles
 {
@@ -27,6 +28,9 @@ namespace ServiceLayer.Profiles
             services.AddSingleton<ChatHubPipeLine>();
             services.AddScoped<IUserLoginService, UserLoginService>();
             services.AddScoped<IChatServices, ChatService>();
+            services.AddScoped<IMediaServcie, MediaService>();
+            services.AddScoped<IFileService, FileService>();
+            services.AddScoped<IFileServerService, FileServerService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IChatHubGroupManager, ChatHubGroupManager>();
