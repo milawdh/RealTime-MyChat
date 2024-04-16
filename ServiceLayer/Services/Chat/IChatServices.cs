@@ -23,8 +23,9 @@ namespace ServiceLayer.Services.Chat
         Task<ServiceResult<MessagesDto>> SendMessageAsync(SendMessageDto messageDto);
         Task RecieveMessageAsync(TblMessage message);
         Task<ServiceResult<object>> GetChatRoomAsync(Guid id);
-        Task SetMessageRead(Guid chatRoomId, Guid messageId, Guid userId);
-        Task SetChatRoomAllMessagesRead(Guid chatRoomId);
+        Task SetMessageReadAsync(Guid chatRoomId, Guid messageId, Guid userId);
+        Task SetChatRoomAllMessagesReadAsync(Guid chatRoomId);
+        Task<ServiceResult<List<MessagesDto>>> GetChatRoomMessagesAsync(Guid chatRoomId);
 
     }
     public class ChatService : IChatServices
@@ -79,7 +80,7 @@ namespace ServiceLayer.Services.Chat
 
                 _core.Save();
 
-                await SetMessageRead(tblMessage.RecieverChatRoomId, tblMessage.Id, _userInfoContext.UserId);
+                await SetMessageReadAsync(tblMessage.RecieverChatRoomId, tblMessage.Id, _userInfoContext.UserId);
 
                 MessagesDto result = tblMessage.Adapt<MessagesDto>();
 
@@ -98,41 +99,13 @@ namespace ServiceLayer.Services.Chat
             }
         }
 
-        /// <summary>
-        /// Gets a Private ChatRoom With Messages From Current User's ChatRoom
-        /// </summary>
-        /// <param name="id">ChatRoom Id</param>
-        /// <returns></returns>
-        public async Task<ServiceResult<PrivateChatRoomDto>> GetPrivateChatRoomAsync(Guid id)
+        public async Task<ServiceResult<List<MessagesDto>>> GetChatRoomMessagesAsync(Guid chatRoomId)
         {
-            var chatRoom = _userInfoContext.ChatRoomsWithMessages
-                .Where(x => x.Type == ChatRoomType.Private)
-                .FirstOrDefault(i => i.Id == id);
+            var chatRoom = _userInfoContext.ChatRoomsWithMessages.FirstOrDefault(x => x.Id == chatRoomId);
+            if (chatRoom == null)
+                return new ServiceResult<List<MessagesDto>>("ChatRoom Not Found!");
 
-            if (chatRoom is null)
-                return new ServiceResult<PrivateChatRoomDto>("Chat Room Not Found");
-
-            var res = chatRoom.MapToPrivateChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId);
-            return new ServiceResult<PrivateChatRoomDto>(res);
-        }
-
-        /// <summary>
-        /// Gets a Group ChatRoom With Messages From Current User's ChatRoom
-        /// </summary>
-        /// <param name="id">ChatRoom Id</param>
-        /// <returns></returns>
-        public async Task<ServiceResult<GroupChatRoomDto>> GetGroupChatRoomAsync(Guid id)
-        {
-            var chatRoom = _userInfoContext.ChatRoomsWithMessages
-                .Where(x => x.Type == ChatRoomType.Group)
-                .FirstOrDefault(i => i.Id == id);
-
-            if (chatRoom is null)
-                return new ServiceResult<GroupChatRoomDto>("Chat Room Not Found");
-
-            var result = chatRoom.MapToGroupChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId);
-
-            return new ServiceResult<GroupChatRoomDto>(result);
+            return new ServiceResult<List<MessagesDto>>(chatRoom.GetChatRoomMessageDtos(_core.TblUserChatRoomRel, _userInfoContext.UserId));
         }
 
         /// <summary>
@@ -172,18 +145,18 @@ namespace ServiceLayer.Services.Chat
             if (!_core.TblChatRoom.Any(x => x.Id == id))
                 return new ServiceResult<object>("ChatRoomNot Found");
 
-            var chatRoom = _core.TblChatRoom.FirstOrDefualt(x => x.Id == id);
+            var chatRoom = _userInfoContext.ChatRooms.FirstOrDefault(x => x.Id == id);
 
-            await SetChatRoomAllMessagesRead(id);
+            await SetChatRoomAllMessagesReadAsync(id);
 
             var chatRoomType = chatRoom.Type;
 
             switch (chatRoomType)
             {
                 case ChatRoomType.Private:
-                    return (await GetPrivateChatRoomAsync(id)).ToObjectiveServiceResult();
+                    return new ServiceResult<object>(chatRoom.MapToPrivateChatRoomDto(_userInfoContext.UserId));
                 case ChatRoomType.Group:
-                    return (await GetGroupChatRoomAsync(id)).ToObjectiveServiceResult();
+                    return new ServiceResult<object>(chatRoom.MapToGroupChatRoomDto(_userInfoContext.UserId));
                 case ChatRoomType.Channel:
                     break;
                 case ChatRoomType.Community:
@@ -204,7 +177,7 @@ namespace ServiceLayer.Services.Chat
         /// <param name="messageId">Message Should Set Read</param>
         /// <param name="userId">Specified User's Id</param>
         /// <returns></returns>
-        public async Task SetMessageRead(Guid chatRoomId, Guid messageId, Guid userId)
+        public async Task SetMessageReadAsync(Guid chatRoomId, Guid messageId, Guid userId)
         {
             _core.TblUserChatRoomRel.Get(i => i.UserId == _userInfoContext.UserId && i.ChatRoomId == chatRoomId)
                 .FirstOrDefault().LastSeenMessageId = messageId;
@@ -216,7 +189,7 @@ namespace ServiceLayer.Services.Chat
         /// </summary>
         /// <param name="chatRoomId">ChatRoom's Id</param>
         /// <returns></returns>
-        public async Task SetChatRoomAllMessagesRead(Guid chatRoomId)
+        public async Task SetChatRoomAllMessagesReadAsync(Guid chatRoomId)
         {
 
             var map = _core.TblUserChatRoomRel.Get(i => i.UserId == _userInfoContext.UserId && i.ChatRoomId == chatRoomId,

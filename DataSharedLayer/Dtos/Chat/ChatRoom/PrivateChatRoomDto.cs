@@ -21,19 +21,12 @@ namespace DomainShared.Dtos.Chat.ChatRoom
         public string NavbarText { get; set; }
         public ChatRoomType Type { get; set; }
 
-        public List<MessagesDto> Messages { get; set; }
-
         public void ConfigMap()
         {
             TypeAdapterConfig<TblChatRoom, PrivateChatRoomDto>.NewConfig()
                 .Map(i => i.NavbarText, src => src.GetNavbarText())
                 .Map(i => i.Pic, src => NavigationProfile.Resources + src.TblUserChatRoomRels.FirstOrDefault()!.User.ProfileImageUrlNavigation.Url)
-                .Map(dest => dest.Messages, src => GetMessages(src))
                 .Map(i => i.Name, src => src.TblUserChatRoomRels.FirstOrDefault()!.User.Name);
         }
-
-        private List<MessagesDto> GetMessages(TblChatRoom src) =>
-         src.TblMessages.OrderBy(x => x.CreatedDate).AsQueryable().ProjectToType<MessagesDto>().ToList();
-
     }
 }

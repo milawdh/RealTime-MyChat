@@ -38,6 +38,10 @@ async function GetChatRoomDetails(charoomId) {
     return await chatConnection.invoke("GetChatRoomDetails", charoomId).then(function (res) { return res.result; });
 }
 
+async function GetChatRoomMessages() {
+    return await chatConnection.invoke("GetCurrentChatRoomMessages").then(function (res) { return res.result; });
+}
+
 async function RecieveMessage(message) {
 
     var messageDto = message.result;

@@ -219,6 +219,7 @@ let generateMessageArea = async (elem, chatId) => {
 
     chat = await GetChatRoomDetails(chatId);
     await setCurrentChatRoom();
+    chat.messages = await GetChatRoomMessages()
 
     document.getElementById(`ChReadDiv${chatId}`).setAttribute("hidden", "")
     document.getElementById(`ChRead-count${chatId}`).innerText = 0;

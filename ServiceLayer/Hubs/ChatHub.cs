@@ -59,6 +59,15 @@ namespace ServiceLayer.Hubs
                 _chatHubGroupManager.SetCurrentChatRoom(Context.ConnectionId, chatRoomId.Value.ToString());
         }
 
+        public async Task<ApiResult<List<MessagesDto>>> GetCurrentChatRoomMessages()
+        {
+            var chatRoomId = _chatHubGroupManager.GetCurrentChatRoom(Context.ConnectionId);
+            if (chatRoomId.Failure)
+                return new ApiResult<List<MessagesDto>>("You are not in a ChatRoom!");
+
+            return new ApiResult<List<MessagesDto>>(await _chatServices.GetChatRoomMessagesAsync(new Guid(chatRoomId.Result)));
+        }
+
         /// <summary>
         /// Gets ChatRoom From Current User's ChatRooms With Messages To Converstation
         /// </summary>
@@ -89,10 +98,15 @@ namespace ServiceLayer.Hubs
                 );
         }
 
+        /// <summary>
+        /// Sets ChatRoom All Messages As Read
+        /// </summary>
+        /// <param name="chatRoomId"></param>
+        /// <returns></returns>
         public async Task SetMessageRead(Guid chatRoomId)
         {
             if (_userInfoContext.ChatRooms.Any(x => x.Id == chatRoomId))
-                await _chatServices.SetChatRoomAllMessagesRead(chatRoomId);
+                await _chatServices.SetChatRoomAllMessagesReadAsync(chatRoomId);
         }
 
         #endregion

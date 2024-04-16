@@ -78,6 +78,12 @@ namespace DomainShared.Extentions.MapExtentions
             return MapToInitChatRoom(new List<TblChatRoom>() { chatRoom }, currentUserId).FirstOrDefault();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tblMessage"></param>
+        /// <param name="core"></param>
+        /// <returns></returns>
         public static RecieveMessageNotificationDto MapToRecieveMessageNotificationDto(this TblMessage tblMessage, Core core)
         {
             var notification = tblMessage.Adapt<RecieveMessageNotificationDto>();
@@ -108,26 +114,15 @@ namespace DomainShared.Extentions.MapExtentions
             return notification;
         }
 
-        public static MessageStatus GetMessageStatus(this TblMessage message, IQueryable<TblUserChatRoomRel> map)
-        {
-            if (message.RecieverChatRoom.Type == ChatRoomType.Private)
-            {
+        
 
-                if (map.FirstOrDefault().LastSeenMessage == null)
-                    return MessageStatus.Sent;
-
-                return
-                    map.FirstOrDefault().LastSeenMessage.CreatedDate >= message.CreatedDate ? MessageStatus.Read : MessageStatus.Sent;
-            }
-            else
-            {
-                if (map.Any(x => x.LastSeenMessage.CreatedDate >= message.CreatedDate))
-                    return MessageStatus.Read;
-
-                return MessageStatus.Sent;
-            }
-        }
-
+        /// <summary>
+        /// Gets And Sorts A ChatRoom Messages And Maps To MessagesDto
+        /// </summary>
+        /// <param name="chatRoom"></param>
+        /// <param name="chatRoomMapRepo"></param>
+        /// <param name="currentUserId"></param>
+        /// <returns></returns>
         public static List<MessagesDto> GetChatRoomMessageDtos(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> chatRoomMapRepo, Guid currentUserId)
         {
             IQueryable<TblUserChatRoomRel> map = chatRoomMapRepo.Get(x => x.ChatRoomId == chatRoom.Id && x.UserId != currentUserId,
@@ -136,25 +131,36 @@ namespace DomainShared.Extentions.MapExtentions
             return chatRoom.TblMessages.OrderBy(x => x.CreatedDate).Select(src =>
                {
                    var res = src.Adapt<MessagesDto>();
-                   res.Status = src.GetMessageStatus(map);
+                   res.Status = src.GetMessageStatusQuery(map);
                    return res;
                }).ToList();
         }
 
-        public static GroupChatRoomDto MapToGroupChatRoomDto(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> chatRoomMapRepo, Guid currentUserId)
+        /// <summary>
+        /// Maps TblChatRoom To GroupChatRoom Dto
+        /// </summary>
+        /// <param name="chatRoom"></param>
+        /// <param name="chatRoomMapRepo"></param>
+        /// <param name="currentUserId"></param>
+        /// <returns></returns>
+        public static GroupChatRoomDto MapToGroupChatRoomDto(this TblChatRoom chatRoom, Guid currentUserId)
         {
             var result = chatRoom.Adapt<GroupChatRoomDto>();
-            result.Messages = chatRoom.GetChatRoomMessageDtos(chatRoomMapRepo, currentUserId);
 
             return result;
         }
 
-        public static PrivateChatRoomDto MapToPrivateChatRoomDto(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> chatRoomMapRepo, Guid currentUserId)
+        /// <summary>
+        /// Maps TblChatRoom To PrivateChatRoom Dto
+        /// </summary>
+        /// <param name="chatRoom"></param>
+        /// <param name="chatRoomMapRepo"></param>
+        /// <param name="currentUserId"></param>
+        /// <returns></returns>
+        public static PrivateChatRoomDto MapToPrivateChatRoomDto(this TblChatRoom chatRoom, Guid currentUserId)
         {
             chatRoom.TblUserChatRoomRels = chatRoom.TblUserChatRoomRels.OrderByDescending(x => x.UserId != currentUserId).ToList();
             var res = chatRoom.Adapt<PrivateChatRoomDto>();
-
-            res.Messages = chatRoom.GetChatRoomMessageDtos(chatRoomMapRepo, currentUserId);
 
             return res;
         }

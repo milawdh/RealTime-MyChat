@@ -28,7 +28,6 @@ namespace DomainShared.Dtos.Chat.ChatRoom
         public string Pic { get; set; }
 
         public string NavbarText { get; set; }
-        public List<MessagesDto> Messages { get; set; }
         public ChatRoomType Type { get; set; }
 
         public void ConfigMap()
