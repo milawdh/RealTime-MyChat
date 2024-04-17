@@ -50,6 +50,8 @@ namespace DomainShared.Dtos.Chat.Message
         /// </summary>
         public Guid RecieverChatRoomId { get; set; }
 
+        public bool IsEnd { get; set; } = false;
+
         public void ConfigMap()
         {
             TypeAdapterConfig<TblMessage, MessagesDto>.NewConfig()

@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ServiceLayer.Hubs.Api;
 using ServiceLayer.Services.Chat;
 using ServiceLayer.Services.User;
+using System.Runtime.CompilerServices;
 
 namespace ServiceLayer.Hubs
 {
@@ -59,13 +60,30 @@ namespace ServiceLayer.Hubs
                 _chatHubGroupManager.SetCurrentChatRoom(Context.ConnectionId, chatRoomId.Value.ToString());
         }
 
-        public async Task<ApiResult<List<MessagesDto>>> GetCurrentChatRoomMessages()
+        public async IAsyncEnumerable<ApiResult<MessagesDto>> GetCurrentChatRoomMessages(
+        [EnumeratorCancellation]
+        CancellationToken cancellationToken,int startRow)
         {
             var chatRoomId = _chatHubGroupManager.GetCurrentChatRoom(Context.ConnectionId);
             if (chatRoomId.Failure)
-                return new ApiResult<List<MessagesDto>>("You are not in a ChatRoom!");
+            {
+                yield return new ApiResult<MessagesDto>(chatRoomId.Messages);
+                yield break;
+            }
 
-            return new ApiResult<List<MessagesDto>>(await _chatServices.GetChatRoomMessagesAsync(new Guid(chatRoomId.Result)));
+            var messages = await _chatServices.GetChatRoomMessagesAsync(new Guid(chatRoomId.Result), startRow);
+
+            if (messages.Failure)
+            {
+                yield return new ApiResult<MessagesDto>(messages.Messages);
+                yield break;
+            }
+
+            foreach (var message in messages.Result)
+            {
+                yield return new ApiResult<MessagesDto>(message);
+               await Task.Delay(5, cancellationToken);
+            }
         }
 
         /// <summary>
@@ -85,7 +103,7 @@ namespace ServiceLayer.Hubs
         /// </summary>
         /// <param name="body"></param>
         /// <returns></returns>
-        public async Task<ApiResult<MessagesDto>> SendMessage(string body, IFormFile? file)
+        public async Task<ApiResult<MessagesDto>> SendMessage(string body)
         {
             var accessResult = _chatHubGroupManager.GetCurrentChatRoom(Context.ConnectionId);
             if (accessResult.Failure)
@@ -94,7 +112,7 @@ namespace ServiceLayer.Hubs
             //Context.c
             return new ApiResult<MessagesDto>(
                 await _chatServices.SendMessageAsync(
-                new SendMessageDto { Body = body, RecieverChatRoomId = new Guid(accessResult.Result), File = file })
+                new SendMessageDto { Body = body, RecieverChatRoomId = new Guid(accessResult.Result) })
                 );
         }
 

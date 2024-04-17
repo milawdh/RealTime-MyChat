@@ -114,7 +114,7 @@ namespace DomainShared.Extentions.MapExtentions
             return notification;
         }
 
-        
+
 
         /// <summary>
         /// Gets And Sorts A ChatRoom Messages And Maps To MessagesDto
@@ -123,17 +123,31 @@ namespace DomainShared.Extentions.MapExtentions
         /// <param name="chatRoomMapRepo"></param>
         /// <param name="currentUserId"></param>
         /// <returns></returns>
-        public static List<MessagesDto> GetChatRoomMessageDtos(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> chatRoomMapRepo, Guid currentUserId)
+        public static List<MessagesDto> GetChatRoomMessageDtos(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> chatRoomMapRepo, Guid currentUserId, int? startRow = null)
         {
             IQueryable<TblUserChatRoomRel> map = chatRoomMapRepo.Get(x => x.ChatRoomId == chatRoom.Id && x.UserId != currentUserId,
             includes: x => x.Include(v => v.LastSeenMessage));
 
-            return chatRoom.TblMessages.OrderBy(x => x.CreatedDate).Select(src =>
-               {
-                   var res = src.Adapt<MessagesDto>();
-                   res.Status = src.GetMessageStatusQuery(map);
-                   return res;
-               }).ToList();
+            var chatRoomMessages = chatRoom.TblMessages.OrderByDescending(x => x.CreatedDate);
+            if (startRow != null)
+            {
+                int totalCount = chatRoomMessages.Count();
+                return chatRoomMessages.Skip(startRow.Value).Take(12).Select(src =>
+                   {
+                       var res = src.Adapt<MessagesDto>();
+                       res.Status = src.GetMessageStatusQuery(map);
+                       res.IsEnd = startRow + 12 >= totalCount;
+                       return res;
+                   }).ToList();
+            }
+            else
+                return chatRoomMessages.Select(src =>
+                {
+                    var res = src.Adapt<MessagesDto>();
+                    res.Status = src.GetMessageStatusQuery(map);
+                    return res;
+                }).ToList();
+
         }
 
         /// <summary>

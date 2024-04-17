@@ -146,32 +146,97 @@ let generateChatList = () => {
     viewChatList();
 };
 
+let LoadDateToMessageArea = (date) => {
+    DOM.messages.innerHTML = `
+	<div class="mx-auto my-2 bg-primary text-white small py-1 px-2 rounded">
+		${date.split(' ')[2]}
+	</div>
+	` + DOM.messages.innerHTML;
+};
+
+let LoadMessageToMessageArea = (msg) => {
+    debugger
+
+    
+
+    var element = DOM.messages
+
+    let sendStatus = `<i class="${msg.status < 2 ? "far" : "fas"
+        } fa-check-circle"></i>`;
+
+    element.innerHTML = `
+  <div class="d-flex ${msg.sender == user.id ? `justify-content-end` : `justify-content-start`}">
+	<div class="${msg.sender == user.id ? `self` : ``
+        } p-1 my-1 mx-3 rounded bg-white shadow-sm message-item" id="MessageId${msg.Id}">
+		<div class="options">
+		<a class="text-decoration-none" uk-toggle href="#msgDrId${msg.id}">
+		<i class="fas fa-angle-down text-muted px-2"></i>
+		</a>
+		<div uk-dropdown="mode: click" class="uk-border-rounded" id="msgDrId${msg.id}">
+			<ul class="uk-nav uk-dropdown-nav">
+				${msg.sender == user.id ?
+            `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowEditMessage(${msg.Id})">Edit</a></li>
+				<hr class="m-0">
+				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.Id})">Delete</a></li>
+				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.Id})">Forward</a></li>
+                `
+            :
+            `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.Id})">Forward</a></li>`
+        }
+			</ul>
+		</div>
+		</div>
+		<a href="#">
+        ${chat.type == 9 ? msg.senderUserName : ""}
+        </a>
+		<div class="d-flex flex-row">
+        ${msg.fileApi != null ?
+            '<a download href="' + msg.fileApi + '">DownloadFile</a>' : ""
+        }
+			<div class="body m-1 mr-2">${msg.body}</div>
+			<div class="time ml-auto small text-right flex-shrink-0 align-self-end text-muted" style="width:75px;">
+				${msg.time.split(' ')[0]}
+				${msg.sender === user.id ? sendStatus : ""}
+			</div>
+		</div>
+	</div>
+    <div>
+    </div>
+        </div>
+	` + element.innerHTML;
+
+    let msgDate = msg.time.split(' ')[2];
+    if (lastDate != msgDate) {
+        LoadDateToMessageArea(msg.time);
+        lastDate = msgDate;
+    }
+
+    DOM.messages.scrollTo(0, DOM.messages.scrollHeight);
+};
+
+
+
 let addDateToMessageArea = (date) => {
     DOM.messages.innerHTML += `
 	<div class="mx-auto my-2 bg-primary text-white small py-1 px-2 rounded">
-		${date}
+		${date.split(' ')[2]}
 	</div>
 	`;
 };
 
 let addMessageToMessageArea = (msg) => {
     debugger
-    let msgDate = mDate(msg.time).getDate();
+    let msgDate = msg.time.split(' ')[2];
     if (lastDate != msgDate) {
-        addDateToMessageArea(msgDate);
+        addDateToMessageArea(msg.time);
         lastDate = msgDate;
     }
-
-    let htmlForGroup = `
-	<div class="small font-weight-bold text-primary">
-		${msg.senderUserName}
-	</div>
-	`;
+    var element = DOM.messages
 
     let sendStatus = `<i class="${msg.status < 2 ? "far" : "fas"
         } fa-check-circle"></i>`;
 
-    DOM.messages.innerHTML += `
+    element.innerHTML += `
   <div class="d-flex ${msg.sender == user.id ? `justify-content-end` : `justify-content-start`}">
 	<div class="${msg.sender == user.id ? `self` : ``
         } p-1 my-1 mx-3 rounded bg-white shadow-sm message-item" id="MessageId${msg.Id}">
@@ -212,14 +277,18 @@ let addMessageToMessageArea = (msg) => {
         </div>
 	`;
 
+    
     DOM.messages.scrollTo(0, DOM.messages.scrollHeight);
 };
 
+
 let generateMessageArea = async (elem, chatId) => {
+    startRow = 0;
+    isMessagesEnd = false;
+    lastDate = "";
 
     chat = await GetChatRoomDetails(chatId);
     await setCurrentChatRoom();
-    chat.messages = await GetChatRoomMessages()
 
     document.getElementById(`ChReadDiv${chatId}`).setAttribute("hidden", "")
     document.getElementById(`ChRead-count${chatId}`).innerText = 0;
@@ -252,15 +321,16 @@ let generateMessageArea = async (elem, chatId) => {
     DOM.messageAreaPic.src = chat.pic;
     DOM.messageAreaDetails.innerHTML = chat.navbarText;
 
-    let msgs = chat.messages;
-
     DOM.messages.innerHTML = "";
 
-    lastDate = "";
-    msgs
-        .sort((a, b) => mDate(a.time).subtract(b.time))
-        .forEach((msg) => addMessageToMessageArea(msg));
+    LoadCurrentMessages();
+    DOM.messages.onscrollend = function (ev) {
+        if (DOM.messages.scrollTop == 0)
+            LoadOtherMessages()
+    };
+    DOM.messages.scrollTo(0, DOM.messages.scrollHeight);
 };
+
 
 let showChatList = () => {
     if (areaSwapped) {
@@ -271,16 +341,14 @@ let showChatList = () => {
 };
 
 let sendMessage = async () => {
-    debugger
-    let value = DOM.messageInput.value;
     var file = document.getElementById('message-file-input')
-    if (value === "" && file.value == null)
+    if (DOM.messageInput.value === "" && file.value == null)
         return;
 
     var sendMessageResult;
 
-    if (file.value == null) {
-        sendMessageResult = await SendMessageToHub(value);
+    if (file.value == "") {
+        sendMessageResult = await SendMessageToHub(DOM.messageInput.value);
         DOM.messageInput.value = "";
         document.getElementById('message-file-input').files = null
         document.getElementById('message-file-input').value = null

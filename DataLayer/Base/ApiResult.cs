@@ -87,22 +87,11 @@ namespace Domain.Base
         }
 
         /// <summary>
-        /// Api Result With Object Direct From Service With Optional Many Messages
-        /// </summary>
-        /// <param name="result">Result Object</param>
-        /// <param name="messages">Optional Messages</param>
-        public ApiResult(T result, List<string> messages = null) : base(messages)
-        {
-            Success = true;
-            Result = result;
-        }
-
-        /// <summary>
         /// Api Result With Object Direct From Service With Optional One Message
         /// </summary>
         /// <param name="result">Result Object</param>
         /// <param name="message">Optional Message</param>
-        public ApiResult(T result, string message = null) : base(message)
+        public ApiResult(T result)
         {
             Success = true;
             Result = result;

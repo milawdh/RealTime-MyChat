@@ -25,7 +25,7 @@ namespace ServiceLayer.Services.Chat
         Task<ServiceResult<object>> GetChatRoomAsync(Guid id);
         Task SetMessageReadAsync(Guid chatRoomId, Guid messageId, Guid userId);
         Task SetChatRoomAllMessagesReadAsync(Guid chatRoomId);
-        Task<ServiceResult<List<MessagesDto>>> GetChatRoomMessagesAsync(Guid chatRoomId);
+        Task<ServiceResult<List<MessagesDto>>> GetChatRoomMessagesAsync(Guid chatRoomId,int startRow);
 
     }
     public class ChatService : IChatServices
@@ -99,13 +99,13 @@ namespace ServiceLayer.Services.Chat
             }
         }
 
-        public async Task<ServiceResult<List<MessagesDto>>> GetChatRoomMessagesAsync(Guid chatRoomId)
+        public async Task<ServiceResult<List<MessagesDto>>> GetChatRoomMessagesAsync(Guid chatRoomId, int startRow)
         {
             var chatRoom = _userInfoContext.ChatRoomsWithMessages.FirstOrDefault(x => x.Id == chatRoomId);
             if (chatRoom == null)
                 return new ServiceResult<List<MessagesDto>>("ChatRoom Not Found!");
 
-            return new ServiceResult<List<MessagesDto>>(chatRoom.GetChatRoomMessageDtos(_core.TblUserChatRoomRel, _userInfoContext.UserId));
+            return new ServiceResult<List<MessagesDto>>(chatRoom.GetChatRoomMessageDtos(_core.TblUserChatRoomRel, _userInfoContext.UserId, startRow));
         }
 
         /// <summary>

@@ -6,6 +6,8 @@
 StyleDisconnected()
 StartChatConnection()
 
+let startRow = 0;
+let isMessagesEnd = false;
 
 function StartChatConnection() {
     chatConnection.start().then(function () {
@@ -38,10 +40,109 @@ async function GetChatRoomDetails(charoomId) {
     return await chatConnection.invoke("GetChatRoomDetails", charoomId).then(function (res) { return res.result; });
 }
 
-async function GetChatRoomMessages() {
-    return await chatConnection.invoke("GetCurrentChatRoomMessages").then(function (res) { return res.result; });
-}
+//async function GetChatRoomMessages() {
+//    return await chatConnection.invoke("GetCurrentChatRoomMessages").then(function (res) { return res.result; });
+//}
 
+function LoadOtherMessages() {
+var LoadOtherMessagesHtml = ""
+    debugger
+    if (!isMessagesEnd) {
+
+        var element = document.getElementById('lazy-div')
+        chatConnection.stream("GetCurrentChatRoomMessages", startRow)
+            .subscribe({
+                next: (msg) => {
+                    let sendStatus = `<i class="${msg.result.status < 2 ? "far" : "fas"} fa-check-circle"></i>`;
+
+                    LoadOtherMessagesHtml = `
+  <div class="d-flex ${msg.result.sender == user.id ? `justify-content-end` : `justify-content-start`}">
+	<div class="${msg.result.sender == user.id ? `self` : ``
+                        } p-1 my-1 mx-3 rounded bg-white shadow-sm message-item" id="MessageId${msg.result.Id}">
+		<div class="options">
+		<a class="text-decoration-none" uk-toggle href="#msgDrId${msg.result.id}">
+		<i class="fas fa-angle-down text-muted px-2"></i>
+		</a>
+		<div uk-dropdown="mode: click" class="uk-border-rounded" id="msgDrId${msg.result.id}">
+			<ul class="uk-nav uk-dropdown-nav">
+				${msg.result.sender == user.id ?
+                            `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowEditMessage(${msg.result.Id})">Edit</a></li>
+				<hr class="m-0">
+				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.result.Id})">Delete</a></li>
+				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.result.Id})">Forward</a></li>
+                `
+                            :
+                            `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.result.Id})">Forward</a></li>`
+                        }
+			</ul>
+		</div>
+		</div>
+		<a href="#">
+        ${chat.type == 9 ? msg.result.senderUserName : ""}
+        </a>
+		<div class="d-flex flex-row">
+        ${msg.result.fileApi != null ?
+                            '<a download href="' + msg.result.fileApi + '">DownloadFile</a>' : ""
+                        }
+			<div class="body m-1 mr-2">${msg.result.body}</div>
+			<div class="time ml-auto small text-right flex-shrink-0 align-self-end text-muted" style="width:75px;">
+				${msg.result.time.split(' ')[0]}
+				${msg.result.sender === user.id ? sendStatus : ""}
+			</div>
+		</div>
+	</div>
+    <div>
+    </div>
+        </div>
+	` + LoadOtherMessagesHtml;
+
+                    let msgDate = mDate(msg.result.time).getDate();
+                    if (lastDate != msgDate) {
+                        LoadOtherMessagesHtml = `
+	                     <div class="mx-auto my-2 bg-primary text-white small py-1 px-2 rounded">
+		                   ${msgDate}
+	                    </div>
+	                    ` + LoadOtherMessagesHtml;
+                        lastDate = msgDate;
+                    }
+                    if (!isMessagesEnd)
+                        isMessagesEnd = msg.result.isEnd
+                },
+                complete: () => {
+                    element.id = null
+                    element.innerHTML = LoadOtherMessagesHtml
+                    LoadOtherMessagesHtml = ""
+                    if (!isMessagesEnd) {
+                        DOM.messages.innerHTML = `<div id="lazy-div"></div>` + DOM.messages.innerHTML
+                        startRow += 12;
+
+                    }
+                },
+                error: (err) => {
+                    LoadOtherMessagesHtml = ""
+                },
+            });
+        LoadOtherMessagesHtml = ""
+    }
+}
+function LoadCurrentMessages() {
+    chatConnection.stream("GetCurrentChatRoomMessages", startRow)
+        .subscribe({
+            next: (item) => {
+                LoadMessageToMessageArea(item.result)
+                isMessagesEnd = item.resul.isEnd
+            },
+            complete: () => {
+                DOM.messages.scrollTop = 15;
+                DOM.messages.innerHTML = `<div id="lazy-div"></div>` + DOM.messages.innerHTML
+                if (!isMessagesEnd)
+                    startRow += 12;
+            },
+            error: (err) => {
+            },
+        });
+
+}
 async function RecieveMessage(message) {
 
     var messageDto = message.result;
@@ -50,6 +151,7 @@ async function RecieveMessage(message) {
         if (chat.id == messageDto.recieverChatRoomId) {
             addMessageToMessageArea(messageDto)
             UpdateCurrentChatListItem(messageDto)
+            startRow++;
             await chatConnection.invoke("SetMessageRead", chat.id);
         }
     }
@@ -69,6 +171,9 @@ function SetAllMessagesRead() {
     $('.far').addClass('fas')
     $('.far').removeClass('far')
 }
+
+
+
 async function SendMessageToHub(messagebody) {
     var messageDto = await chatConnection.invoke("SendMessage", messagebody).then(function (response) {
         return response.result
