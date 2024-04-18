@@ -290,9 +290,16 @@ namespace Services.Repositories
             Func<IQueryable<TEntity>, IQueryable<TEntity>> defualtInclude = null,
             Func<IQueryable<TEntity>, IQueryable<TEntity>> includes = null,
             bool igonoreGlobalQuery = true,
-            bool hasSplitQuery = true)
+            bool hasSplitQuery = true,
+            bool hasEntityFilters = true)
         {
-            IQueryable<TEntity> query = Query;
+            IQueryable<TEntity> query;
+
+            if (hasEntityFilters)
+                query = Query;
+            else
+            query = _context.Set<TEntity>();
+
             if (where != null)
                 query = query.Where(where);
 

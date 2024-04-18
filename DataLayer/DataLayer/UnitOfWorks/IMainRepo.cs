@@ -40,7 +40,8 @@ namespace Services.Repositories
             Func<IQueryable<TEntity>, IQueryable<TEntity>> defualtInclude = null,
             Func<IQueryable<TEntity>, IQueryable<TEntity>> includes = null,
             bool igonoreGlobalQuery = true,
-            bool hasSplitQuery = true);
+            bool hasSplitQuery = true,
+            bool hasEntityFilters = true);
 
 
         ServiceResult<EntityEntry<TEntity>> Reomve(TEntity entity);

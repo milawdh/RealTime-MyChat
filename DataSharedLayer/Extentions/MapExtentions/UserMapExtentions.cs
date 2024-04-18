@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Domain.DataLayer.UnitOfWorks;
+using Domain.Entities;
 using DomainShared.Dtos.Chat.ChatRoom;
 using DomainShared.Dtos.User;
 using Mapster;
@@ -18,13 +19,13 @@ namespace DomainShared.Extentions.MapExtentions
         /// Maps User Entity to UserInitDto that indicates all User's Details for Initializing
         /// </summary>
         /// <param name="user">USer Entity</param>
-        /// <param name="ChatRoomsWithMessages">User's AllChatRooms That Indicates Their Messages</param>
+        /// <param name="ChatRoomsWithOutMessages">User's AllChatRooms That Indicates Their Messages</param>
         /// <returns>All Current User's Details for Initializing</returns>
 
-        public static UserInitDto MapToUserInitDto(this TblUser user, IEnumerable<TblChatRoom> ChatRoomsWithMessages)
+        public static UserInitDto MapToUserInitDto(this TblUser user, IQueryable<TblChatRoom> ChatRoomsWithOutMessages, Core core)
         {
             UserInitDto result = user.Adapt<UserInitDto>();
-            result.ChatRooms = ChatRoomsWithMessages.MapToInitChatRoom(user.Id);
+            result.ChatRooms = ChatRoomsWithOutMessages.MapToInitChatRoom(user.Id, core);
 
             return result;
         }

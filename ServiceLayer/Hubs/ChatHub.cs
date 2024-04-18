@@ -1,5 +1,6 @@
 ﻿using Domain.Base;
 using Domain.DataLayer.Repository;
+using Domain.DataLayer.UnitOfWorks;
 using DomainShared.Dtos.Chat.Message;
 using DomainShared.Extentions.MapExtentions;
 using ElmahCore;
@@ -21,15 +22,17 @@ namespace ServiceLayer.Hubs
         private readonly IUserService _userService;
         private readonly IChatServices _chatServices;
         private readonly IChatHubGroupManager _chatHubGroupManager;
+        private readonly Core _core;
 
         public ChatHub(IUserInfoContext webAppContext, IUserService userService,
             IChatServices chatServices,
-            IChatHubGroupManager chatHubGroupManager)
+            IChatHubGroupManager chatHubGroupManager, Core core)
         {
             _userInfoContext = webAppContext;
             _userService = userService;
             _chatServices = chatServices;
             _chatHubGroupManager = chatHubGroupManager;
+            _core = core;
         }
 
         public override async Task OnConnectedAsync()
@@ -38,7 +41,7 @@ namespace ServiceLayer.Hubs
             _userService.SetUserOnline(Context.ConnectionId);
 
             //Send User's Data To Client
-            var userIniDto = _userInfoContext.User.MapToUserInitDto(_userInfoContext.ChatRoomsWithMessages);
+            var userIniDto = _userInfoContext.User.MapToUserInitDto(_userInfoContext.ChatRooms, _core);
             await Clients.Caller.SetUserInfo(userIniDto);
 
             await base.OnConnectedAsync();
@@ -62,7 +65,7 @@ namespace ServiceLayer.Hubs
 
         public async IAsyncEnumerable<ApiResult<MessagesDto>> GetCurrentChatRoomMessages(
         [EnumeratorCancellation]
-        CancellationToken cancellationToken,int startRow)
+        CancellationToken cancellationToken, int startRow)
         {
             var chatRoomId = _chatHubGroupManager.GetCurrentChatRoom(Context.ConnectionId);
             if (chatRoomId.Failure)
@@ -82,7 +85,7 @@ namespace ServiceLayer.Hubs
             foreach (var message in messages.Result)
             {
                 yield return new ApiResult<MessagesDto>(message);
-               await Task.Delay(5, cancellationToken);
+                await Task.Delay(5, cancellationToken);
             }
         }
 

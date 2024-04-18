@@ -23,7 +23,7 @@ namespace Domain.DataLayer.Repository
         /// Current User's ChatRooms With Their Messages
         /// </summary>
         /// <returns></returns>
-        IQueryable<TblChatRoom> ChatRoomsWithMessages { get; }
+        IQueryable<TblChatRoom> ChatRoomsWithLastMessages { get; }
 
         /// <summary>
         /// Current User's ChatRooms Without Their Messages
@@ -187,17 +187,17 @@ namespace Domain.DataLayer.Repository
         #region ChatRooms
 
         /// <summary>
-        /// Current User's ChatRooms With Their Messages
+        /// Current User's ChatRooms With Their 12 Last Messages
         /// </summary>
         /// <returns></returns>
-        public IQueryable<TblChatRoom> ChatRoomsWithMessages
+        public IQueryable<TblChatRoom> ChatRoomsWithLastMessages
         {
             get
             {
                 return GetChatRooms(
                     i => i.Include(x => x.TblMessages
                     .Where(x => !x.IsDeleted)
-                    .OrderBy(c => c.CreatedDate))
+                    .OrderByDescending(c => c.CreatedDate).Take(12))
                     .ThenInclude(x => x.CreatedBy).ThenInclude(x => x.ProfileImageUrlNavigation)
                     .Include(x => x.TblMessages.Where(x => !x.IsDeleted).OrderBy(c => c.CreatedDate))
                     .Include(x => x.ProfileImage)

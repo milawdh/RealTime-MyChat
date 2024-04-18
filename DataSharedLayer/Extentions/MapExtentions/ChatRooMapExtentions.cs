@@ -48,21 +48,21 @@ namespace DomainShared.Extentions.MapExtentions
         /// <param name="chatRooms">User Chat Rooms</param>
         /// <param name="currentUserId">CurrentUserId</param>
         /// <returns></returns>
-        public static List<InitChatRoom> MapToInitChatRoom(this IEnumerable<TblChatRoom> chatRooms, Guid currentUserId)
+        public static List<InitChatRoom> MapToInitChatRoom(this IQueryable<TblChatRoom> chatRooms, Guid currentUserId, Core core)
         {
-            var result =
-             chatRooms
-             .OrderByDescending(x => x.TblMessages.OrderBy(c => c.CreatedDate).Last().CreatedDate)
-             .Select(i =>
-             {
-                 InitChatRoom res = i.Adapt<InitChatRoom>();
-                 var lastSeenMessageDate = i.TblUserChatRoomRels.FirstOrDefault(c => c.UserId == currentUserId)?.LastSeenMessage?.CreatedDate;
-                 res.NotSeenMessagesCount = i.GetNotSeenMessagesQuery(lastSeenMessageDate, currentUserId).Count();
-                 res.Pic = i.GetChatRoomImage(currentUserId);
-                 return res;
+            var resChatRooms = chatRooms.OrderByDescending(x => x.TblMessages.OrderByDescending(c => c.CreatedDate).First().CreatedDate)
+                .Include(x => x.TblMessages.OrderByDescending(c => c.CreatedDate).Take(1))
+                .ToList();
 
-             })
-             .ToList();
+            var result = resChatRooms.Select(i =>
+              {
+                  InitChatRoom res = i.Adapt<InitChatRoom>();
+                  var lastSeenMessageDate = i.TblUserChatRoomRels.FirstOrDefault(c => c.UserId == currentUserId)?.LastSeenMessage?.CreatedDate;
+                  res.NotSeenMessagesCount = i.Id.GetNotSeenMessagesQuery(core, lastSeenMessageDate, currentUserId).Count();
+                  res.Pic = i.GetChatRoomImage(currentUserId);
+                  return res;
+              })
+              .ToList();
 
             return result;
         }
@@ -73,9 +73,9 @@ namespace DomainShared.Extentions.MapExtentions
         /// <param name="currentUserId">Current UserId</param>
         /// <param name="chatRooms">Chat Room Entity</param>
         /// <returns></returns>
-        public static InitChatRoom MapToInitChatRoom(this TblChatRoom chatRoom, Guid currentUserId)
+        public static InitChatRoom MapToInitChatRoom(this TblChatRoom chatRoom, Guid currentUserId, Core core)
         {
-            return MapToInitChatRoom(new List<TblChatRoom>() { chatRoom }, currentUserId).FirstOrDefault();
+            return MapToInitChatRoom(new List<TblChatRoom>() { chatRoom }.AsQueryable(), currentUserId, core).FirstOrDefault();
         }
 
         /// <summary>
@@ -123,16 +123,16 @@ namespace DomainShared.Extentions.MapExtentions
         /// <param name="chatRoomMapRepo"></param>
         /// <param name="currentUserId"></param>
         /// <returns></returns>
-        public static List<MessagesDto> GetChatRoomMessageDtos(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> chatRoomMapRepo, Guid currentUserId, int? startRow = null)
+        public static List<MessagesDto> GetChatRoomMessageDtos(this Guid chatRoomId, Core core, Guid currentUserId, int? startRow = null)
         {
-            IQueryable<TblUserChatRoomRel> map = chatRoomMapRepo.Get(x => x.ChatRoomId == chatRoom.Id && x.UserId != currentUserId,
+            IQueryable<TblUserChatRoomRel> map = core.TblUserChatRoomRel.Get(x => x.ChatRoomId == chatRoomId && x.UserId != currentUserId,
             includes: x => x.Include(v => v.LastSeenMessage));
 
-            var chatRoomMessages = chatRoom.TblMessages.OrderByDescending(x => x.CreatedDate);
+            var chatRoomMessages = core.TblChatRoom.Get(x => x.Id == chatRoomId).GetChatRoomLazyMessages(startRow).ToList();
             if (startRow != null)
             {
-                int totalCount = chatRoomMessages.Count();
-                return chatRoomMessages.Skip(startRow.Value).Take(12).Select(src =>
+                int totalCount = core.TblMessage.Get(x => x.RecieverChatRoomId == chatRoomId).Count();
+                return chatRoomMessages.Select(src =>
                    {
                        var res = src.Adapt<MessagesDto>();
                        res.Status = src.GetMessageStatusQuery(map);

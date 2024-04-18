@@ -1,6 +1,7 @@
 ﻿using Domain.DataLayer.UnitOfWorks;
 using Domain.Entities;
 using Domain.Enums;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Services.Repositories;
 using System;
@@ -50,16 +51,32 @@ namespace Domain.DataLayer.Helpers
         /// <param name="lastSeenMessageDate"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public static IQueryable<TblMessage> GetNotSeenMessagesQuery(this TblChatRoom chatRoom, DateTime? lastSeenMessageDate, Guid userId)
+        public static IQueryable<TblMessage> GetNotSeenMessagesQuery(this Guid chatRoomId, Core core, DateTime? lastSeenMessageDate, Guid userId)
         {
             if (lastSeenMessageDate is not null)
             {
-                return chatRoom.TblMessages.Where(x => x.CreatedDate > lastSeenMessageDate && x.CreatedById != userId).AsQueryable();
+                return core.TblMessage.Get(x => x.RecieverChatRoomId == chatRoomId).Where(x => x.CreatedDate > lastSeenMessageDate && x.CreatedById != userId).AsQueryable();
             }
             else
             {
-                return chatRoom.TblMessages.Where(x => x.CreatedById != userId).AsQueryable();
+                return core.TblMessage.Get(x => x.RecieverChatRoomId == chatRoomId).Where(x => x.CreatedById != userId).AsQueryable();
             }
+        }
+
+
+        /// <summary>
+        /// GetsChatRoom Messages As LazyLoading
+        /// </summary>
+        /// <param name="tblChatRoom">TblChatRoom IQueryable That indicates just one chatRoom without their Messages</param>
+        /// <param name="chatRoomMapRepo">TblUserChatRoomRel Repository from Core</param>
+        /// <param name="startRow">LazyLoading Start Row</param>
+        /// <returns></returns>
+        public static IQueryable<TblMessage> GetChatRoomLazyMessages(this IQueryable<TblChatRoom> tblChatRoom, int? startRow = null)
+        {
+            startRow = startRow ?? 0;
+
+            return tblChatRoom.SelectMany(x => x.TblMessages.OrderByDescending(x => x.CreatedDate).Skip(startRow.Value).Take(12)).Include(x => x.RecieverChatRoom).AsQueryable();
+
         }
 
         /// <summary>

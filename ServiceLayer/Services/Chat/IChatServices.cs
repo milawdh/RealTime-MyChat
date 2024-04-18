@@ -25,7 +25,7 @@ namespace ServiceLayer.Services.Chat
         Task<ServiceResult<object>> GetChatRoomAsync(Guid id);
         Task SetMessageReadAsync(Guid chatRoomId, Guid messageId, Guid userId);
         Task SetChatRoomAllMessagesReadAsync(Guid chatRoomId);
-        Task<ServiceResult<List<MessagesDto>>> GetChatRoomMessagesAsync(Guid chatRoomId,int startRow);
+        Task<ServiceResult<List<MessagesDto>>> GetChatRoomMessagesAsync(Guid chatRoomId, int startRow);
 
     }
     public class ChatService : IChatServices
@@ -101,11 +101,10 @@ namespace ServiceLayer.Services.Chat
 
         public async Task<ServiceResult<List<MessagesDto>>> GetChatRoomMessagesAsync(Guid chatRoomId, int startRow)
         {
-            var chatRoom = _userInfoContext.ChatRoomsWithMessages.FirstOrDefault(x => x.Id == chatRoomId);
-            if (chatRoom == null)
+            if (!_userInfoContext.ChatRooms.Any(x => x.Id == chatRoomId))
                 return new ServiceResult<List<MessagesDto>>("ChatRoom Not Found!");
 
-            return new ServiceResult<List<MessagesDto>>(chatRoom.GetChatRoomMessageDtos(_core.TblUserChatRoomRel, _userInfoContext.UserId, startRow));
+            return new ServiceResult<List<MessagesDto>>(chatRoomId.GetChatRoomMessageDtos(_core, _userInfoContext.UserId, startRow));
         }
 
         /// <summary>
@@ -192,11 +191,12 @@ namespace ServiceLayer.Services.Chat
         public async Task SetChatRoomAllMessagesReadAsync(Guid chatRoomId)
         {
 
-            var map = _core.TblUserChatRoomRel.Get(i => i.UserId == _userInfoContext.UserId && i.ChatRoomId == chatRoomId,
-                includes: x => x.Include(c => c.ChatRoom).ThenInclude(v => v.TblMessages))
+            var map = _core.TblUserChatRoomRel.Get(i => i.UserId == _userInfoContext.UserId && i.ChatRoomId == chatRoomId)
+                .Include(c => c.ChatRoom).ThenInclude(x => x.TblMessages.OrderByDescending(c => c.CreatedDate).Take(1))
+                .AsSplitQuery()
                  .FirstOrDefault();
 
-            map.LastSeenMessageId = map?.ChatRoom?.TblMessages?.OrderBy(x => x.CreatedDate).LastOrDefault()?.Id;
+            map.LastSeenMessageId = map?.ChatRoom?.TblMessages?.OrderBy(x => x.CreatedDate).FirstOrDefault()?.Id;
             _core.Save();
 
             await _chatHub.Clients.GroupExcept(chatRoomId.ToString(), _userInfoContext.UserChatHubConnectionId).SetAllMessagesRead();
