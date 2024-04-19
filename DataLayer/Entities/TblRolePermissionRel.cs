@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Audited.Models;
+using Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain.Entities;
@@ -16,6 +17,8 @@ public partial class TblRolePermissionRel : FullAuditedEntity<TblRolePermissionR
     [ForeignKey(nameof(PermissionId))]
     [InverseProperty(nameof(TblPermission.TblRolePermissionRels))]
     public virtual TblPermission Permission { get; set; } = null!;
+
+    public PermissionType PermissionType { get; set; }
 
     [ForeignKey(nameof(RoleId))]
     [InverseProperty(nameof(TblRole.TblRolePermissionRels))]

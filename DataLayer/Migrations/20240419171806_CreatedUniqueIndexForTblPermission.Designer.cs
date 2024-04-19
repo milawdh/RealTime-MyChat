@@ -4,6 +4,7 @@ using Domain.DataLayer.Contexts.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domain.Migrations
 {
     [DbContext(typeof(AppBaseDbContex))]
-    partial class AppBaseDbContexModelSnapshot : ModelSnapshot
+    [Migration("20240419171806_CreatedUniqueIndexForTblPermission")]
+    partial class CreatedUniqueIndexForTblPermission
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -433,9 +436,6 @@ namespace Domain.Migrations
 
                     b.Property<Guid>("PermissionId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("PermissionType")
-                        .HasColumnType("int");
 
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");

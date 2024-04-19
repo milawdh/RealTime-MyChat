@@ -4,6 +4,7 @@ using Domain.DataLayer.Contexts.Base;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Domain.Migrations
 {
     [DbContext(typeof(AppBaseDbContex))]
-    partial class AppBaseDbContexModelSnapshot : ModelSnapshot
+    [Migration("20240419125105_AddedUserPerChatRoomPermission")]
+    partial class AddedUserPerChatRoomPermission
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -335,21 +338,16 @@ namespace Domain.Migrations
                         .HasColumnName("ID")
                         .HasDefaultValueSql("(newsequentialid())");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
                         .IsUnicode(false)
                         .HasColumnType("varchar(64)");
 
-                    b.Property<Guid?>("ParentId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.HasIndex("ParentId");
 
                     b.ToTable("TblPermission");
                 });
@@ -433,9 +431,6 @@ namespace Domain.Migrations
 
                     b.Property<Guid>("PermissionId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("PermissionType")
-                        .HasColumnType("int");
 
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
@@ -971,16 +966,6 @@ namespace Domain.Migrations
                     b.Navigation("Reply");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TblPermission", b =>
-                {
-                    b.HasOne("Domain.Entities.TblPermission", "Parent")
-                        .WithMany("Children")
-                        .HasForeignKey("ParentId")
-                        .HasConstraintName("FK_TblPermission_Parent");
-
-                    b.Navigation("Parent");
-                });
-
             modelBuilder.Entity("Domain.Entities.TblRole", b =>
                 {
                     b.HasOne("Domain.Entities.TblUser", "CreatedBy")
@@ -1130,14 +1115,14 @@ namespace Domain.Migrations
                     b.HasOne("Domain.Entities.TblPermission", "Permission")
                         .WithMany("TblUserChatRoomMapPermissions")
                         .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_TblPermission_TblUserChatRoomMapPermission");
 
                     b.HasOne("Domain.Entities.TblUserChatRoomRel", "UserChatRoomRel")
                         .WithMany("TblUserChatRoomMapPermissions")
                         .HasForeignKey("UserChatRoomRelId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_TblUserChatRoomRel_TblUserChatRoomMapPermission");
 
@@ -1308,8 +1293,6 @@ namespace Domain.Migrations
 
             modelBuilder.Entity("Domain.Entities.TblPermission", b =>
                 {
-                    b.Navigation("Children");
-
                     b.Navigation("TblRolePermissionRels");
 
                     b.Navigation("TblUserChatRoomMapPermissions");

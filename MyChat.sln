@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceLayer", "ServiceLaye
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Framework", "Framework\Framework.csproj", "{8504F668-BFDD-45A8-A09A-77FB40E3164C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Src", "Src", "{044741FF-D643-42CA-BC53-1AB89B3A2D88}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,13 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{355B8BED-8F7E-40FE-AFA8-832589DE8542} = {044741FF-D643-42CA-BC53-1AB89B3A2D88}
+		{E7C7E090-459C-4C51-BBA7-8A07313E47BD} = {044741FF-D643-42CA-BC53-1AB89B3A2D88}
+		{8A2CA961-75C8-4873-9C36-1DE34ADAB260} = {044741FF-D643-42CA-BC53-1AB89B3A2D88}
+		{CAAC58F9-5F02-4DE1-B848-2B28FD15A1DA} = {044741FF-D643-42CA-BC53-1AB89B3A2D88}
+		{8504F668-BFDD-45A8-A09A-77FB40E3164C} = {044741FF-D643-42CA-BC53-1AB89B3A2D88}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7BC98CF6-1BA7-4FAF-8D6A-FA00BA083C6A}

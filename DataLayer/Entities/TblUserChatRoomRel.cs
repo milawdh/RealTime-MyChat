@@ -23,4 +23,5 @@ public partial class TblUserChatRoomRel : FullAuditedEntity<TblUserChatRoomRel,G
     [ForeignKey(nameof(UserId))]
     [InverseProperty(nameof(TblUser.TblUserChatRoomRels))]
     public virtual TblUser User { get; set; } = null!;
+    public virtual ICollection<TblUserChatRoomMapPermission> TblUserChatRoomMapPermissions { get; set; } = new List<TblUserChatRoomMapPermission>();
 }

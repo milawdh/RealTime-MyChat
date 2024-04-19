@@ -14,9 +14,15 @@ namespace Domain.Configs
     {
         public void Configure(EntityTypeBuilder<TblPermission> builder)
         {
-            builder.HasQueryFilter(x => !x.IsDeleted);
-
             builder.Property(e => e.Id).HasDefaultValueSql("(newsequentialid())");
+
+            builder.HasIndex(e => e.Name).IsUnique(true);
+
+            builder.HasOne(x=>x.Parent)
+                .WithMany(x=>x.Children)
+                .HasForeignKey(x=>x.ParentId)
+                .HasConstraintName("FK_TblPermission_Parent")
+                .IsRequired(false);
         }
     }
 }
