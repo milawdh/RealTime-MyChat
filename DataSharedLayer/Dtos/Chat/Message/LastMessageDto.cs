@@ -20,8 +20,6 @@ namespace DomainShared.Dtos.Chat.Message
             TypeAdapterConfig<TblMessage, LastMessageDto>.NewConfig()
                 .Map(dst => dst.Body, src => src.Body)
                 .Map(dst => dst.Time, src => src.CreatedDate.ToLongDateString())
-                //.Map(dst => dst.SenderUserName, src => src.RecieverChatRoom.ChatType == src.SenderUser.UserName)
-                //.Map(dest => dest.Status, src => src.IsRead ? MessageStatus.Read : MessageStatus.Sent)
                 ;
         }
     }

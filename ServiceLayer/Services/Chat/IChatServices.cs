@@ -153,13 +153,12 @@ namespace ServiceLayer.Services.Chat
             switch (chatRoomType)
             {
                 case ChatRoomType.Private:
-                    return new ServiceResult<object>(chatRoom.MapToPrivateChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId));
-                case ChatRoomType.Group:
-                    return new ServiceResult<object>(chatRoom.MapToGroupChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId));
-                case ChatRoomType.Channel:
-                    break;
                 case ChatRoomType.SecretChat:
-                    break;
+                    return new ServiceResult<object>(chatRoom.MapToPrivateChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId));
+                case ChatRoomType.Channel:
+                    return new ServiceResult<object>(chatRoom.MapToGroupChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId));
+                case ChatRoomType.Group:
+                    return new ServiceResult<object>(chatRoom.MapToChannelChatRoomDto(_core.TblUserChatRoomRel, chatRoom.Id));
                 default:
                     break;
             }
@@ -176,8 +175,11 @@ namespace ServiceLayer.Services.Chat
         /// <returns></returns>
         public async Task SetMessageReadAsync(Guid chatRoomId, Guid messageId, Guid userId)
         {
-            _core.TblUserChatRoomRel.Get(i => i.UserId == _userInfoContext.UserId && i.ChatRoomId == chatRoomId)
-                .FirstOrDefault().LastSeenMessageId = messageId;
+            var map = _core.TblUserChatRoomRel.Get(i => i.UserId == _userInfoContext.UserId && i.ChatRoomId == chatRoomId)
+                .FirstOrDefault();
+            map.LastSeenMessageId = messageId;
+
+            _core.TblUserChatRoomRel.Update(map);
             _core.Save();
         }
 

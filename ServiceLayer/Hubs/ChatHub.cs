@@ -38,12 +38,12 @@ namespace ServiceLayer.Hubs
         public override async Task OnConnectedAsync()
         {
             //Set UserOnline
-            _userService.SetUserOnline(Context.ConnectionId);
 
             //Send User's Data To Client
             var userIniDto = _userInfoContext.User.MapToUserInitDto(_userInfoContext.ChatRooms, _core);
             await Clients.Caller.SetUserInfo(userIniDto);
 
+            _userService.SetUserOnline(Context.ConnectionId);
             await base.OnConnectedAsync();
 
             //Get User Data From Client

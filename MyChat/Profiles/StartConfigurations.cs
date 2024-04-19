@@ -12,15 +12,18 @@ namespace MyChat.Profiles
     {
         public static async Task ConfigureStartUps(this WebApplication app)
         {
-            var context = app.Services.GetRequiredKeyedService<AppBaseDbContex>("StartUpContext");
-            var contextFactory = app.Services.GetRequiredKeyedService<DbContextFactory>("StartUpContextFactory");
-
             var IsPermissionSeedEnable = bool.Parse(app.Configuration["DataSeed:Permission"]);
             if (IsPermissionSeedEnable)
+            {
+                var context = app.Services.GetRequiredKeyedService<AppBaseDbContex>("StartUpContext");
+                var contextFactory = app.Services.GetRequiredKeyedService<DbContextFactory>("StartUpContextFactory");
+
+
                 await SyncPermissions(context);
 
-            context.Dispose();
-            contextFactory.Dispose();
+                context.Dispose();
+                contextFactory.Dispose();
+            }
         }
 
         public static async Task SyncPermissions(AppBaseDbContex context)

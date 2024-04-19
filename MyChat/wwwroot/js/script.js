@@ -72,7 +72,6 @@ let populateChatList = () => {
     MessageUtils.getMessages()
         .forEach((msg) => {
             let chat = {};
-            debugger
             chat.isGroup = msg.recvIsGroup;
             chat.msg = msg;
 
@@ -102,8 +101,8 @@ let populateChatList = () => {
 };
 function CreateChatListItem(elem) {
 
-    let statusClass = elem.lastMessage.status < 2 ? "far" : "fas";
-    let unreadClass = elem.lastMessage.status < 2 ? "unread" : "";
+    let statusClass = elem.lastMessage != null ? elem.lastMessage.status < 2 ? "far" : "fas" : "";
+    let unreadClass = elem.lastMessage != null ? elem.lastMessage.status < 2 ? "unread" : "" : "";
 
     return `
 		<div class="chat-list-item d-flex flex-row w-100 p-2 border-bottom ${unreadClass}"
@@ -112,27 +111,31 @@ function CreateChatListItem(elem) {
 			<div class="w-50">
 				<div class="name" id="ChLastMessageName${elem.id}">${elem.name}</div>
 				<div class="small last-message" id="ChLastMessage${elem.id}">
-                ${elem.lastMessage.SenderUserName === user.name
+                ${elem.lastMessage != null ? elem.lastMessage.SenderUserName === user.name
             ? '<i class="' + statusClass + ' fa-check-circle mr-1"></i>'
-            : ""
+            : "" : ""
         }
-                ${elem.lastMessage.body}
+                ${elem.lastMessage != null ? elem.lastMessage.body : ""}
                 </div>
 			</div>
 			<div class="flex-grow-1 text-right">
-				<div class="small time" id="ChTime${elem.id}" >${elem.lastMessage.time}</div>
+				<div class="small time" id="ChTime${elem.id}" >${elem.lastMessage != null ? elem.lastMessage.time : ""}</div>
 
-    <div id="ChReadDiv${elem.id}" ${elem.notSeenMessagesCount <= 0 ? "hidden" : ""}>
+    <div id="ChReadDiv${elem.id}" >
         <div class="badge badge-success badge-pill small"
-        id="ChRead-count${elem.id}">
+        id="ChRead-count${elem.id}" ${elem.notSeenMessagesCount <= 0 ? "hidden" : ""}>
             ${elem.notSeenMessagesCount}
             </div>
+            
+            ${elem.isNew ? `<span class="badge badge-success badge-pill small">New</span>` : ""}
+            
                 </div>
 			</div>
 		</div>
 		`;
 }
 let viewChatList = () => {
+    debugger
     DOM.chatList.innerHTML = "";
 
     ChatRoomsList
@@ -142,6 +145,7 @@ let viewChatList = () => {
 }
 
 let generateChatList = () => {
+    debugger
     populateChatList();
     viewChatList();
 };
@@ -157,7 +161,7 @@ let LoadDateToMessageArea = (date) => {
 let LoadMessageToMessageArea = (msg) => {
     debugger
 
-    
+
 
     var element = DOM.messages
 
@@ -277,7 +281,7 @@ let addMessageToMessageArea = (msg) => {
         </div>
 	`;
 
-    
+
     DOM.messages.scrollTo(0, DOM.messages.scrollHeight);
 };
 

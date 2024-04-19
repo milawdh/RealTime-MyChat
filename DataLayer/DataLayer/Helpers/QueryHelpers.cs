@@ -75,7 +75,7 @@ namespace Domain.DataLayer.Helpers
         {
             startRow = startRow ?? 0;
 
-            return tblChatRoom.SelectMany(x => x.TblMessages.OrderByDescending(x => x.CreatedDate).Skip(startRow.Value).Take(12)).Include(x => x.RecieverChatRoom).AsQueryable();
+            return tblChatRoom.SelectMany(x => x.TblMessages.OrderByDescending(x => x.CreatedDate).Skip(startRow.Value).Take(12)).Include(x => x.RecieverChatRoom).Include(x=>x.CreatedBy).AsQueryable();
 
         }
 

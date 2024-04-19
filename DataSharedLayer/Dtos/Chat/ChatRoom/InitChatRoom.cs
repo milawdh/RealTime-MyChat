@@ -16,7 +16,7 @@ namespace DomainShared.Dtos.Chat.ChatRoom
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        [NotMapped]
+
         ///<summary>
         /// Map It With GetChatRoomImage Method
         /// </summary>
@@ -25,13 +25,13 @@ namespace DomainShared.Dtos.Chat.ChatRoom
         public int NotSeenMessagesCount { get; set; } = 0;
         public LastMessageDto LastMessage { get; set; }
 
+        public bool IsNew { get; set; }
+
         public void ConfigMap()
         {
             TypeAdapterConfig<TblChatRoom, InitChatRoom>.NewConfig()
                 .IgnoreNonMapped(true)
                 .Map(dest => dest.Id, src => src.Id)
-                .Map(dest => dest.Name, src => src.Type == ChatRoomType.Group ? src.ChatRoomTitle :
-                src.TblUserChatRoomRels.First().User.Name)
                 .Map(dest => dest.LastMessage, src => src.TblMessages.FirstOrDefault().Adapt<LastMessageDto>());
         }
     }

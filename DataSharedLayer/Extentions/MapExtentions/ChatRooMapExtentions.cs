@@ -33,12 +33,41 @@ namespace DomainShared.Extentions.MapExtentions
         /// <returns></returns>
         public static string? GetChatRoomImage(this TblChatRoom chatroom, Guid currentUserId)
         {
-            return NavigationProfile.Resources + (chatroom.Type == ChatRoomType.Private ?
-                     chatroom.TblUserChatRoomRels.Where(i => i.UserId != currentUserId)
-                    .Select(v => v.User.ProfileImageUrlNavigation.Url)
-                    .FirstOrDefault()
-                    :
-                     chatroom.ProfileImageId != null ? chatroom.ProfileImage.Url : null);
+            var res = NavigationProfile.Resources;
+            switch (chatroom.Type)
+            {
+                case ChatRoomType.Private:
+                case ChatRoomType.SecretChat:
+                    res += chatroom.TblUserChatRoomRels
+                    .FirstOrDefault(i => i.UserId != currentUserId)?.User?.ProfileImageUrlNavigation?.Url;
+                    break;
+                case ChatRoomType.Group:
+                case ChatRoomType.Channel:
+                    res += chatroom.ProfileImage?.Url;
+                    break;
+                default:
+                    break;
+            }
+            return res;
+        }
+
+        public static string GetChatRoomTitle(this TblChatRoom chatRoom, Guid currentUserId)
+        {
+            var res = "";
+            switch (chatRoom.Type)
+            {
+                case ChatRoomType.Private:
+                case ChatRoomType.SecretChat:
+                    res = chatRoom.TblUserChatRoomRels.FirstOrDefault(x => x.UserId != currentUserId).User.Name;
+                    break;
+                case ChatRoomType.Group:
+                case ChatRoomType.Channel:
+                    res = chatRoom.ChatRoomTitle;
+                    break;
+                default:
+                    break;
+            }
+            return res;
         }
 
         /// <summary>
@@ -49,18 +78,21 @@ namespace DomainShared.Extentions.MapExtentions
         /// <returns></returns>
         public static List<InitChatRoom> MapToInitChatRoom(this IQueryable<TblChatRoom> chatRooms, Guid currentUserId, Core core)
         {
-            var resChatRooms = chatRooms.OrderByDescending(x => x.TblMessages.OrderByDescending(c => c.CreatedDate).First().CreatedDate)
-                .Include(x => x.TblMessages.OrderByDescending(c => c.CreatedDate).Take(1))
-                .AsQueryable()
+            var resChatRooms = chatRooms.Include(x => x.TblMessages.OrderByDescending(c => c.CreatedDate).Take(1))
+                .AsSplitQuery()
+                .AsParallel()
+                .ToList()
+                .OrderByDescending(x => x.TblMessages?.FirstOrDefault()?.CreatedDate)
                 .ToList();
 
             var result = resChatRooms.Select(i =>
               {
-                  i.TblUserChatRoomRels = i.TblUserChatRoomRels.OrderBy(x => x.UserId == currentUserId).ToList();
                   InitChatRoom res = i.Adapt<InitChatRoom>();
+                  res.Name = i.GetChatRoomTitle(currentUserId);
                   var lastSeenMessageDate = i.TblUserChatRoomRels.FirstOrDefault(c => c.UserId == currentUserId)!.LastSeenMessage?.CreatedDate;
                   res.NotSeenMessagesCount = i.Id.GetNotSeenMessagesQuery(core, lastSeenMessageDate, currentUserId).Count();
                   res.Pic = i.GetChatRoomImage(currentUserId);
+                  res.IsNew = lastSeenMessageDate == null;
                   return res;
               })
               .ToList();
@@ -129,7 +161,7 @@ namespace DomainShared.Extentions.MapExtentions
             IQueryable<TblUserChatRoomRel> map = core.TblUserChatRoomRel.Get(x => x.ChatRoomId == chatRoomId && x.UserId != currentUserId,
             includes: x => x.Include(v => v.LastSeenMessage));
 
-            var chatRoomMessages = core.TblChatRoom.Get(x => x.Id == chatRoomId).GetChatRoomLazyMessages(startRow).ToList();
+            var chatRoomMessages = core.TblChatRoom.Get(x => x.Id == chatRoomId).GetChatRoomLazyMessages(startRow).AsSplitQuery().ToList();
             if (startRow != null)
             {
                 int totalCount = core.TblMessage.Get(x => x.RecieverChatRoomId == chatRoomId).Count();

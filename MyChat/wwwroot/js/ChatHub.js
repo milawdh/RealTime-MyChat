@@ -191,7 +191,7 @@ function UpdateCurrentChatListItem(messageDto, isNotif = false) {
 
         readCountElement.innerText = readCount
 
-        document.getElementById(`ChReadDiv${messageDto.recieverChatRoomId}`).removeAttribute("hidden")
+        document.getElementById(`ChRead-count${messageDto.recieverChatRoomId}`).removeAttribute("hidden")
     }
 
     document.getElementById(`ChLastMessage${messageDto.recieverChatRoomId}`).innerHTML = formatLength(messageDto.body, 10);
