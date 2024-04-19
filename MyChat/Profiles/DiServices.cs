@@ -25,13 +25,15 @@ namespace ServiceLayer.Profiles
             services.AddScoped<IUserInfoContext>(sp => new UserInfoContext(sp.GetRequiredService<IHttpContextAccessor>(), new Core(sp.GetRequiredService<AppBaseDbContex>())));
 
 
-            services.AddSingleton<ChatHubPipeLine>();
             services.AddScoped<IUserLoginService, UserLoginService>();
             services.AddScoped<IChatServices, ChatService>();
             services.AddScoped<IMediaServcie, MediaService>();
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<IFileServerService, FileServerService>();
 
+            services.AddKeyedSingleton<DbContextFactory>("StartUpContextFactory");
+            services.AddKeyedSingleton("StartUpContext", (sp, a) => sp.GetRequiredKeyedService<DbContextFactory>("StartUpContextFactory").CreateDbContext());
+            services.AddSingleton<ChatHubPipeLine>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IChatHubGroupManager, ChatHubGroupManager>();
             services.AddSingleton<ICacheManager, CacheManager>();

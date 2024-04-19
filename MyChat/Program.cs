@@ -11,13 +11,17 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 var builder = WebApplication.CreateBuilder(args);
 
 #region RegisterServices
-builder.Services.RegisterServices();
-builder.Services.RegisterInversionOfControlls();
-builder.Services.RegisterMapsterConfiguration();
-#endregion
 
 builder.Services.AddPooledDbContextFactory<AppBaseDbContex>(
-    o => { o.UseSqlServer("Data Source=localhost,1433;Initial Catalog=Main_MyChatDb;Integrated Security=True;Trust Server Certificate=True"); });
+    o => o.UseSqlServer(builder.Configuration["ConnectionStrings:MainDb"]));
+
+builder.Services.RegisterServices();
+
+builder.Services.RegisterInversionOfControlls();
+
+builder.Services.RegisterMapsterConfiguration();
+
+#endregion
 
 builder.Services.Configure<FormOptions>(options =>
 {
@@ -33,8 +37,10 @@ builder.Services.Configure<KestrelServerOptions>(options =>
 });
 
 var app = builder.Build();
+
 app.UseMiddlewareProfile();
 
+await app.ConfigureStartUps();
 
 app.MapHub<ChatHub>("/chatHub", options =>
 {
