@@ -3,6 +3,8 @@ using ElmahCore.Mvc;
 using ElmahCore.Sql;
 using Framework.CacheManagement;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using MyChat.PipeLine.HubFilters;
@@ -21,6 +23,19 @@ namespace ServiceLayer.Profiles
 
         public static void RegisterServices(this IServiceCollection services)
         {
+            services.Configure<FormOptions>(options =>
+            {
+                options.MemoryBufferThreshold = 1073741824;
+                options.BufferBody = true;
+                options.ValueLengthLimit = 1073741824;
+                options.MultipartBodyLengthLimit = 1073741824;
+            });
+            services.Configure<KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = 1073741824;
+                options.Limits.MaxRequestBodySize = 1073741824;
+            });
+
             services.AddControllersWithViews();
             services.AddMvc().AddRazorRuntimeCompilation();
             services.AddAuthentication(opt =>

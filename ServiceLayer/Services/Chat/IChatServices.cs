@@ -153,12 +153,10 @@ namespace ServiceLayer.Services.Chat
             switch (chatRoomType)
             {
                 case ChatRoomType.Private:
-                    return new ServiceResult<object>(chatRoom.MapToPrivateChatRoomDto(_userInfoContext.UserId));
+                    return new ServiceResult<object>(chatRoom.MapToPrivateChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId));
                 case ChatRoomType.Group:
-                    return new ServiceResult<object>(chatRoom.MapToGroupChatRoomDto(_userInfoContext.UserId));
+                    return new ServiceResult<object>(chatRoom.MapToGroupChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId));
                 case ChatRoomType.Channel:
-                    break;
-                case ChatRoomType.Community:
                     break;
                 case ChatRoomType.SecretChat:
                     break;

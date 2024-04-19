@@ -24,7 +24,6 @@ namespace DomainShared.Dtos.Chat.ChatRoom
         public void ConfigMap()
         {
             TypeAdapterConfig<TblChatRoom, PrivateChatRoomDto>.NewConfig()
-                .Map(i => i.NavbarText, src => src.GetNavbarText())
                 .Map(i => i.Pic, src => NavigationProfile.Resources + src.TblUserChatRoomRels.FirstOrDefault()!.User.ProfileImageUrlNavigation.Url)
                 .Map(i => i.Name, src => src.TblUserChatRoomRels.FirstOrDefault()!.User.Name);
         }

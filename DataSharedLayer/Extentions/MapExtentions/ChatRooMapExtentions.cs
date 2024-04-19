@@ -1,5 +1,4 @@
-﻿using Azure;
-using Domain.Enums;
+﻿using Domain.Enums;
 using Domain.Entities;
 using Domain.Profiles;
 using Domain.DataLayer.UnitOfWorks;
@@ -7,9 +6,9 @@ using DomainShared.Dtos.Chat.ChatRoom;
 using DomainShared.Dtos.Chat.Message;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
-using static System.Formats.Asn1.AsnWriter;
 using Services.Repositories;
 using Domain.DataLayer.Helpers;
+using DomainShared.Extentions.Utility;
 
 namespace DomainShared.Extentions.MapExtentions
 {
@@ -52,12 +51,14 @@ namespace DomainShared.Extentions.MapExtentions
         {
             var resChatRooms = chatRooms.OrderByDescending(x => x.TblMessages.OrderByDescending(c => c.CreatedDate).First().CreatedDate)
                 .Include(x => x.TblMessages.OrderByDescending(c => c.CreatedDate).Take(1))
+                .AsQueryable()
                 .ToList();
 
             var result = resChatRooms.Select(i =>
               {
+                  i.TblUserChatRoomRels = i.TblUserChatRoomRels.OrderBy(x => x.UserId == currentUserId).ToList();
                   InitChatRoom res = i.Adapt<InitChatRoom>();
-                  var lastSeenMessageDate = i.TblUserChatRoomRels.FirstOrDefault(c => c.UserId == currentUserId)?.LastSeenMessage?.CreatedDate;
+                  var lastSeenMessageDate = i.TblUserChatRoomRels.FirstOrDefault(c => c.UserId == currentUserId)!.LastSeenMessage?.CreatedDate;
                   res.NotSeenMessagesCount = i.Id.GetNotSeenMessagesQuery(core, lastSeenMessageDate, currentUserId).Count();
                   res.Pic = i.GetChatRoomImage(currentUserId);
                   return res;
@@ -157,10 +158,10 @@ namespace DomainShared.Extentions.MapExtentions
         /// <param name="chatRoomMapRepo"></param>
         /// <param name="currentUserId"></param>
         /// <returns></returns>
-        public static GroupChatRoomDto MapToGroupChatRoomDto(this TblChatRoom chatRoom, Guid currentUserId)
+        public static GroupChatRoomDto MapToGroupChatRoomDto(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> repo, Guid currentUserId)
         {
             var result = chatRoom.Adapt<GroupChatRoomDto>();
-
+            result.NavbarText = chatRoom.GetNavbarText(repo, currentUserId);
             return result;
         }
 
@@ -171,12 +172,57 @@ namespace DomainShared.Extentions.MapExtentions
         /// <param name="chatRoomMapRepo"></param>
         /// <param name="currentUserId"></param>
         /// <returns></returns>
-        public static PrivateChatRoomDto MapToPrivateChatRoomDto(this TblChatRoom chatRoom, Guid currentUserId)
+        public static PrivateChatRoomDto MapToPrivateChatRoomDto(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> repo, Guid currentUserId)
         {
-            chatRoom.TblUserChatRoomRels = chatRoom.TblUserChatRoomRels.OrderByDescending(x => x.UserId != currentUserId).ToList();
             var res = chatRoom.Adapt<PrivateChatRoomDto>();
-
+            res.NavbarText = chatRoom.GetNavbarText(repo, currentUserId);
             return res;
+        }
+
+        public static ChannelChatRoomDto MapToChannelChatRoomDto(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> repo, Guid currentUserId)
+        {
+            var res = chatRoom.Adapt<ChannelChatRoomDto>();
+            res.NavbarText = chatRoom.GetNavbarText(repo, currentUserId);
+            return res;
+        }
+
+        /// <summary>
+        /// Gets text That Will be shown on Navbar for User From ChatRoom
+        /// </summary>
+        /// <param name="chatRoom">Chat Room That User opened</param>
+        /// <returns></returns>
+        public static string GetNavbarText(this TblChatRoom chatRoom, MainRepo<TblUserChatRoomRel> repo, Guid currentUserId)
+        {
+            string result = "";
+            switch (chatRoom.Type)
+            {
+                case Domain.Enums.ChatRoomType.Private:
+                    var user = repo.Get(x => x.ChatRoomId == chatRoom.Id && x.UserId != currentUserId).FirstOrDefault()!.User;
+                    if (user.IsOnline)
+                        result = "Online";
+                    else
+                    {
+                        if ((DateTime.Now - user.LastOnline).Days > 1)
+                            result = user.LastOnline.ToString("yyyy/M/dd H:m");
+                        else
+                            result = user.LastOnline.ToString("H:m");
+                    }
+                    break;
+                case Domain.Enums.ChatRoomType.Group:
+                    var userNames = repo.Get(x => x.ChatRoomId == chatRoom.Id).Take(3).Select(i => i.User.UserName).ToList();
+                    result = "You, " + string.Join(", ", userNames);
+                    if (chatRoom.TblUserChatRoomRels.Count > 2)
+                        result += "...";
+                    break;
+                case Domain.Enums.ChatRoomType.Channel:
+                    result = repo.Get(x => x.ChatRoomId == chatRoom.Id).Count().FormatCount();
+                    break;
+                case Domain.Enums.ChatRoomType.SecretChat:
+                    break;
+                default:
+                    break;
+            }
+            return result;
         }
     }
 }

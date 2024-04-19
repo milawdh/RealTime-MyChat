@@ -11,7 +11,6 @@ namespace Domain.Enums
         Private = 8,
         Group = 9,
         Channel = 10,
-        Community = 11,
         SecretChat = 12,
     }
 }

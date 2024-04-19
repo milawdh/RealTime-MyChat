@@ -36,6 +36,34 @@ namespace DomainShared.Extentions.Utility
             return result;
         }
 
+        /// <summary>
+        /// Formats LongNumber in 1000 base
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static string FormatCount(this long num)
+        {
+            if (num < 1000)
+                return num.ToString();
+
+            string result = ((double)num / 1000).ToString("0.0") + "K";
+            return result;
+        }
+
+        /// <summary>
+        /// Formats Int Number in 1000 base
+        /// </summary>
+        /// <param name="num"></param>
+        /// <returns></returns>
+        public static string FormatCount(this int num)
+        {
+            if (num < 1000)
+                return num.ToString();
+
+            string result = ((double)num / 1000).ToString("0.0") + "K";
+            return result;
+        }
+
         public static string FormatLength(this string src, int length)
         {
             var isLong = false;

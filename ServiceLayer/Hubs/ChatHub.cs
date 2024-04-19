@@ -85,7 +85,7 @@ namespace ServiceLayer.Hubs
             foreach (var message in messages.Result)
             {
                 yield return new ApiResult<MessagesDto>(message);
-                await Task.Delay(5, cancellationToken);
+                await Task.Delay(10, cancellationToken);
             }
         }
 

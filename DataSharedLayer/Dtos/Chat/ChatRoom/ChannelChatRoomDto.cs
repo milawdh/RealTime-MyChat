@@ -1,19 +1,20 @@
-﻿using Domain.Enums;
-using Domain.Entities;
-using Domain.Profiles;
-using DomainShared.Dtos.Chat.Message;
-using DomainShared.Extentions.MapExtentions;
-using DomainShared.Services;
-using Mapster;
+﻿using Domain.Entities;
+using Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Mapster;
+using Domain.Profiles;
+using DomainShared.Extentions.MapExtentions;
 
 namespace DomainShared.Dtos.Chat.ChatRoom
 {
-    public class GroupChatRoomDto : IHasCustomMap
+    public class ChannelChatRoomDto
     {
         public Guid Id { get; set; }
 
@@ -36,7 +37,6 @@ namespace DomainShared.Dtos.Chat.ChatRoom
                 .Map(dest => dest.Name, src => src.ChatRoomTitle)
                 .Map(dest => dest.Pic, src => NavigationProfile.Resources + src.ProfileImage.Url);
         }
-
 
     }
 }
