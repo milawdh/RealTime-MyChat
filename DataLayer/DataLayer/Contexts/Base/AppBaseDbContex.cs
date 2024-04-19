@@ -46,7 +46,7 @@ namespace Domain.DataLayer.Contexts.Base
             var entityMethod = typeof(ModelBuilder).GetMethod("Entity", new Type[] { });
 
             var entityTypes = model.GetEntityTypes()
-                .Where(x => x.ClrType.Namespace.StartsWith(nameSpace)).Where(x => x.ClrType.IsSubclassOf(typeof(Entity<>)))
+                .Where(x => x.ClrType.Namespace.StartsWith(nameSpace)).Where(x => x.ClrType.IsSubclassOf(typeof(IEntity)))
                 .Select(x => x.ClrType).ToList();
 
             entityTypes.ForEach(t =>
@@ -55,11 +55,15 @@ namespace Domain.DataLayer.Contexts.Base
             });
         }
 
+        #region Add
+
         public virtual EntityEntry<TEntity> Add<TEntity>(TEntity entity) where TEntity : class
         {
-
-            Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = User.UserId;
-            Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
+            if (entity is ICreationAuditedEntity)
+            {
+                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedById)).CurrentValue = User.UserId;
+                Entry(entity).Property(nameof(ICreationAuditedEntity.CreatedDate)).CurrentValue = DateTime.Now;
+            }
 
             return Set<TEntity>().Add(entity);
         }
@@ -100,6 +104,9 @@ namespace Domain.DataLayer.Contexts.Base
             Set<TEntity>().AddRange(entities);
         }
 
+        #endregion
+
+        #region Update
 
         public virtual EntityEntry<TEntity> Update<TEntity>(TEntity entity) where TEntity : class
         {
@@ -132,6 +139,10 @@ namespace Domain.DataLayer.Contexts.Base
             Set<TEntity>().UpdateRange(entities);
         }
 
+        #endregion
+
+        #region RemoveForce
+
         public virtual EntityEntry<TEntity> RemoveForce<TEntity>(TEntity entity) where TEntity : class
         {
             return base.Remove(entity);
@@ -147,11 +158,17 @@ namespace Domain.DataLayer.Contexts.Base
             Set<TEntity>().RemoveRange(entities);
         }
 
+        #endregion
+
+        #region Remove
+
         public virtual ServiceResult<EntityEntry<TEntity>> Reomve<TEntity>(TEntity entity) where TEntity : class
         {
             if (entity is not IBaseAuditedEntity)
-                return new ServiceResult<EntityEntry<TEntity>>("Given Object does not Inherit Base Entity");
-
+            {
+                RemoveForce<TEntity>(entity);
+                return new ServiceResult<EntityEntry<TEntity>>();
+            }
             Entry(entity).Property(nameof(IBaseAuditedEntity.IsDeleted)).CurrentValue = true;
 
             if (entity is IDeleteAuditedEntity)
@@ -169,7 +186,10 @@ namespace Domain.DataLayer.Contexts.Base
             foreach (var entity in entities)
             {
                 if (entity is not IBaseAuditedEntity)
-                    return new ServiceResult<EntityEntry<TEntity>>("Given Object does not Inherit Base Entity");
+                {
+                    RemoveForce<TEntity>(entity);
+                    return new ServiceResult<EntityEntry<TEntity>>();
+                }
 
                 Entry(entity).Property(nameof(IBaseAuditedEntity.IsDeleted)).CurrentValue = true;
 
@@ -187,7 +207,10 @@ namespace Domain.DataLayer.Contexts.Base
             foreach (var entity in entities)
             {
                 if (entity is not IBaseAuditedEntity)
-                    return new ServiceResult<EntityEntry<TEntity>>("Given Object does not Inherit Base Entity");
+                {
+                    RemoveForce<TEntity>(entity);
+                    return new ServiceResult<EntityEntry<TEntity>>();
+                }
 
                 Entry(entity).Property(nameof(IBaseAuditedEntity.IsDeleted)).CurrentValue = true;
 
@@ -199,6 +222,8 @@ namespace Domain.DataLayer.Contexts.Base
             }
             return new ServiceResult();
         }
+
+        #endregion
 
         public virtual IDbContextTransaction BeginTransaction()
         {

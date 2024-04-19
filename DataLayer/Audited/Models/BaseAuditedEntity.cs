@@ -15,10 +15,13 @@ using Domain.Entities;
 
 namespace Domain.Audited.Models
 {
-    public interface IBaseAuditedEntity
+    public interface IEntity { }
+
+    public interface IBaseAuditedEntity : IEntity
     {
         public bool IsDeleted { get; set; }
     }
+
 
     public class Entity<TEntity> : AuditedValidation<TEntity>, IBaseAuditedEntity where TEntity : class
     {

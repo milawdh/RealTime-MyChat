@@ -10,7 +10,7 @@ using System.Security.Claims;
 
 namespace Domain.DataLayer.Contexts
 {
-    public class DbContextFactory : IDbContextFactory<AppBaseDbContex>
+    public class DbContextFactory : IDbContextFactory<AppBaseDbContex> , IDisposable
     {
         private readonly string _userName;
         private readonly IDbContextFactory<AppBaseDbContex> _dbContextFactory;
@@ -18,8 +18,7 @@ namespace Domain.DataLayer.Contexts
         public DbContextFactory(IDbContextFactory<AppBaseDbContex> dbContextFactory, IHttpContextAccessor httpContextAccessor)
         {
             _dbContextFactory = dbContextFactory;
-            _userName = httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier)?.Value;
-
+            _userName = httpContextAccessor?.HttpContext?.User?.Claims?.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier)?.Value;
         }
         public AppBaseDbContex CreateDbContext()
         {
@@ -27,6 +26,10 @@ namespace Domain.DataLayer.Contexts
             if (context.Any<TblUser>(x => x.UserName == _userName))
                 context.User = new UserInfoContext(new Core(context), _userName);
             return context;
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

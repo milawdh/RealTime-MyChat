@@ -20,7 +20,6 @@ namespace Domain.DataLayer.UnitOfWorks
         private readonly MainRepo<TblMedia> Media;
         private readonly MainRepo<TblMessage> Message;
         private readonly MainRepo<TblMyChatIdentifier> MyChatIdentifier;
-        private readonly MainRepo<TblPermission> Permission;
         private readonly MainRepo<TblRole> Role;
         private readonly MainRepo<TblRolePermissionRel> RolePermissionRel;
         private readonly MainRepo<TblSetting> Settings;
@@ -37,7 +36,6 @@ namespace Domain.DataLayer.UnitOfWorks
         public MainRepo<TblMedia> TblMedia => Media ?? new(_context);
         public MainRepo<TblMessage> TblMessage => Message ?? new(_context);
         public MainRepo<TblMyChatIdentifier> TblMyChatIdentifier => MyChatIdentifier ?? new(_context);
-        public MainRepo<TblPermission> TblPermission => Permission ?? new(_context);
         public MainRepo<TblRole> TblRole => Role ?? new(_context);
         public MainRepo<TblRolePermissionRel> TblRolePermissionRel => RolePermissionRel ?? new(_context);
         public MainRepo<TblSetting> TblSettings => Settings ?? new(_context);
