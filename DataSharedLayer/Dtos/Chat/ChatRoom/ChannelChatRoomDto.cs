@@ -11,10 +11,11 @@ using System.Threading.Tasks;
 using Mapster;
 using Domain.Profiles;
 using DomainShared.Extentions.MapExtentions;
+using DomainShared.Services;
 
 namespace DomainShared.Dtos.Chat.ChatRoom
 {
-    public class ChannelChatRoomDto
+    public class ChannelChatRoomDto : IHasCustomMap
     {
         public Guid Id { get; set; }
 
@@ -33,7 +34,7 @@ namespace DomainShared.Dtos.Chat.ChatRoom
 
         public void ConfigMap()
         {
-            TypeAdapterConfig<TblChatRoom, GroupChatRoomDto>.NewConfig()
+            TypeAdapterConfig<TblChatRoom, ChannelChatRoomDto>.NewConfig()
                 .Map(dest => dest.Name, src => src.ChatRoomTitle)
                 .Map(dest => dest.Pic, src => NavigationProfile.Resources + src.ProfileImage.Url);
         }

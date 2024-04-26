@@ -171,7 +171,7 @@ let LoadMessageToMessageArea = (msg) => {
     element.innerHTML = `
   <div class="d-flex ${msg.sender == user.id ? `justify-content-end` : `justify-content-start`}">
 	<div class="${msg.sender == user.id ? `self` : ``
-        } p-1 my-1 mx-3 rounded bg-white shadow-sm message-item" id="MessageId${msg.Id}">
+        } p-1 my-1 mx-3 rounded bg-white shadow-sm message-item" id="MessageId${msg.id}">
 		<div class="options">
 		<a class="text-decoration-none" uk-toggle href="#msgDrId${msg.id}">
 		<i class="fas fa-angle-down text-muted px-2"></i>
@@ -179,13 +179,13 @@ let LoadMessageToMessageArea = (msg) => {
 		<div uk-dropdown="mode: click" class="uk-border-rounded" id="msgDrId${msg.id}">
 			<ul class="uk-nav uk-dropdown-nav">
 				${msg.sender == user.id ?
-            `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowEditMessage(${msg.Id})">Edit</a></li>
+            `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowEditMessage('${msg.id}')">Edit</a></li>
 				<hr class="m-0">
-				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.Id})">Delete</a></li>
-				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.Id})">Forward</a></li>
+				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage('${msg.id}')">Delete</a></li>
+				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowForwardMessage('${msg.id}','${formatLength(msg.body, 10)}')">Forward</a></li>
                 `
             :
-            `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.Id})">Forward</a></li>`
+        `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowForwardMessage('${msg.id}','${formatLength(msg.body, 10)}')">Forward</a></li>`
         }
 			</ul>
 		</div>
@@ -243,7 +243,7 @@ let addMessageToMessageArea = (msg) => {
     element.innerHTML += `
   <div class="d-flex ${msg.sender == user.id ? `justify-content-end` : `justify-content-start`}">
 	<div class="${msg.sender == user.id ? `self` : ``
-        } p-1 my-1 mx-3 rounded bg-white shadow-sm message-item" id="MessageId${msg.Id}">
+        } p-1 my-1 mx-3 rounded bg-white shadow-sm message-item" id="MessageId${msg.id}">
 		<div class="options">
 		<a class="text-decoration-none" uk-toggle href="#msgDrId${msg.id}">
 		<i class="fas fa-angle-down text-muted px-2"></i>
@@ -251,13 +251,13 @@ let addMessageToMessageArea = (msg) => {
 		<div uk-dropdown="mode: click" class="uk-border-rounded" id="msgDrId${msg.id}">
 			<ul class="uk-nav uk-dropdown-nav">
 				${msg.sender == user.id ?
-            `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowEditMessage(${msg.Id})">Edit</a></li>
+            `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowEditMessage('${msg.id}','${formatLength(msg.body, 10)}')">Edit</a></li>
 				<hr class="m-0">
-				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.Id})">Delete</a></li>
-				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.Id})">Forward</a></li>
+				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage('${msg.id}','${formatLength(msg.body, 10)}')">Delete</a></li>
+				<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowForwardMessage('${msg.id}','${formatLength(msg.body, 10)}')">Forward</a></li>
                 `
             :
-            `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowDeleteMessage(${msg.Id})">Forward</a></li>`
+        `<li class="uk-active"><a style="font-weight: bold;" class="text-decoration-none" onclick="ShowForwardMessage('${msg.id}','${formatLength(msg.body, 10)}')">Forward</a></li>`
         }
 			</ul>
 		</div>
@@ -292,7 +292,6 @@ let generateMessageArea = async (elem, chatId) => {
     lastDate = "";
 
     chat = await GetChatRoomDetails(chatId);
-    await setCurrentChatRoom();
 
     document.getElementById(`ChReadDiv${chatId}`).setAttribute("hidden", "")
     document.getElementById(`ChRead-count${chatId}`).innerText = 0;
@@ -356,7 +355,6 @@ let sendMessage = async () => {
         DOM.messageInput.value = "";
         document.getElementById('message-file-input').files = null
         document.getElementById('message-file-input').value = null
-        addMessageToMessageArea(sendMessageResult);
     }
     else {
         var dataToSend = new FormData();
@@ -376,7 +374,6 @@ let sendMessage = async () => {
                 document.getElementById('message-file-input').files = null
                 document.getElementById('message-file-input').value = null
                 document.getElementById('sender-button').onclick = sendMessage
-                addMessageToMessageArea(sendMessageResult);
                 ShowNotificationText("Message Sent Successfully!")
             },
             error: function (data) {

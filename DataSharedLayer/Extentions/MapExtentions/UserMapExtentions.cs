@@ -25,7 +25,7 @@ namespace DomainShared.Extentions.MapExtentions
         public static UserInitDto MapToUserInitDto(this TblUser user, IQueryable<TblChatRoom> ChatRoomsWithOutMessages, Core core)
         {
             UserInitDto result = user.Adapt<UserInitDto>();
-            result.ChatRooms = ChatRoomsWithOutMessages.MapToInitChatRoom(user.Id, core);
+            result.ChatRooms = ChatRoomsWithOutMessages.MapToChatListItemDto(user.Id, core);
 
             return result;
         }

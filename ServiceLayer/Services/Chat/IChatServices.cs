@@ -15,6 +15,7 @@ using ServiceLayer.Services.User;
 using Domain.DataLayer.UnitOfWorks;
 using Domain.DataLayer.Repository;
 using ServiceLayer.Services.File;
+using System.Linq;
 
 namespace ServiceLayer.Services.Chat
 {
@@ -26,7 +27,7 @@ namespace ServiceLayer.Services.Chat
         Task SetMessageReadAsync(Guid chatRoomId, Guid messageId, Guid userId);
         Task SetChatRoomAllMessagesReadAsync(Guid chatRoomId);
         Task<ServiceResult<List<MessagesDto>>> GetChatRoomMessagesAsync(Guid chatRoomId, int startRow);
-
+        Task<ServiceResult> ForwardMessageAsync(List<Guid> recieverChatRooms, TblMessage tblMessage);
     }
     public class ChatService : IChatServices
     {
@@ -38,13 +39,15 @@ namespace ServiceLayer.Services.Chat
         private readonly IHubContext<ChatHub, IChatHubApi> _chatHub;
         private readonly IChatHubGroupManager _chatHubGroupManager;
         private readonly IMediaServcie _mediaServcie;
+        private readonly IFileServerService _fileServerService;
 
         public ChatService(IUserService userService,
             IUserInfoContext userInfoContext,
             Core core,
             IHubContext<ChatHub, IChatHubApi> chatHub,
             IChatHubGroupManager chatHubGroupManager,
-            IMediaServcie mediaServcie)
+            IMediaServcie mediaServcie,
+            IFileServerService fileServerService)
         {
             _userService = userService;
             _userInfoContext = userInfoContext;
@@ -52,10 +55,16 @@ namespace ServiceLayer.Services.Chat
             _chatHub = chatHub;
             _chatHubGroupManager = chatHubGroupManager;
             _mediaServcie = mediaServcie;
+            _fileServerService = fileServerService;
         }
 
         #endregion
 
+        /// <summary>
+        /// SendsMessage to clients from currentUser
+        /// </summary>
+        /// <param name="messageDto">Message Content Dto</param>
+        /// <returns></returns>
         public async Task<ServiceResult<MessagesDto>> SendMessageAsync(SendMessageDto messageDto)
         {
             if (!_userInfoContext.ChatRooms.Any(x => x.Id == messageDto.RecieverChatRoomId))
@@ -99,6 +108,61 @@ namespace ServiceLayer.Services.Chat
             }
         }
 
+        /// <summary>
+        /// Forwards messages from it's ChatRoom to specified ChatRoom
+        /// </summary>
+        /// <param name="recieverChatRoom">To ForwardChatRoomId</param>
+        /// <param name="tblMessages">Messages Entities</param>
+        /// <returns></returns>
+        public async Task<ServiceResult> ForwardMessageAsync(List<Guid> recieverChatRooms, TblMessage tblMessage)
+        {
+            var newMessages = new List<TblMessage>();
+            TblFileServer activeFileServer = _fileServerService.GetActiveFileServer();
+
+            var maps = _core.TblUserChatRoomRel.Get(x => recieverChatRooms.Contains(x.ChatRoomId) && x.UserId == _userInfoContext.UserId)
+                .ToList();
+
+            foreach (var recieverChatRoom in recieverChatRooms)
+            {
+                TblMessage message = new TblMessage()
+                {
+                    Body = tblMessage.Body,
+                    RecieverChatRoomId = recieverChatRoom,
+                    IsFromSystem = false,
+                };
+                //TODO Ask
+                newMessages.Add(message);
+                _core.TblMedia.AddRange(tblMessage.TblMedias.ToList().Select(x => new TblMedia()
+                {
+                    Message = message,
+                    MediaType = x.MediaType,
+                    FileServerId = activeFileServer.Id,
+                    FileName = x.FileName,
+                    FileMimType = x.FileMimType,
+                }).ToList());
+
+
+                _core.TblMessage.Add(message);
+                maps.FirstOrDefault(x => x.ChatRoomId == recieverChatRoom).LastSeenMessage = message;
+            }
+
+            _core.TblUserChatRoomRel.UpdateRange(maps);
+            _core.Save();
+
+            var result = newMessages.AsQueryable().ProjectToType<MessagesDto>().ToList();
+
+            //TODO : Do it with backTask
+            await RecieveMessageAsync(newMessages);
+
+            return new ServiceResult();
+        }
+
+        /// <summary>
+        /// Gets Current User's ChatRoom Messages
+        /// </summary>
+        /// <param name="chatRoomId">Current User's Chatroom id that you wnat it's messages</param>
+        /// <param name="startRow">Message Count To skip for pagging</param>
+        /// <returns></returns>
         public async Task<ServiceResult<List<MessagesDto>>> GetChatRoomMessagesAsync(Guid chatRoomId, int startRow)
         {
             if (!_userInfoContext.ChatRooms.Any(x => x.Id == chatRoomId))
@@ -108,9 +172,9 @@ namespace ServiceLayer.Services.Chat
         }
 
         /// <summary>
-        /// Calls RecieveMessage Method In Message's Reciever Chat Room Members's Scope from ChatHub Api
+        /// Calls RecieveMessage Method In Message's Reciever Chat Room Members's Scope from ChatHub Api and Adds Message to their MessageArea
         /// </summary>
-        /// <param name="messageDto">Message Dto Will Send</param>
+        /// <param name="tblMessage">Message Entity Will Send</param>
         /// <returns>It Sends data from ChatHub</returns>
         public async Task RecieveMessageAsync(TblMessage tblMessage)
         {
@@ -121,17 +185,31 @@ namespace ServiceLayer.Services.Chat
 
 
             var willNotifyUsers = allRecieverUsers.Where(c => !dict.ContainsKey(c) || dict[c] != tblMessage.RecieverChatRoomId.ToString())
+                .Except(new List<string>() { _userInfoContext.UserChatHubConnectionId })
                 .ToList();
 
-            var notification = tblMessage.MapToRecieveMessageNotificationDto(_core);
+            var notificationDto = tblMessage.MapToRecieveMessageNotificationDto(_core);
 
-            var result = tblMessage.Adapt<RecieveMessageDto>();
+            var result = tblMessage.Adapt<MessagesDto>();
 
-            await _chatHub.Clients.GroupExcept(tblMessage.RecieverChatRoomId.ToString(), _userInfoContext.User.ConnectionId)
-                .RecieveMessage(new ApiResult<RecieveMessageDto>(new ServiceResult<RecieveMessageDto>(result)));
+            await _chatHub.Clients.Group(tblMessage.RecieverChatRoomId.ToString())
+                .AddMessage(new ApiResult<MessagesDto>(new ServiceResult<MessagesDto>(result)));
 
             await _chatHub.Clients.Clients(willNotifyUsers)
-                .RecieveNotification(new ApiResult<RecieveMessageNotificationDto>(new ServiceResult<RecieveMessageNotificationDto>(notification)));
+                .RecieveNotification(new ApiResult<RecieveMessageNotificationDto>(new ServiceResult<RecieveMessageNotificationDto>(notificationDto)));
+        }
+
+        /// <summary>
+        /// Calls Many RecieveMessage Method In Message's Reciever Chat Room Members's Scope from ChatHub Api
+        /// </summary>
+        /// <param name="tblMessages">Messages Entity Will Send</param>
+        /// <returns>It Sends data from ChatHub</returns>
+        public async Task RecieveMessageAsync(List<TblMessage> tblMessages)
+        {
+            foreach (var item in tblMessages)
+            {
+                await RecieveMessageAsync(item);
+            }
         }
 
         /// <summary>
@@ -155,9 +233,9 @@ namespace ServiceLayer.Services.Chat
                 case ChatRoomType.Private:
                 case ChatRoomType.SecretChat:
                     return new ServiceResult<object>(chatRoom.MapToPrivateChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId));
-                case ChatRoomType.Channel:
-                    return new ServiceResult<object>(chatRoom.MapToGroupChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId));
                 case ChatRoomType.Group:
+                    return new ServiceResult<object>(chatRoom.MapToGroupChatRoomDto(_core.TblUserChatRoomRel, _userInfoContext.UserId));
+                case ChatRoomType.Channel:
                     return new ServiceResult<object>(chatRoom.MapToChannelChatRoomDto(_core.TblUserChatRoomRel, chatRoom.Id));
                 default:
                     break;
@@ -196,7 +274,7 @@ namespace ServiceLayer.Services.Chat
                 .AsSplitQuery()
                  .FirstOrDefault();
 
-            map.LastSeenMessageId = map?.ChatRoom?.TblMessages?.OrderBy(x => x.CreatedDate).FirstOrDefault()?.Id;
+            map.LastSeenMessageId = map?.ChatRoom?.TblMessages?.OrderByDescending(x => x.CreatedDate).FirstOrDefault()?.Id;
             _core.Save();
 
             await _chatHub.Clients.GroupExcept(chatRoomId.ToString(), _userInfoContext.UserChatHubConnectionId).SetAllMessagesRead();

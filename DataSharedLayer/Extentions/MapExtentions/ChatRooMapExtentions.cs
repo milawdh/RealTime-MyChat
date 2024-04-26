@@ -71,44 +71,57 @@ namespace DomainShared.Extentions.MapExtentions
         }
 
         /// <summary>
-        /// Gets Many ChatRooms's Init Dtos For ChatRoomLists Item
+        /// Gets Many ChatRooms's Dto's For ChatRoomLists Item with Their LastMessages
         /// </summary>
         /// <param name="chatRooms">User Chat Rooms</param>
         /// <param name="currentUserId">CurrentUserId</param>
         /// <returns></returns>
-        public static List<InitChatRoom> MapToInitChatRoom(this IQueryable<TblChatRoom> chatRooms, Guid currentUserId, Core core)
+        public static List<ChatListItemDto> MapToChatListItemDto(this IQueryable<TblChatRoom> chatRooms, Guid currentUserId, Core core)
         {
             var resChatRooms = chatRooms.Include(x => x.TblMessages.OrderByDescending(c => c.CreatedDate).Take(1))
                 .AsSplitQuery()
-                .AsParallel()
                 .ToList()
                 .OrderByDescending(x => x.TblMessages?.FirstOrDefault()?.CreatedDate)
                 .ToList();
 
+            var maps = core.TblUserChatRoomRel.Get(a => a.UserId == currentUserId).ToList();
+
             var result = resChatRooms.Select(i =>
               {
-                  InitChatRoom res = i.Adapt<InitChatRoom>();
+                  ChatListItemDto res = i.Adapt<ChatListItemDto>();
                   res.Name = i.GetChatRoomTitle(currentUserId);
-                  var lastSeenMessageDate = i.TblUserChatRoomRels.FirstOrDefault(c => c.UserId == currentUserId)!.LastSeenMessage?.CreatedDate;
+                  var lastSeenMessageDate = maps.FirstOrDefault(c => c.ChatRoomId == i.Id)!.LastSeenMessage?.CreatedDate;
                   res.NotSeenMessagesCount = i.Id.GetNotSeenMessagesQuery(core, lastSeenMessageDate, currentUserId).Count();
                   res.Pic = i.GetChatRoomImage(currentUserId);
                   res.IsNew = lastSeenMessageDate == null;
                   return res;
               })
-              .ToList();
+            .ToList();
 
             return result;
         }
 
+
+        public static async IAsyncEnumerable<ChatRoomSelectDto> MapToChatRoomSelectDtoAync(this IQueryable<TblChatRoom> chatRooms, Guid currentUserId, CancellationToken cancellationToken)
+        {
+            await foreach (var x in chatRooms.AsAsyncEnumerable())
+            {
+                var res = x.Adapt<ChatRoomSelectDto>();
+                res.Pic = x.GetChatRoomImage(currentUserId);
+                res.Name = x.GetChatRoomTitle(currentUserId);
+                yield return res;
+            }
+        }
+
         /// <summary>
-        /// Gets a ChatRoom's Init Dto For ChatRoomLists Item
+        /// Gets a ChatRoom's Dto's For ChatRoomLists Item
         /// </summary>
         /// <param name="currentUserId">Current UserId</param>
         /// <param name="chatRooms">Chat Room Entity</param>
         /// <returns></returns>
-        public static InitChatRoom MapToInitChatRoom(this TblChatRoom chatRoom, Guid currentUserId, Core core)
+        public static ChatListItemDto MapToChatListItemDto(this TblChatRoom chatRoom, Guid currentUserId, Core core)
         {
-            return MapToInitChatRoom(new List<TblChatRoom>() { chatRoom }.AsQueryable(), currentUserId, core).FirstOrDefault();
+            return MapToChatListItemDto(new List<TblChatRoom>() { chatRoom }.AsQueryable(), currentUserId, core).FirstOrDefault();
         }
 
         /// <summary>

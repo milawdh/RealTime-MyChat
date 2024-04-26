@@ -9,7 +9,7 @@ namespace ServiceLayer.Hubs.Api
     public interface IChatHubApi
     {
         Task SetUserInfo(UserInitDto userDto);
-        Task RecieveMessage(ApiResult<RecieveMessageDto> message);
+        Task AddMessage(ApiResult<MessagesDto> message);
         Task RecieveNotification(ApiResult<RecieveMessageNotificationDto> message);
 
         Task GetCurrentChatRoom();

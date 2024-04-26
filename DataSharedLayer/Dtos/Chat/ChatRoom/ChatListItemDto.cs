@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace DomainShared.Dtos.Chat.ChatRoom
 {
-    public class InitChatRoom : IHasCustomMap
+    public class ChatListItemDto : IHasCustomMap
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -29,7 +29,7 @@ namespace DomainShared.Dtos.Chat.ChatRoom
 
         public void ConfigMap()
         {
-            TypeAdapterConfig<TblChatRoom, InitChatRoom>.NewConfig()
+            TypeAdapterConfig<TblChatRoom, ChatListItemDto>.NewConfig()
                 .IgnoreNonMapped(true)
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.LastMessage, src => src.TblMessages.FirstOrDefault().Adapt<LastMessageDto>());

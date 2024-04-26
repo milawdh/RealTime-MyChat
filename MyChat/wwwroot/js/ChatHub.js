@@ -1,4 +1,5 @@
-﻿var chatConnection = new signalR.HubConnectionBuilder()
+﻿
+var chatConnection = new signalR.HubConnectionBuilder()
     .withUrl("/chatHub")
     .withStatefulReconnect({ bufferSize: 1000 })
     .build();
@@ -45,7 +46,7 @@ async function GetChatRoomDetails(charoomId) {
 //}
 
 function LoadOtherMessages() {
-var LoadOtherMessagesHtml = ""
+    var LoadOtherMessagesHtml = ""
     debugger
     if (!isMessagesEnd) {
 
@@ -136,14 +137,14 @@ function LoadCurrentMessages() {
                 DOM.messages.scrollTop = 15;
                 DOM.messages.innerHTML = `<div id="lazy-div"></div>` + DOM.messages.innerHTML
                 if (!isMessagesEnd)
-                    startRow += 12;
+                    startRow += 15;
             },
             error: (err) => {
             },
         });
 
 }
-async function RecieveMessage(message) {
+async function AddMessage(message) {
 
     var messageDto = message.result;
 
@@ -172,8 +173,66 @@ function SetAllMessagesRead() {
     $('.far').removeClass('far')
 }
 
+function ShowForwardMessage(messageId, messageBody) {
 
+    UIkit.modal(document.getElementById('ShowForwardMessage-Modal')).show();
+    document.getElementById('ShowForwardMessage-Modal-BtnSend').setAttribute('onclick', ` ConfirmForwardMessage('${messageId}')`);
 
+    document.getElementById('ShowForwardMessage-Modal-ChScroll').innerHTML = ""
+    document.getElementById('ShowForwardMessage-Modal-messageBody').innerHTML = messageBody
+    chatConnection.stream("GetMyChatRooms")
+        .subscribe({
+            next: (item) => {
+                document.getElementById('ShowForwardMessage-Modal-ChScroll').innerHTML += CreateChatRoomSelectItem(item, `SetElementSelected(this,'ForwardMessage',true)`)
+            },
+            complete: () => {
+            },
+            error: (err) => {
+            },
+        });
+}
+
+async function ConfirmForwardMessage(messageId) {
+    debugger
+    var ids = []
+    for (x of document.getElementsByClassName('ForwardMessage-Selected')) {
+        ids.push(x.id)
+    }
+    await chatConnection.invoke("ForwardMessage", ids, messageId)
+}
+
+function SetElementSelected(elem, preClassName = "", hasImage = false) {
+    if (hasImage) {
+        if (elem.classList.contains(preClassName + '-Selected')) {
+            elem.children[0].style.border = ''
+            elem.classList.remove(preClassName + '-Selected')
+
+        }
+        else {
+            elem.children[0].style.border = '2px solid blue'
+            elem.classList.add(preClassName + '-Selected')
+        }
+
+    }
+    else {
+        if (elem.classList.contains(preClassName + '_Selected')) {
+            elem.style.border = ''
+            elem.classList.remove(preClassName + '_Selected')
+
+        }
+        else {
+            elem.style.border = '2px solid blue'
+            elem.classList.add(preClassName + '_Selected')
+        }
+    }
+}
+function CreateChatRoomSelectItem(dto, action) {
+    return ` <div class="uk-text-center" onclick="${action}" uk-tooltip="${dto.name}" id="${dto.id}">
+                            <img src="${dto.pic}" width="70" height="70" class="uk-border-circle">
+                            <p class="my-1 fw-bold">${dto.name}</p>
+                        </div>
+            </div>`
+}
 async function SendMessageToHub(messagebody) {
     var messageDto = await chatConnection.invoke("SendMessage", messagebody).then(function (response) {
         return response.result
@@ -212,6 +271,6 @@ chatConnection.onclose(chatOnClosed)
 
 chatConnection.on("GetCurrentChatRoom", setCurrentChatRoom)
 chatConnection.on("SetUserInfo", SetUserInfo)
-chatConnection.on("RecieveMessage", RecieveMessage)
+chatConnection.on("AddMessage", AddMessage)
 chatConnection.on("RecieveNotification", RecieveNotification)
 chatConnection.on("SetAllMessagesRead", SetAllMessagesRead)

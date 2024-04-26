@@ -3,7 +3,9 @@ using Domain.DataLayer.Repository;
 using Domain.DataLayer.UnitOfWorks;
 using Domain.Entities;
 using DomainShared.Dtos;
+using DomainShared.Dtos.Chat.ChatRoom;
 using DomainShared.Dtos.Chat.Message;
+using DomainShared.Extentions.MapExtentions;
 using Framework.Api;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
@@ -36,6 +38,7 @@ namespace MyChat.Controllers
         {
             return View(_userInfoContext.User);
         }
+
 
         public async Task<IActionResult> DownloadMedia(Guid id)
         {

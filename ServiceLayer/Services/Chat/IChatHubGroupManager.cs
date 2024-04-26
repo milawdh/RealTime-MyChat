@@ -111,17 +111,19 @@ namespace ServiceLayer.Services.Chat
         /// <param name="groupName">Group Identifier For Users</param>
         public void SetCurrentChatRoom(string userConnectionId, string groupName)
         {
-            if (_UserCurrentChatRoom.ContainsKey(userConnectionId))
+            if (GetCurrentChatRoom(userConnectionId).Result != groupName)
             {
-                ChangeUserGroups(userConnectionId, _UserCurrentChatRoom[userConnectionId], groupName);
-                _UserCurrentChatRoom[userConnectionId] = groupName;
+                if (_UserCurrentChatRoom.ContainsKey(userConnectionId))
+                {
+                    ChangeUserGroups(userConnectionId, _UserCurrentChatRoom[userConnectionId], groupName);
+                    _UserCurrentChatRoom[userConnectionId] = groupName;
+                }
+                else
+                {
+                    _UserCurrentChatRoom.Add(userConnectionId, groupName);
+                    AddToGroup(userConnectionId, groupName);
+                }
             }
-            else
-            {
-                _UserCurrentChatRoom.Add(userConnectionId, groupName);
-                AddToGroup(userConnectionId, groupName);
-            }
-
         }
 
         /// <summary>

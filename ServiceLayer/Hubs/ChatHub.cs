@@ -1,13 +1,16 @@
 ﻿using Domain.Base;
 using Domain.DataLayer.Repository;
 using Domain.DataLayer.UnitOfWorks;
+using DomainShared.Dtos.Chat.ChatRoom;
 using DomainShared.Dtos.Chat.Message;
 using DomainShared.Extentions.MapExtentions;
 using ElmahCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using ServiceLayer.Hubs.Api;
 using ServiceLayer.Services.Chat;
 using ServiceLayer.Services.User;
@@ -89,6 +92,19 @@ namespace ServiceLayer.Hubs
             }
         }
 
+        public async IAsyncEnumerable<ChatRoomSelectDto> GetMyChatRooms(
+            [EnumeratorCancellation]
+            CancellationToken cancellationToken)
+        {
+            await foreach (var item in _userInfoContext.ChatRooms.MapToChatRoomSelectDtoAync(_userInfoContext.UserId, cancellationToken))
+            {
+                yield return item;
+                await Task.Delay(50, cancellationToken);
+            }
+
+            yield break;
+        }
+
         /// <summary>
         /// Gets ChatRoom From Current User's ChatRooms With Messages To Converstation
         /// </summary>
@@ -97,7 +113,7 @@ namespace ServiceLayer.Hubs
         public async Task<object> GetChatRoomDetails(Guid id)
         {
             var result = await _chatServices.GetChatRoomAsync(id);
-
+            await SetCurrentChatRoom(id);
             return new ApiResult<object>(result);
         }
 
@@ -117,6 +133,30 @@ namespace ServiceLayer.Hubs
                 await _chatServices.SendMessageAsync(
                 new SendMessageDto { Body = body, RecieverChatRoomId = new Guid(accessResult.Result) })
                 );
+        }
+
+        public async Task<ApiResult> ForwardMessage(List<Guid> recieverChatRoomIds, Guid messageId)
+        {
+            try
+            {
+                //var recieverChatRoomIds = JsonConvert.DeserializeObject<List<Guid>>(ListJson);
+                //if (recieverChatRoomIds != null)
+                //return new ApiResult("UnExpectedType");
+
+                var message = _core.TblMessage.Get(x => x.Id == messageId).AsNoTracking()
+                    .Include(x => x.TblMedias).AsNoTracking()
+                    .FirstOrDefault();
+
+                if (message is null)
+                    return new ApiResult<MessagesDto>("No Access!");
+
+                return new ApiResult(await _chatServices.ForwardMessageAsync(recieverChatRoomIds.ToList(), message));
+            }
+            catch (Exception ex)
+            {
+                ElmahCore.ElmahExtensions.RaiseError(ex);
+                return new ApiResult("UnExpectedType");
+            }
         }
 
         /// <summary>

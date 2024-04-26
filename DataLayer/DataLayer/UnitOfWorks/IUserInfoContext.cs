@@ -91,7 +91,7 @@ namespace Domain.DataLayer.Repository
             get
             {
                 return
-                i => i.Include(x => x.TblUserChatRoomRels.Take(3)).ThenInclude(x => x.User).AsSplitQuery();
+                i => i.Include(x => x.ProfileImage).Include(x => x.TblUserChatRoomRels.Take(3).OrderByDescending(x => x.UserId != UserId)).ThenInclude(x => x.User).AsSplitQuery();
             }
         }
 

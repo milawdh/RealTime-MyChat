@@ -25,7 +25,7 @@ namespace DomainShared.Dtos.User
         /// <summary>
         /// Current User ChatRooms
         /// </summary>
-        public List<InitChatRoom> ChatRooms { get; set; } = new();
+        public List<ChatListItemDto> ChatRooms { get; set; } = new();
 
         #region Maps
 
