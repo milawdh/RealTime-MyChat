@@ -33,7 +33,7 @@ namespace Domain.Audited.Models
         /// </summary>
         /// <param name="entity">Entity Thath Will be Validated</param>
         /// <returns>ValidationResult</returns>
-        public override ServiceResult ValidateAdd(TEntity entity, Core core)
+        public override ServiceResult<TEntity> ValidateAdd(TEntity entity, Core core)
         {
             return base.ValidateAdd(entity, core);
         }
@@ -53,7 +53,7 @@ namespace Domain.Audited.Models
         /// </summary>
         /// <param name="entity">Entity Thath Will be Validated</param>
         /// <returns>ValidationResult</returns>
-        public override ServiceResult ValidateRemove(TEntity entity, Core core)
+        public override ServiceResult<TEntity> ValidateRemove(TEntity entity, Core core)
         {
             return base.ValidateRemove(entity, core);
         }
@@ -63,7 +63,7 @@ namespace Domain.Audited.Models
         /// </summary>
         /// <param name="entity">Entity Thath Will be Validated</param>
         /// <returns>ValidationResult</returns>
-        public override ServiceResult ValidateUpdate(TEntity entity, Core core)
+        public override ServiceResult<TEntity> ValidateUpdate(TEntity entity, Core core)
         {
             return base.ValidateUpdate(entity, core);
         }

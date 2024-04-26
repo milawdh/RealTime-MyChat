@@ -24,21 +24,21 @@ namespace Domain.Entities
         public bool IsActive { get; set; } = true;
 
 
-        public override ServiceResult ValidateAdd(TblFileServer entity, Core core)
+        public override ServiceResult<TblFileServer> ValidateAdd(TblFileServer entity, Core core)
         {
             if (core.TblFileServer.Any(x => x.Title == entity.Title))
-                return new ServiceResult("There is another File Server With This Title Exist!");
+                return new ServiceResult<TblFileServer>("There is another File Server With This Title Exist!");
 
             if (entity.IsActive)
-                return new ServiceResult("File Server is Active You can't Delete It!");
+                return new ServiceResult<TblFileServer>("File Server is Active You can't Delete It!");
 
             return base.ValidateAdd(entity, core);
         }
 
-        public override ServiceResult ValidateUpdate(TblFileServer entity, Core core)
+        public override ServiceResult<TblFileServer> ValidateUpdate(TblFileServer entity, Core core)
         {
             if (core.TblFileServer.Any(x => x.Title == entity.Title && x.Id != entity.Id))
-                return new ServiceResult("There is another File Server With This Title Exist!");
+                return new ServiceResult<TblFileServer>("There is another File Server With This Title Exist!");
 
             return base.ValidateUpdate(entity, core);
         }

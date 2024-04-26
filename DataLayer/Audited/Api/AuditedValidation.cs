@@ -21,9 +21,9 @@ namespace Domain.Audited.Api
         /// </summary>
         /// <param name="entity">Entity Thath Will be Validated</param>
         /// <returns>ValidationResult</returns>
-        public virtual ServiceResult ValidateAdd(TEntity entity, Core core)
+        public virtual ServiceResult<TEntity> ValidateAdd(TEntity entity, Core core)
         {
-            return new ServiceResult();
+            return new ServiceResult<TEntity>(entity);
         }
 
         /// <summary>
@@ -43,9 +43,9 @@ namespace Domain.Audited.Api
         /// </summary>
         /// <param name="entity">Entity Thath Will be Validated</param>
         /// <returns>ValidationResult</returns>
-        public virtual ServiceResult ValidateRemove(TEntity entity, Core core)
+        public virtual ServiceResult<TEntity> ValidateRemove(TEntity entity, Core core)
         {
-            return new ServiceResult();
+            return new ServiceResult<TEntity>(entity);
         }
 
         /// <summary>
@@ -53,9 +53,9 @@ namespace Domain.Audited.Api
         /// </summary>
         /// <param name="entity">Entity Thath Will be Validated</param>
         /// <returns>ValidationResult</returns>
-        public virtual ServiceResult ValidateUpdate(TEntity entity, Core core)
+        public virtual ServiceResult<TEntity> ValidateUpdate(TEntity entity, Core core)
         {
-            return new ServiceResult();
+            return new ServiceResult<TEntity>(entity);
         }
     }
 }
