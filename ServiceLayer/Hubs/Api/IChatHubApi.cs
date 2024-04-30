@@ -14,5 +14,8 @@ namespace ServiceLayer.Hubs.Api
 
         Task GetCurrentChatRoom();
         Task SetAllMessagesRead();
+
+        Task ShowError(List<string> message);
+        Task ShowError(params string[] message);
     }
 }

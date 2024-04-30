@@ -73,7 +73,7 @@ namespace ServiceLayer.Hubs
             var chatRoomId = _chatHubGroupManager.GetCurrentChatRoom(Context.ConnectionId);
             if (chatRoomId.Failure)
             {
-                yield return new ApiResult<MessagesDto>(chatRoomId.Messages);
+                await Clients.Caller.ShowError(chatRoomId.Messages);
                 yield break;
             }
 
@@ -126,9 +126,8 @@ namespace ServiceLayer.Hubs
         {
             var accessResult = _chatHubGroupManager.GetCurrentChatRoom(Context.ConnectionId);
             if (accessResult.Failure)
-                return new ApiResult<MessagesDto>(accessResult.Messages);
+                await Clients.Caller.ShowError(accessResult.Messages);
 
-            //Context.c
             return new ApiResult<MessagesDto>(
                 await _chatServices.SendMessageAsync(
                 new SendMessageDto { Body = body, RecieverChatRoomId = new Guid(accessResult.Result) })

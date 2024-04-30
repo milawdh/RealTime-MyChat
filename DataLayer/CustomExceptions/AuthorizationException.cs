@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Domain.CustomExceptions
 {
-    public class AuthenticateException : Exception
+    public class AuthorizationException : Exception
     {
         /// <summary>
         /// Occurs In Authenticate and Athorize Invalidation
         /// </summary>
         /// <param name="message"></param>
-        public AuthenticateException(string message) : base(message) { }
+        public AuthorizationException(string message) : base(message) { }
     }
 }
