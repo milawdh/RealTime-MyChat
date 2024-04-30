@@ -37,9 +37,8 @@ namespace Services.Repositories
                 var validationResult = entity.ValidateAdd(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                 if (validationResult.Failure)
                     return new ServiceResult<EntityEntry<TEntity>>(validationResult.Messages);
-
-                entity = validationResult.Result;
             }
+
             return new ServiceResult<EntityEntry<TEntity>>(_context.Add(entity));
         }
 
@@ -50,16 +49,12 @@ namespace Services.Repositories
                 var validationResult = entity.ValidateAdd(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                 if (validationResult.Failure)
                     return new ServiceResult<EntityEntry<TEntity>>(validationResult.Messages);
-
-                entity = validationResult.Result;
             }
             return new ServiceResult<EntityEntry<TEntity>>(await _context.AddAsync(entity));
         }
 
         public virtual ServiceResult AddRange(IEnumerable<TEntity> entities)
         {
-            List<TEntity> validatedEntities = new List<TEntity>();
-
             foreach (var entity in entities)
             {
                 if (entity is AuditedValidation<TEntity>)
@@ -67,20 +62,14 @@ namespace Services.Repositories
                     var validationResult = entity.ValidateAdd(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                     if (validationResult.Failure)
                         return new ServiceResult(validationResult.Messages);
-
-                    validatedEntities.Add(validationResult.Result);
                 }
-                else
-                    validatedEntities.Add(entity);
             }
-            _context.AddRange(validatedEntities);
+            _context.AddRange(entities);
             return new ServiceResult();
         }
 
         public virtual ServiceResult AddRange(params TEntity[] entities)
         {
-            List<TEntity> validatedEntities = new List<TEntity>();
-
             foreach (var entity in entities)
             {
                 if (entity is AuditedValidation<TEntity>)
@@ -88,13 +77,9 @@ namespace Services.Repositories
                     var validationResult = entity.ValidateAdd(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                     if (validationResult.Failure)
                         return new ServiceResult(validationResult.Messages);
-
-                    validatedEntities.Add(validationResult.Result);
                 }
-                else
-                    validatedEntities.Add(entity);
             }
-            _context.AddRange(validatedEntities.ToArray());
+            _context.AddRange(entities.ToArray());
             return new ServiceResult();
         }
 
@@ -109,16 +94,12 @@ namespace Services.Repositories
                 var validationResult = entity.ValidateUpdate(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                 if (validationResult.Failure)
                     return new ServiceResult<EntityEntry<TEntity>>(validationResult.Messages);
-
-                entity = validationResult.Result;
             }
             return new ServiceResult<EntityEntry<TEntity>>(_context.Update(entity));
         }
 
         public virtual ServiceResult UpdateRange(IEnumerable<TEntity> entities)
         {
-            List<TEntity> validatedEntities = new List<TEntity>();
-
             foreach (var entity in entities)
             {
                 if (entity is AuditedValidation<TEntity>)
@@ -126,21 +107,15 @@ namespace Services.Repositories
                     var validationResult = entity.ValidateUpdate(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                     if (validationResult.Failure)
                         return new ServiceResult(validationResult.Messages);
-
-                    validatedEntities.Add(validationResult.Result);
                 }
-                else
-                    validatedEntities.Add(entity);
             }
 
-            _context.UpdateRange(validatedEntities);
+            _context.UpdateRange(entities);
             return new ServiceResult();
         }
 
         public virtual ServiceResult UpdateRange(params TEntity[] entities)
         {
-            List<TEntity> validatedEntities = new List<TEntity>();
-
             foreach (var entity in entities)
             {
                 if (entity is AuditedValidation<TEntity>)
@@ -148,13 +123,9 @@ namespace Services.Repositories
                     var validationResult = entity.ValidateUpdate(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                     if (validationResult.Failure)
                         return new ServiceResult(validationResult.Messages);
-
-                    validatedEntities.Add(validationResult.Result);
                 }
-                else
-                    validatedEntities.Add(entity);
             }
-            _context.UpdateRange(validatedEntities);
+            _context.UpdateRange(entities);
             return new ServiceResult();
         }
 
@@ -169,8 +140,6 @@ namespace Services.Repositories
                 var validationResult = entity.ValidateRemove(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                 if (validationResult.Failure)
                     return new ServiceResult<EntityEntry<TEntity>>(validationResult.Messages);
-
-                entity = validationResult.Result;
             }
 
             return new ServiceResult<EntityEntry<TEntity>>(_context.Remove(entity));
@@ -178,8 +147,6 @@ namespace Services.Repositories
 
         public virtual ServiceResult RemoveRange(IEnumerable<TEntity> entities)
         {
-            List<TEntity> validatedEntities = new List<TEntity>();
-
             foreach (var entity in entities)
             {
                 if (entity is AuditedValidation<TEntity>)
@@ -187,19 +154,14 @@ namespace Services.Repositories
                     var validationResult = entity.ValidateRemove(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                     if (validationResult.Failure)
                         return new ServiceResult(validationResult.Messages);
-
-                    validatedEntities.Add(validationResult.Result);
                 }
-                else
-                    validatedEntities.Add(entity);
             }
-            _context.RemoveRange(validatedEntities);
+            _context.RemoveRange(entities);
             return new ServiceResult();
         }
 
         public virtual ServiceResult RemoveRange(params TEntity[] entities)
         {
-            List<TEntity> validatedEntities = new List<TEntity>();
             foreach (var entity in entities)
             {
                 if (entity is AuditedValidation<TEntity>)
@@ -207,13 +169,9 @@ namespace Services.Repositories
                     var validationResult = entity.ValidateRemove(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                     if (validationResult.Failure)
                         return new ServiceResult(validationResult.Messages);
-
-                    validatedEntities.Add(validationResult.Result);
                 }
-                else
-                    validatedEntities.Add(entity);
             }
-            _context.RemoveRange(validatedEntities);
+            _context.RemoveRange(entities);
             return new ServiceResult();
         }
 
@@ -228,8 +186,6 @@ namespace Services.Repositories
                 var validationResult = entity.ValidateRemove(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                 if (validationResult.Failure)
                     return new ServiceResult<EntityEntry<TEntity>>(validationResult.Messages);
-                
-                entity = validationResult.Result;
             }
 
             return new ServiceResult<EntityEntry<TEntity>>(_context.RemoveForce(entity));
@@ -237,41 +193,31 @@ namespace Services.Repositories
 
         public virtual ServiceResult RemoveRangeForce(IEnumerable<TEntity> entities)
         {
-            List<TEntity> validatedEntities = new List<TEntity>();
             foreach (var entity in entities)
             {
                 if (entity is AuditedValidation<TEntity>)
                 {
                     var validationResult = entity.ValidateRemove(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                     if (validationResult.Failure)
-                        return new ServiceResult(validationResult.Messages);
-
-                    validatedEntities.Add(validationResult.Result);
+                        return new ServiceResult<EntityEntry<TEntity>>(validationResult.Messages);
                 }
-                else
-                    validatedEntities.Add(entity);
             }
-            _context.RemoveRangeForce(validatedEntities);
+            _context.RemoveRangeForce(entities);
             return new ServiceResult();
         }
 
         public virtual ServiceResult RemoveRangeForce(params TEntity[] entities)
         {
-            List<TEntity> validatedEntities = new List<TEntity>();
             foreach (var entity in entities)
             {
                 if (entity is AuditedValidation<TEntity>)
                 {
                     var validationResult = entity.ValidateRemove(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                     if (validationResult.Failure)
-                        return new ServiceResult(validationResult.Messages);
-
-                    validatedEntities.Add(validationResult.Result);
+                        return new ServiceResult<EntityEntry<TEntity>>(validationResult.Messages);
                 }
-                else
-                    validatedEntities.Add(entity);
             }
-            _context.RemoveRangeForce(validatedEntities);
+            _context.RemoveRangeForce(entities);
             return new ServiceResult();
         }
 
@@ -352,7 +298,7 @@ namespace Services.Repositories
             if (hasEntityFilters)
                 query = Query;
             else
-                query = _context.Set<TEntity>();
+            query = _context.Set<TEntity>();
 
             if (where != null)
                 query = query.Where(where);
