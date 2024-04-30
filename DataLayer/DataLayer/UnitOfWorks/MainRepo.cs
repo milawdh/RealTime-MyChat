@@ -228,7 +228,7 @@ namespace Services.Repositories
                 var validationResult = entity.ValidateRemove(entity, new Domain.DataLayer.UnitOfWorks.Core(_context));
                 if (validationResult.Failure)
                     return new ServiceResult<EntityEntry<TEntity>>(validationResult.Messages);
-
+                
                 entity = validationResult.Result;
             }
 

@@ -45,7 +45,7 @@ namespace Domain.DataLayer.Repository
         /// </summary>
         /// <param name="custom">Custom Query</param>
         /// <returns></returns>
-        /// <exception cref="AuthorizationException">If UserName Was Not Found In Database It Occurs</exception>
+        /// <exception cref="AuthenticateException">If UserName Was Not Found In Database It Occurs</exception>
         public IQueryable<TblUser> GetUser(Func<IQueryable<TblUser>, IQueryable<TblUser>> custom = null);
     }
 
@@ -135,7 +135,7 @@ namespace Domain.DataLayer.Repository
                 {
                     var userName = HttpContext.User.Claims.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
                     if (!tblUsers.Any(i => i.UserName == userName))
-                        throw new AuthorizationException("UserName Not Found");
+                        throw new AuthenticateException("UserName Not Found");
 
                     _userName = userName;
                     return tblUsers.Where(i => i.Id == UserId).Select(x => x.UserName).FirstOrDefault();
@@ -248,7 +248,7 @@ namespace Domain.DataLayer.Repository
         /// </summary>
         /// <param name="custom">Custom Query</param>
         /// <returns></returns>
-        /// <exception cref="AuthorizationException">If UserName Was Not Found In Database It Occurs</exception>
+        /// <exception cref="AuthenticateException">If UserName Was Not Found In Database It Occurs</exception>
         public IQueryable<TblUser> GetUser(Func<IQueryable<TblUser>, IQueryable<TblUser>> custom = null)
         {
             var query = tblUsers.Where(i => i.Id == UserId);
@@ -263,7 +263,7 @@ namespace Domain.DataLayer.Repository
         /// </summary>
         /// <param name="custom">Custom Query</param>
         /// <returns></returns>
-        /// <exception cref="AuthorizationException">If UserName Was Not Found In Database It Occurs</exception>
+        /// <exception cref="AuthenticateException">If UserName Was Not Found In Database It Occurs</exception>
         private IQueryable<TblChatRoom> GetChatRooms(Func<IQueryable<TblChatRoom>, IQueryable<TblChatRoom>> custom = null)
         {
 

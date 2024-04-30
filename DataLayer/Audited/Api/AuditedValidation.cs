@@ -34,7 +34,7 @@ namespace Domain.Audited.Api
         /// <returns>A Validated and Filtered Entities Query</returns>
         public virtual IQueryable<TEntity> ValidateGetPermission(Core core, IQueryable<TEntity> entities, IUserInfoContext userInfoContext)
         {
-            return (entities);
+            return entities;
         }
 
         /// <summary>

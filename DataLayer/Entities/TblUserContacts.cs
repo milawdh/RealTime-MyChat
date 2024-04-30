@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Domain.API;
 using Domain.Audited.Models;
 using Domain.DataLayer.Repository;
 using Domain.DataLayer.UnitOfWorks;

@@ -104,33 +104,33 @@ namespace ServiceLayer.Services.User
         /// Validates User When Loging In
         /// </summary>
         /// <param name="loginDto"></param>
-        /// <exception cref="AuthorizationException">Throws Exception on Invalid Dto</exception>
+        /// <exception cref="AuthenticateException">Throws Exception on Invalid Dto</exception>
         /// 
         private void ValidateUserLogin(UserLoginDto loginDto)
         {
             if (!_core.TblUsers.Any(_ => _.UserName == loginDto.UserName && _.Password == loginDto.Password))
-                throw new AuthorizationException("UserName Or Password Is wrong");
+                throw new AuthenticateException("UserName Or Password Is wrong");
         }
 
         /// <summary>
         /// Validates User When Signing In
         /// </summary>
         /// <param name="registerDto"></param>
-        /// <exception cref="AuthorizationException">Throws Exception on Invalid Dto</exception>
+        /// <exception cref="AuthenticateException">Throws Exception on Invalid Dto</exception>
         private void ValidateUserRegister(UserRegisterDto registerDto)
         {
             if (registerDto.Password != registerDto.PasswordRepeat)
-                throw new AuthorizationException("Password Repeat doesn't Match!");
+                throw new AuthenticateException("Password Repeat doesn't Match!");
 
             if (_core.TblUsers.Any(_ => _.Tell == registerDto.Tell))
-                throw new AuthorizationException("This Phone Number Exist!");
+                throw new AuthenticateException("This Phone Number Exist!");
 
             var regex = new Regex("^\\d[-0-9]+\\d$");
             if (registerDto.Tell.Length != 11 || !regex.IsMatch(registerDto.Tell))
-                throw new AuthorizationException("Invalid Phone Number!");
+                throw new AuthenticateException("Invalid Phone Number!");
 
             if (_core.TblMyChatIdentifier.Any(_ => _.Identifier == registerDto.UserName))
-                throw new AuthorizationException("This UserName Allready Exist!");
+                throw new AuthenticateException("This UserName Allready Exist!");
         }
 
         #endregion
